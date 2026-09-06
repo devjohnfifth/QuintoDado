@@ -1,0 +1,74 @@
+{
+  "Metadata": {
+    "home": {
+      "title": "Quinto Dado — Mesas de RPG online e material gratuito para mestres",
+      "description": "Mesas de RPG com o Mestre Quintão: Ordem Paranormal, Tormenta 20, Vaesen e mais. Tabelas de encontros, mapas e homebrews gratuitos, material novo toda semana."
+    }
+  },
+  "Nav": {
+    "suplementos": "Suplementos",
+    "mesas": "Mesas",
+    "sobre": "Sobre",
+    "links": "Links",
+    "entrar": "Entrar",
+    "minhaConta": "Minha conta"
+  },
+  "Home": {
+    "hero": {
+      "titulo": "Quinto Dado",
+      "subtitulo": "Mesas de RPG, mapas e material autoral para quem quer viver a história, não só rolar o dado.",
+      "ctaComunidade": "Entrar na comunidade",
+      "ctaMesas": "Ver mesas abertas"
+    },
+    "apresentacao": {
+      "corpo": "Sou o João, o Mestre Quintão. Mestro Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart — em português ou inglês, no Discord com Foundry VTT.\n\nGosto tanto de construir mundo quanto de jogar nele: se der, eu faço o cardápio da taverna e o mapa interativo antes da sessão começar. Aqui você encontra minhas mesas abertas e todo o material que produzo pelo caminho — a maior parte de graça.",
+      "ctaSobre": "Conheça o Quinto Dado"
+    },
+    "suplementos": {
+      "titulo": "Material para a sua mesa",
+      "corpo": "Tabelas de encontros que você rola aqui mesmo, mapas, tokens, homebrews e aventuras prontas. Quase tudo gratuito. Coisa nova toda semana.",
+      "cta": "Ver a biblioteca"
+    },
+    "mesas": {
+      "titulo": "Sente-se à mesa",
+      "corpo": "One-shots online, para iniciantes e veteranos. Vagas limitadas, linhas e véus combinados antes de começar.",
+      "cta": "Ver mesas abertas"
+    },
+    "comunidade": {
+      "titulo": "A comunidade do Quinto Dado",
+      "corpo": "Um grupo no WhatsApp onde eu aviso das mesas novas, solto material antes e a galera combina jogo.",
+      "cta": "Entrar no grupo"
+    }
+  },
+  "Sobre": {
+    "titulo": "Quem é o Quinto Dado",
+    "intro": "Me chamo João Quintão e sou mestre de RPG. Sou apaixonado por viver em outro mundo — eu sei, meio cafona, mas é verdade.\n\nPode ser desde fazer o cardápio de uma taverna até um mapa interativo: eu simplesmente amo a possibilidade de viver uma aventura com outras pessoas. Viver experiências sem precisar passar por elas no nosso cotidiano, e sim naquele mundo mágico que criamos juntos.\n\nO que eu puder fazer para você viver uma história que te renda experiências ricas, eu farei.",
+    "comoEuMestroTitulo": "Como eu mestro",
+    "comoEuMestroCorpo": "Trabalho principalmente com one-shots online, no Discord com Foundry VTT, em português ou inglês. Antes de qualquer sessão, a gente alinha linhas e véus — o que pode e o que não pode aparecer na mesa. Mesa boa é mesa em que todo mundo se sente seguro para jogar.",
+    "sistemasTitulo": "Sistemas",
+    "sistemas": "Ordem Paranormal e OP2 · Tormenta 20 · Vaesen · Fabula Ultima · Daggerheart · Sacramento RPG",
+    "produzoTitulo": "O que eu produzo",
+    "produzoCorpo": "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas. Publico material novo toda semana, e a maior parte é gratuita — quem mestra sabe como faz falta ter uma tabela boa na hora H.",
+    "ctaMesas": "Ver mesas abertas",
+    "ctaSuplementos": "Ver a biblioteca",
+    "ctaComunidade": "Entrar na comunidade"
+  },
+  "Links": {
+    "titulo": "Quinto Dado",
+    "comunidade": "Entrar na comunidade",
+    "mesas": "Mesas abertas",
+    "suplementos": "Material gratuito",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
+    "youtube": "YouTube",
+    "mesaquest": "Meu perfil no MesaQuest",
+    "apoie": "Apoiar o projeto"
+  },
+  "Rodape": {
+    "avisoLegal": "Quinto Dado é um projeto independente e não possui vínculo com as editoras dos sistemas citados. Materiais compatíveis são publicados sob as respectivas licenças abertas de cada sistema. Marcas e nomes mencionados pertencem a seus respectivos detentores.",
+    "termos": "Termos de uso",
+    "privacidade": "Privacidade",
+    "reembolso": "Reembolso",
+    "licenca": "Licença de uso"
+  }
+}
