@@ -10,6 +10,7 @@ import {
   MODALIDADE_LABEL,
   CLASSIFICACAO_LABEL,
   NIVEL_LABEL,
+  FREQUENCIA_LABEL,
 } from "@/lib/mesas/labels";
 import { CandidaturaForm } from "./candidatura-form";
 
@@ -23,10 +24,13 @@ type MesaDetalhe = {
   classificacao: string;
   nivel_experiencia: string;
   preco_centavos: number;
+  frequencia: string;
+  qtd_sessoes: number | null;
   data_inicio: string;
   horario_inicio: string;
   vagas_total: number;
   sistemas: { nome: string } | null;
+  profiles: { nome_exibicao: string } | null;
 };
 
 async function buscarMesa(slug: string) {
@@ -36,7 +40,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, data_inicio, horario_inicio, vagas_total, sistemas(nome)",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao)",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -114,6 +118,11 @@ export default async function MesaDetalhePage({
         {mesa.sistemas?.nome ?? "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
       </p>
       <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
+      {mesa.profiles?.nome_exibicao && (
+        <p className="mt-1 text-sm text-muted-foreground">
+          Mestrado por {mesa.profiles.nome_exibicao}
+        </p>
+      )}
       <p className="mt-4 text-muted-foreground">{mesa.sinopse}</p>
 
       <dl className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3">
@@ -127,6 +136,13 @@ export default async function MesaDetalhePage({
         <div>
           <dt className="text-muted-foreground">{t("data")}</dt>
           <dd className="font-medium">{dataFormatada}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Frequência</dt>
+          <dd className="font-medium">
+            {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
+            {mesa.qtd_sessoes ? ` (${mesa.qtd_sessoes} sessões)` : ""}
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">{t("vagasLabel")}</dt>

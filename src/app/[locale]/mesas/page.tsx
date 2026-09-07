@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { TIPO_MESA_LABEL, MODALIDADE_LABEL } from "@/lib/mesas/labels";
+import { formatarFrequenciaEHorario } from "@/lib/mesas/horario";
 import { Reveal } from "@/components/site/reveal";
 
 export async function generateMetadata({
@@ -31,9 +32,12 @@ type Mesa = {
   classificacao: string;
   preco_centavos: number;
   cobranca_gerenciada_pelo_site: boolean;
+  frequencia: string;
   data_inicio: string;
+  horario_inicio: string;
   vagas_total: number;
   sistemas: { nome: string } | null;
+  profiles: { nome_exibicao: string } | null;
 };
 
 async function buscarMesas(): Promise<Mesa[]> {
@@ -46,7 +50,7 @@ async function buscarMesas(): Promise<Mesa[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, data_inicio, vagas_total, sistemas(nome)",
+      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, frequencia, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao)",
     )
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
@@ -103,11 +107,19 @@ export default async function MesasPage({
                   <p className="mt-1 line-clamp-2 flex-1 text-sm text-muted-foreground">
                     {mesa.sinopse}
                   </p>
-                  <p className="mt-3 text-sm font-medium">
-                    {mesa.preco_centavos === 0
-                      ? t("gratuita")
-                      : formatBRL(mesa.preco_centavos)}
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {formatarFrequenciaEHorario(mesa.data_inicio, mesa.horario_inicio, mesa.frequencia)}
                   </p>
+                  <div className="mt-1 flex items-center justify-between">
+                    <p className="text-sm font-medium">
+                      {mesa.preco_centavos === 0
+                        ? t("gratuita")
+                        : formatBRL(mesa.preco_centavos)}
+                    </p>
+                    {mesa.profiles?.nome_exibicao && (
+                      <p className="text-xs text-muted-foreground">com {mesa.profiles.nome_exibicao}</p>
+                    )}
+                  </div>
                 </Link>
               </li>
             ))}
