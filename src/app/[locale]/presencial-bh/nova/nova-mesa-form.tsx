@@ -69,7 +69,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
         <Label htmlFor="sistemaId">{t("campoSistema")}</Label>
         <Select name="sistemaId" required>
           <SelectTrigger id="sistemaId" className="w-full">
-            <SelectValue placeholder="Escolha um sistema" />
+            <SelectValue placeholder={t("campoSistemaPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {sistemas.map((s) => (
@@ -146,10 +146,10 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="livre">Livre</SelectItem>
-              <SelectItem value="14">14 anos</SelectItem>
-              <SelectItem value="16">16 anos</SelectItem>
-              <SelectItem value="18">18 anos</SelectItem>
+              <SelectItem value="livre">{t("classLivre")}</SelectItem>
+              <SelectItem value="14">{t("class14")}</SelectItem>
+              <SelectItem value="16">{t("class16")}</SelectItem>
+              <SelectItem value="18">{t("class18")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -160,10 +160,10 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="todos">Todos</SelectItem>
-              <SelectItem value="iniciante">Iniciante</SelectItem>
-              <SelectItem value="intermediario">Intermediário</SelectItem>
-              <SelectItem value="avancado">Avançado</SelectItem>
+              <SelectItem value="todos">{t("nivelTodos")}</SelectItem>
+              <SelectItem value="iniciante">{t("nivelIniciante")}</SelectItem>
+              <SelectItem value="intermediario">{t("nivelIntermediario")}</SelectItem>
+              <SelectItem value="avancado">{t("nivelAvancado")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

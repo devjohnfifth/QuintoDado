@@ -30,7 +30,7 @@ export default function HomePage() {
           className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[24rem] w-[24rem] translate-x-[40%] rounded-full bg-[#A855F7]/8 blur-[130px]"
         />
 
-        <div className="mx-auto max-w-xl text-center">
+        <div className="mx-auto max-w-lg text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Dices className="size-3.5 text-primary" aria-hidden />
             {t("hero.eyebrow")}

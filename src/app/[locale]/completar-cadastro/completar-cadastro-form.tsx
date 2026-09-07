@@ -16,7 +16,7 @@ export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="nomeExibicao">Nome de exibição</Label>
+        <Label htmlFor="nomeExibicao">{t("campoNome")}</Label>
         <Input
           id="nomeExibicao"
           name="nomeExibicao"

@@ -13,12 +13,12 @@ export const metadata: Metadata = {
  */
 const linksEstaticos = [
   { chave: "comunidade", href: SITE_LINKS.whatsappComunidade, icone: "💬" },
-  { chave: "mesas", href: "/mesas", icone: "🎲" },
+  { chave: "mesas", href: SITE_LINKS.mesaquest, icone: "🎲" },
   { chave: "suplementos", href: "/suplementos", icone: "📚" },
   { chave: "instagram", href: SITE_LINKS.instagram, icone: "📷" },
   { chave: "tiktok", href: SITE_LINKS.tiktok, icone: "🎵" },
   { chave: "youtube", href: SITE_LINKS.youtube, icone: "▶️" },
-  { chave: "mesaquest", href: SITE_LINKS.mesaquest, icone: "🗡️" },
+  { chave: "presencialBh", href: "/presencial-bh", icone: "🗺️" },
   { chave: "apoie", href: "/apoie", icone: "☕" },
 ] as const;
 
