@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Dices, Info, Link2, Menu, MapPin, X } from "lucide-react";
+import { BookOpen, Dices, Info, Link2, Menu, MapPin } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -27,26 +27,16 @@ export function MobileNav() {
     { href: "/links", label: t("links"), Icon: Link2 },
   ] as const;
 
-  const easing = "ease-[cubic-bezier(0.16,1,0.3,1)]";
-
   return (
     <Sheet open={aberto} onOpenChange={setAberto}>
+      {/* A gaveta abre por cima do header (z-index maior), então o botão
+          fica coberto assim que abre — sem sentido animar ele pra virar X
+          se ninguém vê. O X visível é só o de dentro da gaveta (SheetContent). */}
       <SheetTrigger
         render={<Button variant="ghost" size="icon" className="sm:hidden" />}
         aria-label={t("abrirMenu")}
       >
-        <span className="relative flex size-5 items-center justify-center">
-          <Menu
-            className={`absolute size-5 transition-all duration-300 ${easing} ${
-              aberto ? "rotate-90 scale-75 opacity-0" : "rotate-0 scale-100 opacity-100"
-            }`}
-          />
-          <X
-            className={`absolute size-5 transition-all duration-300 ${easing} ${
-              aberto ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-75 opacity-0"
-            }`}
-          />
-        </span>
+        <Menu className="size-5" />
       </SheetTrigger>
       <SheetContent side="right" className="flex w-72 flex-col">
         <SheetHeader>
