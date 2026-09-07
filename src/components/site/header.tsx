@@ -5,10 +5,11 @@ import logo5d from "@/assets/brand/logo-5d.png";
 import { DesktopNav } from "./desktop-nav";
 import { MobileNav } from "./mobile-nav";
 import { AccountMenu } from "./account-menu";
+import { NotificationBell } from "./notification-bell";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 
-async function buscarPerfilLogado() {
+async function buscarSessao() {
   if (!isSupabaseConfigured()) return null;
 
   const supabase = await createClient();
@@ -17,25 +18,35 @@ async function buscarPerfilLogado() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: perfil } = await supabase
-    .from("profiles")
-    .select("username, nome_exibicao, avatar_url, papel")
-    .eq("id", user.id)
-    .maybeSingle();
+  const [{ data: perfil }, { count: naoLidas }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("username, nome_exibicao, avatar_url, papel")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("notificacoes")
+      .select("id", { count: "exact", head: true })
+      .eq("usuario_id", user.id)
+      .is("lida_em", null),
+  ]);
 
   if (!perfil) return null;
 
   return {
-    username: perfil.username as string,
-    nomeExibicao: perfil.nome_exibicao as string,
-    avatarUrl: perfil.avatar_url as string | null,
-    papel: perfil.papel as string,
+    perfil: {
+      username: perfil.username as string,
+      nomeExibicao: perfil.nome_exibicao as string,
+      avatarUrl: perfil.avatar_url as string | null,
+      papel: perfil.papel as string,
+    },
+    naoLidas: naoLidas ?? 0,
   };
 }
 
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
-  const perfil = await buscarPerfilLogado();
+  const sessao = await buscarSessao();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
@@ -58,8 +69,11 @@ export async function SiteHeader() {
         <DesktopNav />
 
         <div className="flex items-center gap-2">
-          {perfil ? (
-            <AccountMenu perfil={perfil} />
+          {sessao ? (
+            <>
+              <NotificationBell naoLidasIniciais={sessao.naoLidas} />
+              <AccountMenu perfil={sessao.perfil} />
+            </>
           ) : (
             <Link
               href="/entrar"

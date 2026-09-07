@@ -38,6 +38,7 @@ type Mesa = {
   vagas_total: number;
   sistemas: { nome: string } | null;
   profiles: { nome_exibicao: string } | null;
+  inscricoes: { count: number }[];
 };
 
 async function buscarMesas(): Promise<Mesa[]> {
@@ -50,8 +51,9 @@ async function buscarMesas(): Promise<Mesa[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, frequencia, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao)",
+      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, frequencia, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), inscricoes(count)",
     )
+    .eq("inscricoes.status", "aprovado")
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
 
@@ -63,6 +65,21 @@ async function buscarMesas(): Promise<Mesa[]> {
   return (data ?? []) as unknown as Mesa[];
 }
 
+async function ehAdmin() {
+  if (!isSupabaseConfigured()) return false;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data: perfil } = await supabase
+    .from("profiles")
+    .select("papel")
+    .eq("id", user.id)
+    .maybeSingle();
+  return perfil?.papel === "admin";
+}
+
 export default async function MesasPage({
   params,
 }: {
@@ -71,16 +88,28 @@ export default async function MesasPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Mesas");
-  const mesas = await buscarMesas();
+  const [mesas, admin] = await Promise.all([buscarMesas(), ehAdmin()]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <Reveal>
-        <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-          <Dices className="size-5" aria-hidden />
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
+              <Dices className="size-5" aria-hidden />
+            </div>
+            <h1 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">{t("titulo")}</h1>
+            <p className="mt-2 max-w-xl text-muted-foreground">{t("subtitulo")}</p>
+          </div>
+          {admin && (
+            <Link
+              href="/admin/mesas/nova"
+              className="shrink-0 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white"
+            >
+              + Nova mesa
+            </Link>
+          )}
         </div>
-        <h1 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">{t("titulo")}</h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">{t("subtitulo")}</p>
       </Reveal>
 
       <Reveal className="mt-10">
@@ -109,6 +138,9 @@ export default async function MesasPage({
                   </p>
                   <p className="mt-3 text-xs text-muted-foreground">
                     {formatarFrequenciaEHorario(mesa.data_inicio, mesa.horario_inicio, mesa.frequencia)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {mesa.inscricoes[0]?.count ?? 0}/{mesa.vagas_total} vagas preenchidas
                   </p>
                   <div className="mt-1 flex items-center justify-between">
                     <p className="text-sm font-medium">

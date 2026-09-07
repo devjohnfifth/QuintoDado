@@ -25,6 +25,9 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [gratuita, setGratuita] = useState(true);
+  const [sistemaId, setSistemaId] = useState("");
+  const [classificacao, setClassificacao] = useState("livre");
+  const [nivelExperiencia, setNivelExperiencia] = useState("todos");
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,7 +36,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
     const formData = new FormData(e.currentTarget);
     const input = {
       titulo: formData.get("titulo"),
-      sistemaId: formData.get("sistemaId"),
+      sistemaId,
       sinopse: formData.get("sinopse"),
       cidadeUf: formData.get("cidadeUf"),
       dataInicio: formData.get("dataInicio"),
@@ -41,8 +44,8 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
       horarioFim: formData.get("horarioFim"),
       vagasTotal: formData.get("vagasTotal"),
       minJogadores: formData.get("minJogadores"),
-      classificacao: formData.get("classificacao"),
-      nivelExperiencia: formData.get("nivelExperiencia"),
+      classificacao,
+      nivelExperiencia,
       gratuita,
       valorReais: formData.get("valorReais"),
     };
@@ -67,9 +70,11 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
 
       <div className="space-y-2">
         <Label htmlFor="sistemaId">{t("campoSistema")}</Label>
-        <Select name="sistemaId" required>
+        <Select value={sistemaId} onValueChange={(v) => v && setSistemaId(v)}>
           <SelectTrigger id="sistemaId" className="w-full">
-            <SelectValue placeholder={t("campoSistemaPlaceholder")} />
+            <SelectValue placeholder={t("campoSistemaPlaceholder")}>
+              {(v: string) => sistemas.find((s) => s.id === v)?.nome ?? t("campoSistemaPlaceholder")}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {sistemas.map((s) => (
@@ -141,9 +146,13 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="classificacao">{t("campoClassificacao")}</Label>
-          <Select name="classificacao" defaultValue="livre" required>
+          <Select value={classificacao} onValueChange={(v) => v && setClassificacao(v)}>
             <SelectTrigger id="classificacao" className="w-full">
-              <SelectValue />
+              <SelectValue>
+                {(v: string) =>
+                  ({ livre: t("classLivre"), "14": t("class14"), "16": t("class16"), "18": t("class18") })[v] ?? v
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="livre">{t("classLivre")}</SelectItem>
@@ -155,9 +164,18 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="nivelExperiencia">{t("campoNivel")}</Label>
-          <Select name="nivelExperiencia" defaultValue="todos" required>
+          <Select value={nivelExperiencia} onValueChange={(v) => v && setNivelExperiencia(v)}>
             <SelectTrigger id="nivelExperiencia" className="w-full">
-              <SelectValue />
+              <SelectValue>
+                {(v: string) =>
+                  ({
+                    todos: t("nivelTodos"),
+                    iniciante: t("nivelIniciante"),
+                    intermediario: t("nivelIntermediario"),
+                    avancado: t("nivelAvancado"),
+                  })[v] ?? v
+                }
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">{t("nivelTodos")}</SelectItem>

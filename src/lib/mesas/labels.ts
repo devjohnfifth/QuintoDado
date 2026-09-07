@@ -11,9 +11,9 @@ export const MODALIDADE_LABEL: Record<string, string> = {
 
 export const CLASSIFICACAO_LABEL: Record<string, string> = {
   livre: "Livre",
-  "14": "14 anos",
-  "16": "16 anos",
-  "18": "18 anos",
+  "14": "+14 anos",
+  "16": "+16 anos",
+  "18": "+18 anos",
 };
 
 export const NIVEL_LABEL: Record<string, string> = {

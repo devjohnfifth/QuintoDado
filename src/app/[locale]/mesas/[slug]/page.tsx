@@ -31,6 +31,7 @@ type MesaDetalhe = {
   vagas_total: number;
   sistemas: { nome: string } | null;
   profiles: { nome_exibicao: string } | null;
+  inscricoes: { count: number }[];
 };
 
 async function buscarMesa(slug: string) {
@@ -40,8 +41,9 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao)",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), inscricoes(count)",
     )
+    .eq("inscricoes.status", "aprovado")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -49,7 +51,7 @@ async function buscarMesa(slug: string) {
 
   const { data: perguntas } = await supabase
     .from("mesa_perguntas")
-    .select("id, enunciado, tipo, obrigatoria, ordem")
+    .select("id, enunciado, tipo, opcoes, obrigatoria, ordem")
     .eq("mesa_id", mesa.id)
     .order("ordem");
 
@@ -146,7 +148,9 @@ export default async function MesaDetalhePage({
         </div>
         <div>
           <dt className="text-muted-foreground">{t("vagasLabel")}</dt>
-          <dd className="font-medium">{mesa.vagas_total}</dd>
+          <dd className="font-medium">
+            {mesa.inscricoes[0]?.count ?? 0}/{mesa.vagas_total} preenchidas
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">{t("classificacao")}</dt>

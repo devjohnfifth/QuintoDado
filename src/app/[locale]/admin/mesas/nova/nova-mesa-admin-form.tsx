@@ -18,12 +18,43 @@ import { criarMesaAdmin } from "../actions";
 
 type Sistema = { id: string; nome: string };
 
+const TIPO_LABEL: Record<string, string> = {
+  one_shot: "One-shot",
+  aventura: "Aventura fechada",
+  campanha: "Campanha",
+};
+
+const FREQUENCIA_LABEL: Record<string, string> = {
+  unica: "Sessão única (one-shot)",
+  semanal: "Semanal",
+  quinzenal: "Quinzenal",
+  mensal: "Mensal",
+};
+
+const CLASSIFICACAO_LABEL: Record<string, string> = {
+  livre: "Livre",
+  "14": "+14 anos",
+  "16": "+16 anos",
+  "18": "+18 anos",
+};
+
+const NIVEL_LABEL: Record<string, string> = {
+  todos: "Todos",
+  iniciante: "Iniciante",
+  intermediario: "Intermediário",
+  avancado: "Avançado",
+};
+
 export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
+  const [sistemaId, setSistemaId] = useState("");
+  const [tipo, setTipo] = useState("one_shot");
   const [modalidade, setModalidade] = useState<"online" | "presencial">("online");
   const [frequencia, setFrequencia] = useState("unica");
+  const [classificacao, setClassificacao] = useState("livre");
+  const [nivelExperiencia, setNivelExperiencia] = useState("todos");
   const [gratuita, setGratuita] = useState(false);
   const [cobrancaGerenciadaPeloSite, setCobrancaGerenciadaPeloSite] = useState(true);
   const [publicarAgora, setPublicarAgora] = useState(true);
@@ -35,9 +66,9 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
     const formData = new FormData(e.currentTarget);
     const input = {
       titulo: formData.get("titulo"),
-      sistemaId: formData.get("sistemaId"),
+      sistemaId,
       sinopse: formData.get("sinopse"),
-      tipo: formData.get("tipo"),
+      tipo,
       modalidade,
       cidadeUf: formData.get("cidadeUf") || undefined,
       plataformaVtt: formData.get("plataformaVtt") || undefined,
@@ -49,8 +80,8 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       horarioFim: formData.get("horarioFim"),
       vagasTotal: formData.get("vagasTotal"),
       minJogadores: formData.get("minJogadores"),
-      classificacao: formData.get("classificacao"),
-      nivelExperiencia: formData.get("nivelExperiencia"),
+      classificacao,
+      nivelExperiencia,
       gratuita,
       valorReais: formData.get("valorReais"),
       cobrancaGerenciadaPeloSite,
@@ -78,9 +109,11 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="sistemaId">Sistema</Label>
-          <Select name="sistemaId" required>
+          <Select value={sistemaId} onValueChange={(v) => v && setSistemaId(v)}>
             <SelectTrigger id="sistemaId" className="w-full">
-              <SelectValue placeholder="Escolha um sistema" />
+              <SelectValue placeholder="Escolha um sistema">
+                {(v: string) => sistemas.find((s) => s.id === v)?.nome ?? "Escolha um sistema"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {sistemas.map((s) => (
@@ -93,9 +126,16 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
         </div>
         <div className="space-y-2">
           <Label htmlFor="tipo">Tipo</Label>
-          <Select name="tipo" defaultValue="one_shot" required>
+          <Select
+            value={tipo}
+            onValueChange={(v) => {
+              if (!v) return;
+              setTipo(v);
+              if (v === "one_shot") setFrequencia("unica");
+            }}
+          >
             <SelectTrigger id="tipo" className="w-full">
-              <SelectValue />
+              <SelectValue>{(v: string) => TIPO_LABEL[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="one_shot">One-shot</SelectItem>
@@ -157,28 +197,30 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="frequencia">Frequência</Label>
-          <Select value={frequencia} onValueChange={(v) => v && setFrequencia(v)}>
-            <SelectTrigger id="frequencia" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="unica">Sessão única (one-shot)</SelectItem>
-              <SelectItem value="semanal">Semanal</SelectItem>
-              <SelectItem value="quinzenal">Quinzenal</SelectItem>
-              <SelectItem value="mensal">Mensal</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {frequencia !== "unica" && (
+      {tipo !== "one_shot" && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="qtdSessoes">Nº de sessões previstas</Label>
-            <Input id="qtdSessoes" name="qtdSessoes" type="number" min={1} max={999} placeholder="Deixe em branco se for campanha aberta" />
+            <Label htmlFor="frequencia">Frequência</Label>
+            <Select value={frequencia} onValueChange={(v) => v && setFrequencia(v)}>
+              <SelectTrigger id="frequencia" className="w-full">
+                <SelectValue>{(v: string) => FREQUENCIA_LABEL[v] ?? v}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unica">Sessão única (one-shot)</SelectItem>
+                <SelectItem value="semanal">Semanal</SelectItem>
+                <SelectItem value="quinzenal">Quinzenal</SelectItem>
+                <SelectItem value="mensal">Mensal</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        )}
-      </div>
+          {frequencia !== "unica" && (
+            <div className="space-y-2">
+              <Label htmlFor="qtdSessoes">Nº de sessões previstas</Label>
+              <Input id="qtdSessoes" name="qtdSessoes" type="number" min={1} max={999} placeholder="Deixe em branco se for campanha aberta" />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -194,23 +236,23 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="classificacao">Classificação etária</Label>
-          <Select name="classificacao" defaultValue="livre" required>
+          <Select value={classificacao} onValueChange={(v) => v && setClassificacao(v)}>
             <SelectTrigger id="classificacao" className="w-full">
-              <SelectValue />
+              <SelectValue>{(v: string) => CLASSIFICACAO_LABEL[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="livre">Livre</SelectItem>
-              <SelectItem value="14">14 anos</SelectItem>
-              <SelectItem value="16">16 anos</SelectItem>
-              <SelectItem value="18">18 anos</SelectItem>
+              <SelectItem value="14">+14 anos</SelectItem>
+              <SelectItem value="16">+16 anos</SelectItem>
+              <SelectItem value="18">+18 anos</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
           <Label htmlFor="nivelExperiencia">Nível de experiência</Label>
-          <Select name="nivelExperiencia" defaultValue="todos" required>
+          <Select value={nivelExperiencia} onValueChange={(v) => v && setNivelExperiencia(v)}>
             <SelectTrigger id="nivelExperiencia" className="w-full">
-              <SelectValue />
+              <SelectValue>{(v: string) => NIVEL_LABEL[v] ?? v}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="todos">Todos</SelectItem>

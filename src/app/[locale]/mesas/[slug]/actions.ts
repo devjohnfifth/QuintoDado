@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { serviceRole } from "@/lib/supabase/service-role";
 
 const schema = z.object({
   mesaId: z.string().uuid(),
@@ -55,6 +56,43 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
     }
   }
 
+  await notificarMestre(mesaId, slug, user.id);
+
   revalidatePath(`/mesas/${slug}`);
   return { ok: true };
+}
+
+/**
+ * O jogador não tem (nem deveria ter) permissão de RLS pra inserir uma
+ * notificação na conta de outra pessoa (o mestre) — daí o service_role
+ * aqui: é uma notificação de sistema disparada por uma ação já validada
+ * acima (candidatura criada de verdade), não conteúdo livre do jogador.
+ */
+async function notificarMestre(mesaId: string, slug: string, candidatoId: string) {
+  const admin = serviceRole();
+
+  const { data: mesa } = await admin
+    .from("mesas")
+    .select("titulo, mestre_id")
+    .eq("id", mesaId)
+    .single();
+  if (!mesa) return;
+
+  const { data: candidato } = await admin
+    .from("profiles")
+    .select("nome_exibicao")
+    .eq("id", candidatoId)
+    .single();
+
+  const { error } = await admin.from("notificacoes").insert({
+    usuario_id: mesa.mestre_id,
+    tipo: "nova_candidatura",
+    titulo: "Nova candidatura",
+    corpo: `${candidato?.nome_exibicao ?? "Alguém"} se candidatou pra "${mesa.titulo}".`,
+    url: `/admin/mesas/${mesaId}`,
+  });
+
+  if (error) {
+    console.error("[notificarMestre] erro ao criar notificação:", error.message);
+  }
 }

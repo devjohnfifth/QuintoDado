@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
+import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 
 const schema = z
   .object({
@@ -98,24 +99,9 @@ export async function criarMesaPresencial(
     return { ok: false, error: "Não deu pra criar a mesa. Tente de novo em instantes." };
   }
 
-  const { error: perguntasError } = await supabase.from("mesa_perguntas").insert([
-    {
-      mesa_id: mesa.id,
-      enunciado: "Linhas e véus: o que não pode aparecer nessa mesa?",
-      tipo: "texto_longo",
-      obrigatoria: true,
-      fixa: true,
-      ordem: 0,
-    },
-    {
-      mesa_id: mesa.id,
-      enunciado: "Qual sua experiência com o sistema?",
-      tipo: "texto_longo",
-      obrigatoria: true,
-      fixa: true,
-      ordem: 1,
-    },
-  ]);
+  const { error: perguntasError } = await supabase
+    .from("mesa_perguntas")
+    .insert(perguntasFixas(mesa.id));
 
   if (perguntasError) {
     console.error("[criarMesaPresencial] erro ao semear perguntas fixas:", perguntasError.message);

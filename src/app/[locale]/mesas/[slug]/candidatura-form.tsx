@@ -5,12 +5,20 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { criarCandidatura } from "./actions";
 
 type Pergunta = {
   id: string;
   enunciado: string;
   tipo: string;
+  opcoes: string[] | null;
   obrigatoria: boolean;
 };
 
@@ -27,6 +35,7 @@ export function CandidaturaForm({
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
+  const [escolhas, setEscolhas] = useState<Record<string, string>>({});
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,7 +44,8 @@ export function CandidaturaForm({
     const formData = new FormData(e.currentTarget);
     const respostas = perguntas.map((p) => ({
       perguntaId: p.id,
-      resposta: String(formData.get(p.id) ?? ""),
+      resposta:
+        p.tipo === "escolha_unica" ? escolhas[p.id] ?? "" : String(formData.get(p.id) ?? ""),
     }));
 
     startTransition(async () => {
@@ -65,7 +75,27 @@ export function CandidaturaForm({
             {pergunta.enunciado}
             {pergunta.obrigatoria && <span className="text-destructive"> *</span>}
           </Label>
-          <Textarea id={pergunta.id} name={pergunta.id} required={pergunta.obrigatoria} rows={3} />
+          {pergunta.tipo === "escolha_unica" && pergunta.opcoes ? (
+            <Select
+              value={escolhas[pergunta.id] ?? ""}
+              onValueChange={(v) => v && setEscolhas((prev) => ({ ...prev, [pergunta.id]: v }))}
+            >
+              <SelectTrigger id={pergunta.id} className="w-full">
+                <SelectValue placeholder="Escolha uma opção">
+                  {(v: string) => v || "Escolha uma opção"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {pergunta.opcoes.map((opcao) => (
+                  <SelectItem key={opcao} value={opcao}>
+                    {opcao}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Textarea id={pergunta.id} name={pergunta.id} required={pergunta.obrigatoria} rows={3} />
+          )}
         </div>
       ))}
 
