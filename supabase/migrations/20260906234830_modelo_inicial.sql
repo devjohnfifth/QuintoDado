@@ -513,12 +513,22 @@ create policy inscricao_leitura on inscricoes for select using (
 );
 create policy inscricao_cria on inscricoes for insert
   with check (usuario_id = auth.uid());
+-- Mestre da mesa (ou admin) avalia a candidatura — aprova/recusa.
+create policy inscricao_mestre_avalia on inscricoes for update using (
+  eh_admin() or exists (select 1 from mesas m where m.id = mesa_id and m.mestre_id = auth.uid())
+);
 
 -- Respostas da ficha (inclui linhas e véus — dado sensível)
 create policy resposta_leitura on inscricao_respostas for select using (
   eh_admin() or exists (
     select 1 from inscricoes i join mesas m on m.id = i.mesa_id
     where i.id = inscricao_id and (i.usuario_id = auth.uid() or m.mestre_id = auth.uid())
+  )
+);
+-- Jogador responde a própria ficha (só dele, e só na hora que cria a inscrição).
+create policy resposta_cria on inscricao_respostas for insert with check (
+  exists (
+    select 1 from inscricoes i where i.id = inscricao_id and i.usuario_id = auth.uid()
   )
 );
 
