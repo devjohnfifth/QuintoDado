@@ -52,21 +52,7 @@ export default async function LinksPage({
   const [primeiro, ...resto] = links;
 
   return (
-    <div className="relative overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-20 opacity-[0.06]"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1'/%3E%3C/svg%3E\")",
-          backgroundSize: "80px 92px",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-16 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-[#4F7DF3]/10 blur-[120px]"
-      />
-
+    <div>
       <div className="mx-auto flex min-h-[80vh] max-w-sm flex-col items-center px-4 py-16 sm:px-6">
         <div
           className="motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
