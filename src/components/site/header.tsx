@@ -2,6 +2,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import logo5d from "@/assets/brand/logo-5d.png";
+import { MobileNav } from "./mobile-nav";
 
 export function SiteHeader() {
   const t = useTranslations("Nav");
@@ -37,12 +38,15 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <Link
-          href="/entrar"
-          className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          {t("entrar")}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/entrar"
+            className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            {t("entrar")}
+          </Link>
+          <MobileNav />
+        </div>
       </div>
     </header>
   );

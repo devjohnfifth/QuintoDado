@@ -12,7 +12,8 @@
     "sobre": "Sobre",
     "links": "Links",
     "entrar": "Entrar",
-    "minhaConta": "Minha conta"
+    "minhaConta": "Minha conta",
+    "abrirMenu": "Abrir menu"
   },
   "Entrar": {
     "titulo": "Entrar no Quinto Dado",
@@ -72,14 +73,19 @@
     }
   },
   "Sobre": {
-    "titulo": "Quem é o Quinto Dado",
-    "intro": "Me chamo João Quintão e sou mestre de RPG. Sou apaixonado por viver em outro mundo — eu sei, meio cafona, mas é verdade.\n\nPode ser desde fazer o cardápio de uma taverna até um mapa interativo: eu simplesmente amo a possibilidade de viver uma aventura com outras pessoas. Viver experiências sem precisar passar por elas no nosso cotidiano, e sim naquele mundo mágico que criamos juntos.\n\nO que eu puder fazer para você viver uma história que te renda experiências ricas, eu farei.",
-    "comoEuMestroTitulo": "Como eu mestro",
-    "comoEuMestroCorpo": "Trabalho principalmente com one-shots online, no Discord com Foundry VTT, em português ou inglês. Antes de qualquer sessão, a gente alinha linhas e véus — o que pode e o que não pode aparecer na mesa. Mesa boa é mesa em que todo mundo se sente seguro para jogar.",
+    "titulo": "O que é o Quinto Dado",
+    "intro": "Quinto Dado é uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério.\n\nNasceu do trabalho do Mestre Quintão, mas cresce com quem mais entra: outros mestres cadastrados também publicam suas próprias mesas presenciais, como as de Belo Horizonte.",
+    "pilaresTitulo": "Três frentes",
+    "pilarSuplementosTitulo": "Suplementos",
+    "pilarSuplementosCorpo": "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas. Publicação nova toda semana, a maior parte gratuita.",
+    "pilarMesasTitulo": "Mesas",
+    "pilarMesasCorpo": "One-shots online com o Mestre Quintão, e mesas presenciais publicadas por qualquer mestre cadastrado — como as de Belo Horizonte.",
+    "pilarComunidadeTitulo": "Comunidade",
+    "pilarComunidadeCorpo": "Um grupo no WhatsApp onde a galera fica sabendo de mesa nova, material novo, e combina jogo.",
+    "segurancaTitulo": "Segurança em primeiro lugar",
+    "segurancaCorpo": "Linhas e véus são pergunta obrigatória em toda mesa — o que pode e o que não pode aparecer na sessão. Classificação etária é levada a sério, não só um selo decorativo. Mesa boa é mesa em que todo mundo se sente seguro pra jogar.",
     "sistemasTitulo": "Sistemas",
     "sistemas": "Ordem Paranormal e OP2 · Tormenta 20 · Vaesen · Fabula Ultima · Daggerheart · Sacramento RPG",
-    "produzoTitulo": "O que eu produzo",
-    "produzoCorpo": "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas. Publico material novo toda semana, e a maior parte é gratuita — quem mestra sabe como faz falta ter uma tabela boa na hora H.",
     "ctaMesas": "Ver mesas abertas",
     "ctaSuplementos": "Ver a biblioteca",
     "ctaComunidade": "Entrar na comunidade"

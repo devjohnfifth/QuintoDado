@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
+import discordIcon from "@/assets/brand/discord-icon.png";
+import googleIcon from "@/assets/brand/google-icon.png";
 import {
   entrarComEmailAction,
   entrarComProvedorAction,
@@ -28,13 +31,15 @@ export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
       <div className="space-y-3">
         <form action={entrarComProvedorAction}>
           <input type="hidden" name="provider" value="discord" />
-          <Button type="submit" variant="outline" className="w-full">
+          <Button type="submit" variant="outline" className="w-full gap-2">
+            <Image src={discordIcon} alt="" width={20} height={20} className="rounded-sm" />
             {t("continuarDiscord")}
           </Button>
         </form>
         <form action={entrarComProvedorAction}>
           <input type="hidden" name="provider" value="google" />
-          <Button type="submit" variant="outline" className="w-full">
+          <Button type="submit" variant="outline" className="w-full gap-2">
+            <Image src={googleIcon} alt="" width={20} height={20} className="rounded-sm" />
             {t("continuarGoogle")}
           </Button>
         </form>
