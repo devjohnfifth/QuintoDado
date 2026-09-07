@@ -1,8 +1,8 @@
 # CLAUDE.md — Quinto Dado
 
-> Renomeie para `CLAUDE.md` na raiz do repositório.
-> Leia também `docs/Projeto_QuintoDado_v1.md` e `docs/Modelo-de-Dados_QuintoDado_v1.sql`
-> antes de qualquer tarefa. Eles são a fonte da verdade.
+> Leia também `docs/Especificacao-Completa_QuintoDado_v1.md` (documento-mãe,
+> fonte da verdade — se o código divergir dele, o documento é que está
+> certo) e `docs/Modelo-de-Dados_QuintoDado_v1.sql` antes de qualquer tarefa.
 
 ## O que é
 
@@ -66,9 +66,15 @@ papéis e gating etário, catálogo de suplementos gratuitos, uma tabela aleató
 interativa, `/mesas` com candidatura **sem pagamento**, admin mínimo, SEO base
 e páginas legais.
 
-Fora do escopo agora: pagamento integrado, suplementos pagos, mestres de
-terceiros, split, avaliações, blog, lembretes automáticos, cartão e recorrência.
-Se uma tarefa pedir algo dessa lista, avise antes de implementar.
+Fora do escopo agora: pagamento integrado, suplementos pagos, split,
+avaliações, blog, lembretes automáticos, cartão e recorrência. Se uma tarefa
+pedir algo dessa lista, avise antes de implementar.
+
+**Exceção:** mestre cadastrado (não só admin) *pode* criar mesa — mas só a
+presencial de `/presencial-bh` (ver `docs/Especificacao-Completa_QuintoDado_v1.md`
+§28, D11–D13). Nasce `aguardando_aprovacao` igual a qualquer mesa, valor é só
+informativo (`cobranca_gerenciada_pelo_site = false`, nunca entra no fluxo de
+Pix). Mesa online comissionada continua só do admin.
 
 ## Antes de encerrar uma tarefa
 

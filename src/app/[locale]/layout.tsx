@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/site/header";
 import { SiteFooter } from "@/components/site/footer";
+import bannerOg from "@/assets/brand/banner-og.webp";
 import "../globals.css";
 
 const inter = Inter({
@@ -31,6 +32,7 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "Metadata.home" });
 
   return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
     title: t("title"),
     description: t("description"),
     openGraph: {
@@ -38,6 +40,13 @@ export async function generateMetadata({
       description: t("description"),
       locale,
       type: "website",
+      images: [{ url: bannerOg.src, width: bannerOg.width, height: bannerOg.height }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("title"),
+      description: t("description"),
+      images: [bannerOg.src],
     },
   };
 }
