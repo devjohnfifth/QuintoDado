@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { SITE_LINKS } from "@/lib/site-links";
 
 export default function HomePage() {
   const t = useTranslations("Home");
@@ -27,12 +28,14 @@ export default function HomePage() {
             {t("hero.subtitulo")}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/links"
+            <a
+              href={SITE_LINKS.whatsappComunidade}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full rounded-full bg-primary px-6 py-3 text-center text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:w-auto"
             >
               {t("hero.ctaComunidade")}
-            </Link>
+            </a>
             <Link
               href="/mesas"
               className="w-full rounded-full border border-border px-6 py-3 text-center text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground sm:w-auto"
@@ -107,12 +110,14 @@ export default function HomePage() {
             {t("comunidade.titulo")}
           </h2>
           <p className="mt-2 text-muted-foreground">{t("comunidade.corpo")}</p>
-          <Link
-            href="/links"
+          <a
+            href={SITE_LINKS.whatsappComunidade}
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-6 inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             {t("comunidade.cta")}
-          </Link>
+          </a>
         </div>
       </section>
     </>

@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import { SITE_LINKS } from "@/lib/site-links";
 
 export const metadata: Metadata = {
   title: "Quinto Dado — Links",
@@ -9,17 +10,15 @@ export const metadata: Metadata = {
 /**
  * TODO(Supabase): substituir por `select * from links where ativo order by ordem`
  * assim que o banco estiver plugado (ver docs/Modelo-de-Dados_QuintoDado_v1.sql).
- * As URLs de TikTok, YouTube e MesaQuest ainda não foram confirmadas pelo
- * admin — ficam como "#" até serem preenchidas pela tabela `links`.
  */
 const linksEstaticos = [
-  { chave: "comunidade", href: "#", icone: "💬" },
+  { chave: "comunidade", href: SITE_LINKS.whatsappComunidade, icone: "💬" },
   { chave: "mesas", href: "/mesas", icone: "🎲" },
   { chave: "suplementos", href: "/suplementos", icone: "📚" },
-  { chave: "instagram", href: "https://www.instagram.com/quintodado/", icone: "📷" },
-  { chave: "tiktok", href: "#", icone: "🎵" },
-  { chave: "youtube", href: "#", icone: "▶️" },
-  { chave: "mesaquest", href: "#", icone: "🗡️" },
+  { chave: "instagram", href: SITE_LINKS.instagram, icone: "📷" },
+  { chave: "tiktok", href: SITE_LINKS.tiktok, icone: "🎵" },
+  { chave: "youtube", href: SITE_LINKS.youtube, icone: "▶️" },
+  { chave: "mesaquest", href: SITE_LINKS.mesaquest, icone: "🗡️" },
   { chave: "apoie", href: "/apoie", icone: "☕" },
 ] as const;
 
@@ -37,18 +36,20 @@ export default async function LinksPage({
       <h1 className="font-heading text-2xl font-bold">{t("titulo")}</h1>
 
       <nav className="mt-8 flex w-full flex-col gap-3">
-        {linksEstaticos.map((link) => (
-          <a
-            key={link.chave}
-            href={link.href}
-            target={link.href.startsWith("http") ? "_blank" : undefined}
-            rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-            className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-          >
-            <span aria-hidden>{link.icone}</span>
-            {t(link.chave)}
-          </a>
-        ))}
+        {linksEstaticos
+          .filter((link): link is typeof link & { href: string } => Boolean(link.href))
+          .map((link) => (
+            <a
+              key={link.chave}
+              href={link.href}
+              target={link.href.startsWith("http") ? "_blank" : undefined}
+              rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+            >
+              <span aria-hidden>{link.icone}</span>
+              {t(link.chave)}
+            </a>
+          ))}
       </nav>
     </div>
   );
