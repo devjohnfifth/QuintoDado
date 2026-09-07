@@ -14,6 +14,36 @@
     "entrar": "Entrar",
     "minhaConta": "Minha conta"
   },
+  "Entrar": {
+    "titulo": "Entrar no Quinto Dado",
+    "continuarDiscord": "Continuar com Discord",
+    "continuarGoogle": "Continuar com Google",
+    "ou": "ou",
+    "entrar": "Entrar",
+    "cadastrar": "Criar conta",
+    "entrando": "Entrando...",
+    "cadastrando": "Criando conta...",
+    "campoEmail": "E-mail",
+    "campoSenha": "Senha",
+    "campoNome": "Nome de exibição",
+    "campoUsername": "Nome de usuário",
+    "campoNascimento": "Data de nascimento",
+    "aceiteTermosPre": "Eu li e aceito os",
+    "aceiteTermosLink": "termos de uso",
+    "mensagemConfirmeEmail": "Quase lá! Confirme seu e-mail pra ativar a conta.",
+    "mensagemErroOauth": "Não deu pra entrar com esse provedor. Tenta de novo.",
+    "mensagemJaLogado": "Você já está logado."
+  },
+  "CompletarCadastro": {
+    "titulo": "Só falta um passo",
+    "subtitulo": "Sua conta social não manda esses dados — a gente precisa deles pra liberar o cadastro (a data de nascimento define o que você pode ver no site).",
+    "campoUsername": "Nome de usuário",
+    "campoNascimento": "Data de nascimento",
+    "aceiteTermosPre": "Eu li e aceito os",
+    "aceiteTermosLink": "termos de uso",
+    "enviar": "Concluir cadastro",
+    "enviando": "Enviando..."
+  },
   "Home": {
     "hero": {
       "titulo": "Quinto Dado",
