@@ -1,6 +1,21 @@
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
+import {
+  MessageCircle,
+  Dices,
+  BookOpen,
+  Camera,
+  Music2,
+  PlayCircle,
+  MapPin,
+  Coffee,
+  ArrowUpRight,
+  ChevronRight,
+  type LucideIcon,
+} from "lucide-react";
 import { SITE_LINKS } from "@/lib/site-links";
+import logo5d from "@/assets/brand/logo-5d.png";
 
 export const metadata: Metadata = {
   title: "Quinto Dado — Links",
@@ -11,16 +26,16 @@ export const metadata: Metadata = {
  * TODO(Supabase): substituir por `select * from links where ativo order by ordem`
  * assim que o banco estiver plugado (ver docs/Modelo-de-Dados_QuintoDado_v1.sql).
  */
-const linksEstaticos = [
-  { chave: "comunidade", href: SITE_LINKS.whatsappComunidade, icone: "💬" },
-  { chave: "mesas", href: SITE_LINKS.mesaquest, icone: "🎲" },
-  { chave: "suplementos", href: "/suplementos", icone: "📚" },
-  { chave: "instagram", href: SITE_LINKS.instagram, icone: "📷" },
-  { chave: "tiktok", href: SITE_LINKS.tiktok, icone: "🎵" },
-  { chave: "youtube", href: SITE_LINKS.youtube, icone: "▶️" },
-  { chave: "presencialBh", href: "/presencial-bh", icone: "🗺️" },
-  { chave: "apoie", href: "/apoie", icone: "☕" },
-] as const;
+const linksEstaticos: { chave: string; href: string | null; Icon: LucideIcon }[] = [
+  { chave: "comunidade", href: SITE_LINKS.whatsappComunidade, Icon: MessageCircle },
+  { chave: "mesas", href: SITE_LINKS.mesaquest, Icon: Dices },
+  { chave: "suplementos", href: "/suplementos", Icon: BookOpen },
+  { chave: "instagram", href: SITE_LINKS.instagram, Icon: Camera },
+  { chave: "tiktok", href: SITE_LINKS.tiktok, Icon: Music2 },
+  { chave: "youtube", href: SITE_LINKS.youtube, Icon: PlayCircle },
+  { chave: "presencialBh", href: "/presencial-bh", Icon: MapPin },
+  { chave: "apoie", href: "/apoie", Icon: Coffee },
+];
 
 export default async function LinksPage({
   params,
@@ -31,26 +46,101 @@ export default async function LinksPage({
   setRequestLocale(locale);
   const t = await getTranslations("Links");
 
-  return (
-    <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center px-4 py-16 sm:px-6">
-      <h1 className="font-heading text-2xl font-bold">{t("titulo")}</h1>
+  const links = linksEstaticos.filter(
+    (link): link is typeof link & { href: string } => Boolean(link.href),
+  );
+  const [primeiro, ...resto] = links;
 
-      <nav className="mt-8 flex w-full flex-col gap-3">
-        {linksEstaticos
-          .filter((link): link is typeof link & { href: string } => Boolean(link.href))
-          .map((link) => (
+  return (
+    <div className="relative overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-20 opacity-[0.06]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1'/%3E%3C/svg%3E\")",
+          backgroundSize: "80px 92px",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-16 left-1/2 -z-10 h-80 w-80 -translate-x-1/2 rounded-full bg-[#4F7DF3]/10 blur-[120px]"
+      />
+
+      <div className="mx-auto flex min-h-[80vh] max-w-sm flex-col items-center px-4 py-16 sm:px-6">
+        <div
+          className="motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
+          style={{ animationDelay: "0ms" }}
+        >
+          <Image
+            src={logo5d}
+            alt=""
+            priority
+            className="mx-auto h-16 w-16 rounded-2xl ring-1 ring-border"
+          />
+        </div>
+        <h1
+          className="mt-4 font-heading text-2xl font-bold motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
+          style={{ animationDelay: "40ms" }}
+        >
+          {t("titulo")}
+        </h1>
+        <p
+          className="mt-1 text-sm text-muted-foreground motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
+          style={{ animationDelay: "80ms" }}
+        >
+          {t("tagline")}
+        </p>
+
+        <nav className="mt-8 flex w-full flex-col gap-3">
+          {primeiro && (
             <a
-              key={link.chave}
-              href={link.href}
-              target={link.href.startsWith("http") ? "_blank" : undefined}
-              rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+              href={primeiro.href}
+              target={primeiro.href.startsWith("http") ? "_blank" : undefined}
+              rel={primeiro.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              style={{ animationDelay: "120ms" }}
+              className="group flex transform-gpu items-center gap-3 rounded-xl bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-4 text-sm font-semibold text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
             >
-              <span aria-hidden>{link.icone}</span>
-              {t(link.chave)}
+              <primeiro.Icon className="size-5 shrink-0" aria-hidden />
+              <span className="flex-1">{t(primeiro.chave)}</span>
+              <ArrowUpRight
+                className="size-4 shrink-0 opacity-80 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden
+              />
             </a>
-          ))}
-      </nav>
+          )}
+
+          {resto.map(({ chave, href, Icon }, i) => {
+            const externo = href.startsWith("http");
+            return (
+              <a
+                key={chave}
+                href={href}
+                target={externo ? "_blank" : undefined}
+                rel={externo ? "noopener noreferrer" : undefined}
+                style={{ animationDelay: `${160 + i * 50}ms` }}
+                className="group flex transform-gpu items-center gap-3 rounded-xl border border-border bg-card/60 px-5 py-4 text-sm font-medium transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40 motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
+                  <Icon className="size-4" aria-hidden />
+                </span>
+                <span className="flex-1">{t(chave)}</span>
+                {externo ? (
+                  <ArrowUpRight
+                    className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    aria-hidden
+                  />
+                ) : (
+                  <ChevronRight
+                    className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                    aria-hidden
+                  />
+                )}
+              </a>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 }
