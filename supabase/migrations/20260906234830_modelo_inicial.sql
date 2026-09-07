@@ -211,9 +211,15 @@ create table mesas (
   nivel_experiencia nivel_experiencia not null default 'todos',
   vagas_total int not null check (vagas_total between 1 and 12),
   min_jogadores int not null default 3,
-  preco_centavos int not null check (preco_centavos >= 500),  -- mínimo R$5,00
+  -- 0 = gratuita. Entre 1 e 499 não existe (evita cobrança de centavos sem
+  -- sentido); a partir de 500 é R$5,00, o mínimo de mesa paga pelo site.
+  preco_centavos int not null default 0 check (preco_centavos = 0 or preco_centavos >= 500),
   moeda char(3) not null default 'BRL',
   modelo_cobranca modelo_cobranca not null default 'por_sessao',
+  -- false = mesa presencial autogerenciada por um mestre (ex. aba "Presencial
+  -- BH"): o valor em preco_centavos é só informativo, combinado no local —
+  -- não passa pelo fluxo de Pix/webhook nem entra na fila de aguardando_pagamento.
+  cobranca_gerenciada_pelo_site boolean not null default true,
   frequencia frequencia_mesa not null default 'unica',
   qtd_sessoes int,
   data_inicio date not null,
@@ -399,6 +405,7 @@ create index on mesas (status, data_inicio);
 create index on mesas (sistema_id);
 create index on mesas (classificacao);
 create index on mesas (idioma);
+create index on mesas (modalidade, cidade_uf);
 create index on suplementos (publicado, publicado_em desc);
 create index on suplementos (tipo, sistema_id);
 create index on inscricoes (mesa_id, status);
@@ -464,6 +471,40 @@ create policy mesa_leitura on mesas for select using (
 );
 create policy mesa_mestre_edita on mesas for update
   using (mestre_id = auth.uid() or eh_admin());
+
+-- Criação: admin cria qualquer mesa; um usuário com papel 'mestre' só cria
+-- mesa em nome dele mesmo (mestre_id = auth.uid()). Toda mesa nasce em
+-- 'rascunho'/'aguardando_aprovacao' e passa pela aprovação do admin (ver
+-- status_mesa) antes de virar pública — vale também pra mesa presencial
+-- autogerenciada (aba "Presencial BH").
+create policy mesa_cria on mesas for insert
+  with check (
+    eh_admin()
+    or (
+      mestre_id = auth.uid()
+      and exists (select 1 from profiles p where p.id = auth.uid() and p.papel in ('mestre', 'admin'))
+    )
+  );
+
+-- Perguntas da ficha: leitura acompanha a visibilidade da própria mesa
+-- (candidato precisa ver a pergunta pra responder na inscrição).
+create policy mesa_pergunta_leitura on mesa_perguntas for select using (
+  exists (
+    select 1 from mesas m where m.id = mesa_id
+      and (
+        eh_admin() or m.mestre_id = auth.uid()
+        or (m.status in ('publicada', 'confirmada', 'em_andamento')
+            and m.classificacao = any (classificacoes_permitidas()))
+      )
+  )
+);
+-- Escrita (inclui semear as duas perguntas fixas — linhas e véus,
+-- experiência — na criação) é só de quem é dono da mesa ou admin.
+create policy mesa_pergunta_gerencia on mesa_perguntas for all using (
+  eh_admin() or exists (select 1 from mesas m where m.id = mesa_id and m.mestre_id = auth.uid())
+) with check (
+  eh_admin() or exists (select 1 from mesas m where m.id = mesa_id and m.mestre_id = auth.uid())
+);
 
 -- Inscrições: o jogador vê a sua; o mestre vê as da mesa dele
 create policy inscricao_leitura on inscricoes for select using (
