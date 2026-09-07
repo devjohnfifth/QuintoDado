@@ -20,17 +20,17 @@ export default function HomePage() {
             backgroundSize: "80px 92px",
           }}
         />
-        {/* Glows de marca — profundidade sutil, nunca competindo com o texto */}
+        {/* Glows de marca — só uma sugestão de profundidade nos cantos, bem discretos pra não brigar com o texto */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-[28rem] w-[28rem] -translate-x-[65%] rounded-full bg-[#4F7DF3]/25 blur-[110px]"
+          className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-[28rem] w-[28rem] -translate-x-[90%] rounded-full bg-[#4F7DF3]/10 blur-[130px]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[24rem] w-[24rem] translate-x-[10%] rounded-full bg-[#A855F7]/20 blur-[110px]"
+          className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[24rem] w-[24rem] translate-x-[40%] rounded-full bg-[#A855F7]/8 blur-[130px]"
         />
 
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-xl text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Dices className="size-3.5 text-primary" aria-hidden />
             {t("hero.eyebrow")}
@@ -41,7 +41,7 @@ export default function HomePage() {
               {t("hero.titulo")}
             </span>
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+          <p className="mt-6 text-lg text-muted-foreground">
             {t("hero.subtitulo")}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -65,28 +65,33 @@ export default function HomePage() {
 
       {/* Bloco 3 — apresentação curta */}
       <Reveal className="px-4 py-16 sm:px-6">
-        <div className="mx-auto max-w-2xl border-l-2 border-primary/40 pl-6">
-          {t("apresentacao.corpo")
-            .split("\n\n")
-            .map((paragrafo, i) => (
-              <p key={i} className="mt-4 text-muted-foreground first:mt-0">
-                {paragrafo}
-              </p>
-            ))}
-          <Link
-            href="/sobre"
-            className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-          >
-            {t("apresentacao.ctaSobre")}
-            <ArrowRight className="size-4" aria-hidden />
-          </Link>
+        <div className="group mx-auto max-w-2xl border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary hover:bg-primary/[0.03]">
+          <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+            {t("apresentacao.corpo")
+              .split("\n\n")
+              .map((paragrafo, i) => (
+                <p
+                  key={i}
+                  className="mt-4 text-muted-foreground transition-colors duration-300 first:mt-0 group-hover:text-foreground/90"
+                >
+                  {paragrafo}
+                </p>
+              ))}
+            <Link
+              href="/sobre"
+              className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              {t("apresentacao.ctaSobre")}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
         </div>
       </Reveal>
 
       {/* Blocos 4 e 5 — suplementos e mesas, lado a lado pra quebrar a pilha vertical */}
       <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
-          <div className="group rounded-2xl border border-border bg-card/60 p-6 transition-colors hover:border-primary/40">
+          <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
             <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
               <BookOpen className="size-5" aria-hidden />
             </div>
@@ -105,7 +110,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="group rounded-2xl border border-border bg-card/60 p-6 transition-colors hover:border-primary/40">
+          <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
             <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
               <Dices className="size-5" aria-hidden />
             </div>
