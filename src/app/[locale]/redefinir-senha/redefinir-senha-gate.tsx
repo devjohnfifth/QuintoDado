@@ -13,26 +13,45 @@ export function RedefinirSenhaGate() {
   useEffect(() => {
     const supabase = createClient();
 
+    // O e-mail de recuperação do Supabase sempre manda um link no formato
+    // implícito (tokens no hash da URL, nunca chegam ao servidor). Mas o
+    // createBrowserClient do @supabase/ssr trava flowType em "pkce" — e o
+    // detector automático do SDK (o que dispararia PASSWORD_RECOVERY sozinho)
+    // rejeita qualquer callback implícito nesse modo e falha em silêncio,
+    // sem nunca emitir o evento. Por isso lemos os tokens do hash na mão e
+    // chamamos setSession() diretamente, sem depender da detecção automática.
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const accessToken = hashParams.get("access_token");
+    const refreshToken = hashParams.get("refresh_token");
+    const erroNoHash = hashParams.get("error_description");
+    const queryCode = new URLSearchParams(window.location.search).get("code");
+
+    if (erroNoHash) {
+      setEstado("invalido");
+      return;
+    }
+
+    if (accessToken && refreshToken) {
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+        window.history.replaceState(null, "", window.location.pathname);
+        setEstado(error ? "invalido" : "pronto");
+      });
+      return;
+    }
+
+    if (queryCode) {
+      supabase.auth.exchangeCodeForSession(queryCode).then(({ error }) => {
+        window.history.replaceState(null, "", window.location.pathname);
+        setEstado(error ? "invalido" : "pronto");
+      });
+      return;
+    }
+
+    // Sem link de recuperação na URL — só deixa passar se já houver sessão
+    // (ex.: usuário voltou pra essa página com a troca ainda em andamento).
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setEstado("pronto");
+      setEstado(data.session ? "pronto" : "invalido");
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
-        setEstado("pronto");
-      }
-    });
-
-    const tempoLimite = setTimeout(() => {
-      setEstado((atual) => (atual === "verificando" ? "invalido" : atual));
-    }, 4000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(tempoLimite);
-    };
   }, []);
 
   if (estado === "verificando") {
