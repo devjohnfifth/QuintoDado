@@ -10,6 +10,21 @@ const DIA_SEMANA = [
   "sábado",
 ];
 
+const DIA_SEMANA_ABREV = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/** "Sex" — abreviação do dia da semana da data de início. */
+export function diaSemanaAbreviado(dataInicio: string) {
+  return DIA_SEMANA_ABREV[new Date(`${dataInicio}T00:00:00`).getDay()];
+}
+
+/** Dias completos até `dataInicio` (0 = hoje, negativo = já passou). */
+export function diasParaComeco(dataInicio: string) {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const inicio = new Date(`${dataInicio}T00:00:00`);
+  return Math.round((inicio.getTime() - hoje.getTime()) / 86_400_000);
+}
+
 /** "Semanal · domingo às 18:30" — mesmo padrão do Tavernaria/MesaQuest. */
 export function formatarFrequenciaEHorario(
   dataInicio: string,

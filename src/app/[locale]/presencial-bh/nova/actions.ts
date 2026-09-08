@@ -21,6 +21,7 @@ const schema = z
     nivelExperiencia: z.enum(["iniciante", "intermediario", "avancado", "todos"]),
     gratuita: z.coerce.boolean(),
     valorReais: z.coerce.number().min(0).max(999).optional(),
+    bannerUrl: z.string().url().nullable().optional(),
   })
   .refine((d) => d.minJogadores <= d.vagasTotal, {
     message: "O mínimo de jogadores não pode passar do total de vagas.",
@@ -89,6 +90,7 @@ export async function criarMesaPresencial(
       data_inicio: dados.dataInicio,
       horario_inicio: dados.horarioInicio,
       horario_fim: dados.horarioFim,
+      banner_url: dados.bannerUrl || null,
       status: "aguardando_aprovacao",
     })
     .select("id")

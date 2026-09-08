@@ -83,6 +83,7 @@ const schema = z
     valorReais: z.coerce.number().min(0).max(9999).optional(),
     cobrancaGerenciadaPeloSite: z.coerce.boolean(),
     publicarAgora: z.coerce.boolean(),
+    bannerUrl: z.string().url().nullable().optional(),
   })
   .refine((d) => d.minJogadores <= d.vagasTotal, {
     message: "O mínimo de jogadores não pode passar do total de vagas.",
@@ -136,6 +137,7 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
       data_inicio: d.dataInicio,
       horario_inicio: d.horarioInicio,
       horario_fim: d.horarioFim,
+      banner_url: d.bannerUrl || null,
       status: d.publicarAgora ? "publicada" : "rascunho",
       aprovada_por: d.publicarAgora ? adminId : null,
       aprovada_em: d.publicarAgora ? agora : null,

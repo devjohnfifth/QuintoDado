@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { BannerUpload } from "@/components/site/banner-upload";
 import { criarMesaAdmin } from "../actions";
 
 type Sistema = { id: string; nome: string };
@@ -58,6 +59,7 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
   const [gratuita, setGratuita] = useState(false);
   const [cobrancaGerenciadaPeloSite, setCobrancaGerenciadaPeloSite] = useState(true);
   const [publicarAgora, setPublicarAgora] = useState(true);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -86,6 +88,7 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       valorReais: formData.get("valorReais"),
       cobrancaGerenciadaPeloSite,
       publicarAgora,
+      bannerUrl,
     };
 
     startTransition(async () => {
@@ -149,6 +152,11 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="space-y-2">
         <Label htmlFor="sinopse">Sinopse</Label>
         <Textarea id="sinopse" name="sinopse" required maxLength={2000} rows={4} />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Imagem de capa</Label>
+        <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
 
       <div className="space-y-3 rounded-xl border border-border p-4">

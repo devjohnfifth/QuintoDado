@@ -6,7 +6,9 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // TODO(fase 1): apontar para o bucket real do Cloudflare R2 quando existir.
+      // Storage do Supabase (capas de mesa, avatares) — trocar/complementar
+      // com o bucket do Cloudflare R2 quando ele existir de verdade.
+      { protocol: "https", hostname: "jqtkjovvrjdpzpbrqyeg.supabase.co", pathname: "/storage/v1/object/public/**" },
     ],
   },
 };
