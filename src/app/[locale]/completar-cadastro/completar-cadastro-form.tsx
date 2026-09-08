@@ -1,17 +1,45 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
+import { sanitizarUsername } from "@/lib/username";
 import { completarCadastroAction } from "./actions";
 
 export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }) {
   const t = useTranslations("CompletarCadastro");
   const [estado, formAction, pending] = useActionState(completarCadastroAction, null);
+  const [valores, setValores] = useState({
+    nomeExibicao: nomeSugerido,
+    username: "",
+    dataNascimento: "",
+  });
+
+  // Depois de um erro, só limpa os campos que o servidor apontou como
+  // inválidos — o resto do que a pessoa já preencheu certo continua ali.
+  useEffect(() => {
+    if (!estado?.valores) return;
+    setValores((atual) => {
+      const proximo = { ...atual };
+      for (const campo of Object.keys(atual) as (keyof typeof atual)[]) {
+        proximo[campo] = estado.camposInvalidos?.includes(campo)
+          ? ""
+          : (estado.valores?.[campo] ?? atual[campo]);
+      }
+      return proximo;
+    });
+  }, [estado]);
+
+  const campo =
+    (nome: keyof typeof valores, transformar?: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = transformar ? transformar(e.target.value) : e.target.value;
+      setValores((atual) => ({ ...atual, [nome]: v }));
+    };
 
   return (
     <form action={formAction} className="space-y-4">
@@ -22,16 +50,34 @@ export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }
           name="nomeExibicao"
           required
           maxLength={80}
-          defaultValue={nomeSugerido}
+          value={valores.nomeExibicao}
+          onChange={campo("nomeExibicao")}
         />
       </div>
       <div className="space-y-2">
         <Label htmlFor="username">{t("campoUsername")}</Label>
-        <Input id="username" name="username" required maxLength={30} />
+        <Input
+          id="username"
+          name="username"
+          required
+          maxLength={30}
+          value={valores.username}
+          onChange={campo("username", sanitizarUsername)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Só letras minúsculas, números, - ou _. A gente ajusta pra esse formato enquanto você digita.
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="dataNascimento">{t("campoNascimento")}</Label>
-        <Input id="dataNascimento" name="dataNascimento" type="date" required />
+        <Input
+          id="dataNascimento"
+          name="dataNascimento"
+          type="date"
+          required
+          value={valores.dataNascimento}
+          onChange={campo("dataNascimento")}
+        />
       </div>
       <div className="flex items-start gap-2">
         <Checkbox id="aceiteTermos" name="aceiteTermos" required className="mt-0.5" />

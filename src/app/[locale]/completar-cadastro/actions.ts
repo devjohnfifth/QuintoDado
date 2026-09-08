@@ -5,7 +5,13 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { idadeEmAnos } from "@/lib/idade";
 
-export type EstadoCompletarCadastro = { erro?: string } | null;
+export type EstadoCompletarCadastro = {
+  erro?: string;
+  // Em vez de limpar o formulário inteiro a cada erro, ecoa de volta o que
+  // já tinha sido digitado certo e diz só quais campos precisam de novo.
+  camposInvalidos?: string[];
+  valores?: Record<string, string>;
+} | null;
 
 const schema = z
   .object({
@@ -35,14 +41,21 @@ export async function completarCadastroAction(
   _estado: EstadoCompletarCadastro,
   formData: FormData,
 ): Promise<EstadoCompletarCadastro> {
-  const parsed = schema.safeParse({
-    nomeExibicao: formData.get("nomeExibicao"),
-    username: formData.get("username"),
-    dataNascimento: formData.get("dataNascimento"),
+  const bruto = {
+    nomeExibicao: String(formData.get("nomeExibicao") ?? ""),
+    username: String(formData.get("username") ?? ""),
+    dataNascimento: String(formData.get("dataNascimento") ?? ""),
     aceiteTermos: formData.get("aceiteTermos"),
-  });
+  };
+  const parsed = schema.safeParse(bruto);
   if (!parsed.success) {
-    return { erro: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+    const camposInvalidos = [...new Set(parsed.error.issues.map((i) => String(i.path[0])))];
+    const { aceiteTermos: _aceiteTermos, ...valoresSeguros } = bruto;
+    return {
+      erro: parsed.error.issues[0]?.message ?? "Dados inválidos.",
+      camposInvalidos,
+      valores: valoresSeguros,
+    };
   }
   const d = parsed.data;
 
@@ -63,11 +76,16 @@ export async function completarCadastroAction(
   });
 
   if (perfilError) {
+    const { aceiteTermos: _aceiteTermos, ...valoresSeguros } = bruto;
     if (perfilError.code === "23505") {
-      return { erro: "Esse nome de usuário já está em uso." };
+      return {
+        erro: "Esse nome de usuário já está em uso.",
+        camposInvalidos: ["username"],
+        valores: valoresSeguros,
+      };
     }
     console.error("[completarCadastroAction] erro ao criar profile:", perfilError.message);
-    return { erro: "Não deu pra concluir o cadastro agora. Tente de novo." };
+    return { erro: "Não deu pra concluir o cadastro agora. Tente de novo.", valores: valoresSeguros };
   }
 
   const { error: aceiteError } = await supabase.from("aceites_termos").insert({

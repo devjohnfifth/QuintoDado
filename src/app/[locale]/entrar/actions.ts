@@ -5,7 +5,14 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { idadeEmAnos } from "@/lib/idade";
 
-export type EstadoFormEntrar = { erro?: string } | null;
+export type EstadoFormEntrar = {
+  erro?: string;
+  // Só usados pelo formulário de cadastro: em vez de limpar o formulário
+  // inteiro a cada erro, ecoa de volta o que a pessoa já tinha digitado
+  // certo e diz só quais campos precisam ser preenchidos de novo.
+  camposInvalidos?: string[];
+  valores?: Record<string, string>;
+} | null;
 
 export async function entrarComProvedorAction(formData: FormData) {
   const provider = formData.get("provider");
@@ -86,16 +93,27 @@ export async function criarContaAction(
   _estado: EstadoFormEntrar,
   formData: FormData,
 ): Promise<EstadoFormEntrar> {
-  const parsed = signupSchema.safeParse({
-    nomeExibicao: formData.get("nomeExibicao"),
-    username: formData.get("username"),
-    dataNascimento: formData.get("dataNascimento"),
-    email: formData.get("email"),
-    senha: formData.get("senha"),
+  const bruto = {
+    nomeExibicao: String(formData.get("nomeExibicao") ?? ""),
+    username: String(formData.get("username") ?? ""),
+    dataNascimento: String(formData.get("dataNascimento") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    senha: String(formData.get("senha") ?? ""),
     aceiteTermos: formData.get("aceiteTermos"),
-  });
+  };
+  const parsed = signupSchema.safeParse(bruto);
   if (!parsed.success) {
-    return { erro: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+    // Nunca ecoa a senha de volta pro cliente — só os campos que dá pra
+    // reexibir com segurança. Um campo só entra em "camposInvalidos" (e
+    // por isso é limpo no formulário) se o próprio Zod apontou erro nele;
+    // os demais mantêm o que a pessoa digitou.
+    const camposInvalidos = [...new Set(parsed.error.issues.map((i) => String(i.path[0])))];
+    const { senha: _senha, aceiteTermos: _aceiteTermos, ...valoresSeguros } = bruto;
+    return {
+      erro: parsed.error.issues[0]?.message ?? "Dados inválidos.",
+      camposInvalidos,
+      valores: valoresSeguros,
+    };
   }
   const d = parsed.data;
 
@@ -114,11 +132,16 @@ export async function criarContaAction(
   });
 
   if (error) {
+    const { senha: _senha, aceiteTermos: _aceiteTermos, ...valoresSeguros } = bruto;
     if (error.code === "user_already_exists" || error.status === 422) {
-      return { erro: "Esse e-mail já tem conta. Tenta entrar em vez de cadastrar." };
+      return {
+        erro: "Esse e-mail já tem conta. Tenta entrar em vez de cadastrar.",
+        camposInvalidos: ["email"],
+        valores: valoresSeguros,
+      };
     }
     console.error("[criarContaAction] erro no signUp:", error.message);
-    return { erro: "Não deu pra criar a conta agora. Tente de novo em instantes." };
+    return { erro: "Não deu pra criar a conta agora. Tente de novo em instantes.", valores: valoresSeguros };
   }
 
   redirect("/entrar?cadastro=confirme-email");

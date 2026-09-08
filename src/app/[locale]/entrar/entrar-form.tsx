@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
+import { sanitizarUsername } from "@/lib/username";
 import discordIcon from "@/assets/brand/discord-icon.png";
 import googleIcon from "@/assets/brand/google-icon.png";
 import {
@@ -139,27 +140,85 @@ function FormEsqueciSenha({ onVoltar }: { onVoltar: () => void }) {
   );
 }
 
+const CAMPOS_CADASTRO_VAZIOS = { nomeExibicao: "", username: "", dataNascimento: "", email: "" };
+
 function FormCadastro() {
   const t = useTranslations("Entrar");
   const [estado, formAction, pending] = useActionState(criarContaAction, null);
+  const [valores, setValores] = useState(CAMPOS_CADASTRO_VAZIOS);
+
+  // Depois de um erro, só limpa os campos que o servidor apontou como
+  // inválidos — o resto do que a pessoa já preencheu certo continua ali.
+  // Sem isso, um erro em QUALQUER campo apagava o formulário inteiro,
+  // inclusive senha/nome/data que já estavam corretos.
+  useEffect(() => {
+    if (!estado?.valores) return;
+    setValores((atual) => {
+      const proximo = { ...atual };
+      for (const campo of Object.keys(atual) as (keyof typeof atual)[]) {
+        proximo[campo] = estado.camposInvalidos?.includes(campo)
+          ? ""
+          : (estado.valores?.[campo] ?? atual[campo]);
+      }
+      return proximo;
+    });
+  }, [estado]);
+
+  const campo =
+    (nome: keyof typeof valores, transformar?: (v: string) => string) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const v = transformar ? transformar(e.target.value) : e.target.value;
+      setValores((atual) => ({ ...atual, [nome]: v }));
+    };
 
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="nomeExibicao">{t("campoNome")}</Label>
-        <Input id="nomeExibicao" name="nomeExibicao" required maxLength={80} />
+        <Input
+          id="nomeExibicao"
+          name="nomeExibicao"
+          required
+          maxLength={80}
+          value={valores.nomeExibicao}
+          onChange={campo("nomeExibicao")}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="username">{t("campoUsername")}</Label>
-        <Input id="username" name="username" required maxLength={30} />
+        <Input
+          id="username"
+          name="username"
+          required
+          maxLength={30}
+          value={valores.username}
+          onChange={campo("username", sanitizarUsername)}
+        />
+        <p className="text-xs text-muted-foreground">
+          Só letras minúsculas, números, - ou _. A gente ajusta pra esse formato enquanto você digita.
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="dataNascimento">{t("campoNascimento")}</Label>
-        <Input id="dataNascimento" name="dataNascimento" type="date" required />
+        <Input
+          id="dataNascimento"
+          name="dataNascimento"
+          type="date"
+          required
+          value={valores.dataNascimento}
+          onChange={campo("dataNascimento")}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">{t("campoEmail")}</Label>
-        <Input id="email" name="email" type="email" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          required
+          value={valores.email}
+          onChange={campo("email")}
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="senha">{t("campoSenha")}</Label>
