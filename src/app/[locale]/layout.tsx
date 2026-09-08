@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
             <SiteFooter />
           </div>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );
