@@ -42,11 +42,13 @@ export function CandidaturaForm({
     setErro(null);
 
     const formData = new FormData(e.currentTarget);
-    const respostas = perguntas.map((p) => ({
-      perguntaId: p.id,
-      resposta:
-        p.tipo === "escolha_unica" ? escolhas[p.id] ?? "" : String(formData.get(p.id) ?? ""),
-    }));
+    const respostas = perguntas
+      .map((p) => ({
+        perguntaId: p.id,
+        resposta:
+          p.tipo === "escolha_unica" ? escolhas[p.id] ?? "" : String(formData.get(p.id) ?? ""),
+      }))
+      .filter((r) => r.resposta.trim().length > 0);
 
     startTransition(async () => {
       const resultado = await criarCandidatura({ mesaId, slug, respostas });
