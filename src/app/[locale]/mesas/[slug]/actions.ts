@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
+import { idadeEmAnos } from "@/lib/idade";
+import { limiteIdadeClassificacao } from "@/lib/mesas/labels";
 
 const schema = z.object({
   mesaId: z.string().uuid(),
@@ -27,6 +29,20 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
 
   if (!user) {
     return { ok: false, error: "Você precisa estar logado pra se candidatar." };
+  }
+
+  const [{ data: mesa }, { data: perfil }] = await Promise.all([
+    supabase.from("mesas").select("classificacao").eq("id", mesaId).single(),
+    supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+  ]);
+
+  const limite = mesa ? limiteIdadeClassificacao(mesa.classificacao) : 0;
+  const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
+  if (limite > 0 && idade < limite) {
+    return {
+      ok: false,
+      error: `Esta mesa é classificada para +${limite} anos. Sua conta não atende essa idade mínima.`,
+    };
   }
 
   const { data: inscricao, error: inscricaoError } = await supabase

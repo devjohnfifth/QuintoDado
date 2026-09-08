@@ -38,7 +38,7 @@ type Mesa = {
   vagas_total: number;
   sistemas: { nome: string } | null;
   profiles: { nome_exibicao: string } | null;
-  inscricoes: { count: number }[];
+  vagas_preenchidas: number;
 };
 
 async function buscarMesas(): Promise<Mesa[]> {
@@ -51,9 +51,8 @@ async function buscarMesas(): Promise<Mesa[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, frequencia, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), inscricoes(count)",
+      "id, slug, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, preco_centavos, cobranca_gerenciada_pelo_site, frequencia, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas",
     )
-    .eq("inscricoes.status", "aprovado")
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
 
@@ -140,7 +139,7 @@ export default async function MesasPage({
                     {formatarFrequenciaEHorario(mesa.data_inicio, mesa.horario_inicio, mesa.frequencia)}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {mesa.inscricoes[0]?.count ?? 0}/{mesa.vagas_total} vagas preenchidas
+                    {mesa.vagas_preenchidas}/{mesa.vagas_total} vagas preenchidas
                   </p>
                   <div className="mt-1 flex items-center justify-between">
                     <p className="text-sm font-medium">

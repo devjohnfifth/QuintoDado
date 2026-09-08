@@ -11,7 +11,9 @@ import {
   CLASSIFICACAO_LABEL,
   NIVEL_LABEL,
   FREQUENCIA_LABEL,
+  limiteIdadeClassificacao,
 } from "@/lib/mesas/labels";
+import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
 
 type MesaDetalhe = {
@@ -31,7 +33,7 @@ type MesaDetalhe = {
   vagas_total: number;
   sistemas: { nome: string } | null;
   profiles: { nome_exibicao: string } | null;
-  inscricoes: { count: number }[];
+  vagas_preenchidas: number;
 };
 
 async function buscarMesa(slug: string) {
@@ -41,9 +43,8 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), inscricoes(count)",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas",
     )
-    .eq("inscricoes.status", "aprovado")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -60,14 +61,22 @@ async function buscarMesa(slug: string) {
   } = await supabase.auth.getUser();
 
   let inscricao: { status: string } | null = null;
+  let idadeInsuficiente = false;
   if (user) {
-    const { data } = await supabase
-      .from("inscricoes")
-      .select("status")
-      .eq("mesa_id", mesa.id)
-      .eq("usuario_id", user.id)
-      .maybeSingle();
-    inscricao = data;
+    const [{ data: inscricaoData }, { data: perfil }] = await Promise.all([
+      supabase
+        .from("inscricoes")
+        .select("status")
+        .eq("mesa_id", mesa.id)
+        .eq("usuario_id", user.id)
+        .maybeSingle(),
+      supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+    ]);
+    inscricao = inscricaoData;
+
+    const limite = limiteIdadeClassificacao(mesa.classificacao);
+    const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
+    idadeInsuficiente = limite > 0 && idade < limite;
   }
 
   return {
@@ -75,6 +84,7 @@ async function buscarMesa(slug: string) {
     perguntas: perguntas ?? [],
     logado: Boolean(user),
     inscricao,
+    idadeInsuficiente,
   };
 }
 
@@ -107,7 +117,7 @@ export default async function MesaDetalhePage({
 
   const resultado = await buscarMesa(slug);
   if (!resultado) notFound();
-  const { mesa, perguntas, logado, inscricao } = resultado;
+  const { mesa, perguntas, logado, inscricao, idadeInsuficiente } = resultado;
 
   const dataFormatada = new Date(`${mesa.data_inicio}T${mesa.horario_inicio}`).toLocaleDateString(
     "pt-BR",
@@ -149,7 +159,7 @@ export default async function MesaDetalhePage({
         <div>
           <dt className="text-muted-foreground">{t("vagasLabel")}</dt>
           <dd className="font-medium">
-            {mesa.inscricoes[0]?.count ?? 0}/{mesa.vagas_total} preenchidas
+            {mesa.vagas_preenchidas}/{mesa.vagas_total} preenchidas
           </dd>
         </div>
         <div>
@@ -180,6 +190,10 @@ export default async function MesaDetalhePage({
       ) : inscricao ? (
         <p className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
           {t("jaCandidatado")}
+        </p>
+      ) : idadeInsuficiente ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+          {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
         </p>
       ) : (
         <div className="mt-4">

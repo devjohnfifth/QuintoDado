@@ -13,7 +13,8 @@
     "links": "Links",
     "entrar": "Entrar",
     "minhaConta": "Minha conta",
-    "abrirMenu": "Abrir menu"
+    "abrirMenu": "Abrir menu",
+    "fecharMenu": "Fechar menu"
   },
   "Entrar": {
     "titulo": "Entrar no Quinto Dado",
@@ -116,6 +117,7 @@
     "jaCandidatado": "Você já se candidatou a esta mesa",
     "verStatus": "Ver status da candidatura",
     "precisaEntrar": "Entre na sua conta pra se candidatar a esta mesa.",
+    "idadeInsuficiente": "Esta mesa é classificada para {classificacao}. Sua conta não atende essa idade mínima.",
     "campoLinhasVeus": "Linhas e véus: o que não pode aparecer nessa mesa?",
     "campoExperiencia": "Qual sua experiência com o sistema?",
     "enviar": "Enviar candidatura",
@@ -151,6 +153,8 @@
   "PresencialBhNova": {
     "titulo": "Criar mesa presencial em BH",
     "subtitulo": "Preencha os dados da sessão. Sua mesa entra em análise e vai ao ar assim que aprovada.",
+    "precisaEntrar": "Entre na sua conta pra criar uma mesa presencial.",
+    "precisaSerMestre": "Pra criar uma mesa aqui você precisa ter o papel de mestre na sua conta. Fale com a gente na comunidade pra virar mestre.",
     "campoTitulo": "Título da mesa",
     "campoSistema": "Sistema",
     "campoSistemaPlaceholder": "Escolha um sistema",
@@ -185,5 +189,24 @@
     "privacidade": "Privacidade",
     "reembolso": "Reembolso",
     "licenca": "Licença de uso"
+  },
+  "Suplementos": {
+    "titulo": "Material para a sua mesa",
+    "subtitulo": "Estamos preparando o catálogo — tabelas de encontros, mapas, tokens, homebrews e aventuras prontas, a maior parte gratuita.",
+    "avisoTitulo": "Em construção",
+    "avisoCorpo": "O catálogo ainda não está no ar. Enquanto isso, entra na comunidade pra saber assim que o primeiro material sair.",
+    "cta": "Entrar na comunidade"
+  },
+  "Legal": {
+    "termosTitulo": "Termos de uso",
+    "termosCorpo": "Ao criar uma conta ou usar o Quinto Dado, você concorda com estes termos.\n\nO Quinto Dado é um projeto pessoal do Mestre Quintão (João Quintão), oferecendo mesas de RPG e material autoral gratuito. Não temos vínculo com as editoras dos sistemas de RPG citados no site.\n\nPra criar uma conta você precisa ter pelo menos 14 anos. Mesas com classificação etária mais alta (+14, +16 ou +18) só ficam disponíveis pra contas que atendem a idade mínima informada no cadastro — essa checagem é feita pelo próprio site, não só um aviso.\n\nCandidatar-se a uma mesa não garante vaga: o mestre da mesa avalia cada candidatura e pode recusar por qualquer motivo, incluindo incompatibilidade de agenda, experiência ou perfil do grupo.\n\nAtualmente o site não processa pagamentos. Mesas presenciais com valor sugerido são combinadas e pagas diretamente entre jogador e mestre, fora da plataforma.\n\nPodemos suspender ou encerrar contas que violem estes termos, as diretrizes de segurança da comunidade (linhas e véus, respeito entre jogadores) ou a lei brasileira.\n\nPodemos atualizar estes termos conforme o site evolui. Mudanças relevantes serão avisadas na comunidade.",
+    "privacidadeTitulo": "Política de privacidade",
+    "privacidadeCorpo": "Coletamos apenas o necessário pra operar o site: nome de exibição, nome de usuário, e-mail, data de nascimento e, opcionalmente, foto de perfil.\n\nData de nascimento é usada só pra checar a idade mínima de cadastro e liberar mesas com classificação etária compatível — ela não aparece pra outros usuários.\n\nSe você se candidata a uma mesa, o mestre responsável vê seu nome de exibição, nome de usuário e as respostas da ficha de candidatura (incluindo linhas e véus, quando preenchidas). Essas respostas não ficam públicas nem visíveis a outros jogadores.\n\nUsamos o Supabase (banco de dados e autenticação) e, quando configurado, Resend (e-mail) como fornecedores de infraestrutura. Não vendemos dados a terceiros.\n\nVocê pode pedir a exclusão da sua conta e dos seus dados a qualquer momento, falando com a gente pela comunidade.\n\nLogin social (Discord, Google), quando habilitado, segue a política de privacidade de cada provedor pra dados trocados nesse fluxo.",
+    "reembolsoTitulo": "Política de reembolso",
+    "reembolsoCorpo": "O Quinto Dado ainda não processa pagamentos pelo site — a fase atual permite candidatura a mesas sem cobrança pela plataforma.\n\nMesas presenciais que informam um valor sugerido (pra cobrir handouts e material físico) são combinadas e pagas diretamente entre jogador e mestre, fora do site. Qualquer reembolso desse tipo de combinado é entre as partes.\n\nQuando o pagamento via Pix for habilitado no site, esta página será atualizada com prazos e condições claras de reembolso antes do lançamento dessa funcionalidade.",
+    "licencaTitulo": "Licença de uso do material",
+    "licencaCorpo": "Os sistemas de RPG citados no Quinto Dado (Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima, Daggerheart, Sacramento RPG e outros) pertencem às suas respectivas editoras e autores. O Quinto Dado não tem vínculo oficial com nenhuma delas.\n\nMaterial autoral publicado no Quinto Dado (tabelas, mapas, homebrews, aventuras) pode ser usado livremente nas suas próprias mesas, sem fins comerciais, com crédito ao Quinto Dado quando possível.\n\nConteúdo compatível com sistemas de licença aberta (como licenças de terceira-parte dos próprios sistemas) segue os termos dessa licença específica, indicados junto ao material quando aplicável.\n\nNão reproduza nem redistribua material protegido dos sistemas originais sem autorização de quem detém os direitos.",
+    "atualizadoEm": "Última atualização: 7 de setembro de 2026",
+    "voltar": "Voltar pro início"
   }
 }

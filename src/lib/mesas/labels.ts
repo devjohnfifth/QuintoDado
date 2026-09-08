@@ -16,6 +16,17 @@ export const CLASSIFICACAO_LABEL: Record<string, string> = {
   "18": "+18 anos",
 };
 
+const LIMITE_IDADE_CLASSIFICACAO: Record<string, number> = {
+  livre: 0,
+  "14": 14,
+  "16": 16,
+  "18": 18,
+};
+
+export function limiteIdadeClassificacao(classificacao: string): number {
+  return LIMITE_IDADE_CLASSIFICACAO[classificacao] ?? 0;
+}
+
 export const NIVEL_LABEL: Record<string, string> = {
   todos: "Todos os níveis",
   iniciante: "Iniciante",
