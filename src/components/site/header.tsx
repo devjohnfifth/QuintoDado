@@ -18,6 +18,7 @@ async function buscarSessao() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
+  const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const [{ data: perfil }, { count: naoLidas }] = await Promise.all([
     supabase
       .from("profiles")
@@ -28,7 +29,8 @@ async function buscarSessao() {
       .from("notificacoes")
       .select("id", { count: "exact", head: true })
       .eq("usuario_id", user.id)
-      .is("lida_em", null),
+      .is("lida_em", null)
+      .gte("criado_em", umDiaAtras),
   ]);
 
   if (!perfil) return null;

@@ -10,10 +10,12 @@ export async function buscarNotificacoesAction() {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
+  const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data } = await supabase
     .from("notificacoes")
     .select("id, titulo, corpo, url, lida_em, criado_em")
     .eq("usuario_id", user.id)
+    .gte("criado_em", umDiaAtras)
     .order("criado_em", { ascending: false })
     .limit(10);
 

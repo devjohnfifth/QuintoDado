@@ -35,17 +35,11 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
   const extras = jogadores.length - jogadoresVisiveis.length;
 
   return (
-    <Link
-      href={`/mesas/${mesa.slug}`}
-      className="group relative flex overflow-hidden rounded-2xl border border-border bg-card/60 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.015] hover:border-primary/40"
-    >
-      {/* Coluna de dados */}
-      <div className="flex w-[55%] flex-col p-4 sm:w-1/2 sm:p-5">
+    <Link href={`/mesas/${mesa.slug}`} className="group relative flex items-stretch">
+      {/* Talão — peça própria, forma e cor nunca mudam */}
+      <div className="flex flex-1 flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 sm:p-5">
         {logo && (
-          <div
-            className="relative h-9 w-24 shrink-0 overflow-hidden bg-white shadow-sm"
-            style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%)" }}
-          >
+          <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
             <Image src={logo} alt={mesa.sistemas?.nome ?? ""} fill className="object-cover" sizes="96px" />
           </div>
         )}
@@ -104,24 +98,24 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
         </div>
       </div>
 
-      {/* Costura de talão de ingresso */}
-      <div
-        aria-hidden
-        className="relative w-0 border-l-2 border-dashed border-border/70"
-      >
-        <span className="absolute -left-2 -top-2 size-4 rounded-full bg-background" />
-        <span className="absolute -bottom-2 -left-2 size-4 rounded-full bg-background" />
+      {/* Costura — fica parada, marca onde o talão se destacaria */}
+      <div aria-hidden className="relative w-0 shrink-0 border-l-2 border-dashed border-border/70">
+        <span className="absolute -left-2.5 -top-2.5 size-5 rounded-full border border-border/70 bg-background shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]" />
+        <span className="absolute -bottom-2.5 -left-2.5 size-5 rounded-full border border-border/70 bg-background shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]" />
       </div>
 
-      {/* Canhoto destacável */}
-      <div className="relative w-[45%] shrink-0 overflow-hidden transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:rotate-1 sm:w-1/2">
+      {/* Canhoto destacável — peça própria e completa, forma nunca muda, só a posição no hover.
+          As mordidas (furo de perfuração) ficam na própria borda dele, fora do overflow-hidden,
+          pra se moverem junto quando ele se solta — a metade da costura fica parada. */}
+      <div className="relative w-[27%] shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:z-10 group-hover:translate-x-3 group-hover:rotate-2 sm:w-[30%]">
+        <div className="relative size-full overflow-hidden rounded-r-2xl border-y border-r border-border bg-card transition-[box-shadow,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:border-primary/40 group-hover:shadow-2xl">
         {mesa.banner_url ? (
           <Image
             src={mesa.banner_url}
             alt=""
             fill
             className="object-cover"
-            sizes="(min-width: 640px) 25vw, 45vw"
+            sizes="(min-width: 640px) 15vw, 27vw"
           />
         ) : (
           <div
@@ -135,56 +129,56 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
 
-        <div className="absolute inset-x-2 top-2 flex flex-wrap gap-1 sm:inset-x-3 sm:top-3">
+        <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-2 sm:top-2">
           {dias >= 0 && dias <= 14 && (
-            <span className="flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-[10px] font-semibold text-white sm:text-xs">
-              <Flame className="size-3" aria-hidden />
-              {dias === 0 ? "Começa hoje" : `Começa em ${dias} dia${dias === 1 ? "" : "s"}`}
+            <span className="flex items-center gap-1 rounded-full bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+              <Flame className="size-2.5 shrink-0" aria-hidden />
+              {dias === 0 ? "Hoje" : `${dias}d`}
             </span>
           )}
           {faltam > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-semibold text-white sm:text-xs">
-              <UserPlus className="size-3" aria-hidden />
-              Falta {faltam} jogador{faltam === 1 ? "" : "es"}!
+            <span className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+              <UserPlus className="size-2.5 shrink-0" aria-hidden />
+              Falta {faltam}
             </span>
           )}
-          <span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm sm:text-xs">
-            {NIVEL_LABEL[mesa.nivel_experiencia] ?? mesa.nivel_experiencia}
-          </span>
         </div>
 
-        <p className="absolute inset-x-2 top-1/2 -translate-y-1/2 text-center font-heading text-sm font-bold uppercase leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:inset-x-3 sm:text-base">
+        <p className="absolute inset-x-1.5 top-1/2 -translate-y-1/2 text-center font-heading text-xs font-bold uppercase leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:inset-x-2">
           {mesa.titulo}
         </p>
 
         {jogadoresVisiveis.length > 0 && (
-          <div className="absolute bottom-2 left-2 flex items-center -space-x-2 sm:bottom-3 sm:left-3">
+          <div className="absolute bottom-1.5 left-1.5 flex items-center -space-x-1.5 sm:bottom-2 sm:left-2">
             {jogadoresVisiveis.map((j, i) =>
               j.avatar_url ? (
                 <Image
                   key={i}
                   src={j.avatar_url}
                   alt={j.nome}
-                  width={28}
-                  height={28}
-                  className="size-7 rounded-full border-2 border-background object-cover"
+                  width={22}
+                  height={22}
+                  className="size-5 rounded-full border-2 border-background object-cover sm:size-6"
                 />
               ) : (
                 <span
                   key={i}
-                  className="flex size-7 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[10px] font-bold text-white"
+                  className="flex size-5 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[9px] font-bold text-white sm:size-6"
                 >
                   {j.nome.charAt(0).toUpperCase()}
                 </span>
               ),
             )}
             {extras > 0 && (
-              <span className="flex size-7 items-center justify-center rounded-full border-2 border-background bg-black/60 text-[10px] font-bold text-white">
+              <span className="flex size-5 items-center justify-center rounded-full border-2 border-background bg-black/60 text-[9px] font-bold text-white sm:size-6">
                 +{extras}
               </span>
             )}
           </div>
         )}
+        </div>
+        <span className="absolute -left-2.5 -top-2.5 size-5 rounded-full border border-border/70 bg-background shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]" />
+        <span className="absolute -bottom-2.5 -left-2.5 size-5 rounded-full border border-border/70 bg-background shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]" />
       </div>
     </Link>
   );

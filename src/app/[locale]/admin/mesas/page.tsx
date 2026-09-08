@@ -15,9 +15,11 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default async function AdminMesasPage() {
   const supabase = await createClient();
+  const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data: mesas, error } = await supabase
     .from("mesas")
     .select("id, slug, titulo, status, modalidade, cidade_uf, tipo, data_inicio, sistemas(nome)")
+    .or(`status.neq.cancelada,cancelado_em.gte.${umDiaAtras}`)
     .order("criado_em", { ascending: false });
 
   if (error) {

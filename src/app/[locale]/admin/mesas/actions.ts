@@ -47,7 +47,7 @@ export async function cancelarMesaAction(mesaId: string) {
 
   const { error } = await supabase
     .from("mesas")
-    .update({ status: "cancelada" })
+    .update({ status: "cancelada", cancelado_em: new Date().toISOString() })
     .eq("id", mesaId);
 
   if (error) {
