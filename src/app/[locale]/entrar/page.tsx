@@ -15,7 +15,7 @@ export default async function EntrarPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ erro?: string; cadastro?: string }>;
+  searchParams: Promise<{ erro?: string; cadastro?: string; recuperacao?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -37,7 +37,9 @@ export default async function EntrarPage({
       ? t("mensagemConfirmeEmail")
       : sp.erro === "oauth"
         ? t("mensagemErroOauth")
-        : undefined;
+        : sp.recuperacao === "enviada"
+          ? "Se esse e-mail tiver conta, mandamos um link de recuperação. Confira sua caixa de entrada."
+          : undefined;
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16 sm:px-6">

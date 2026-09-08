@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
-import { MODALIDADE_LABEL, FREQUENCIA_LABEL, NIVEL_LABEL } from "@/lib/mesas/labels";
+import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
 import { diaSemanaAbreviado, diasParaComeco } from "@/lib/mesas/horario";
 import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
 

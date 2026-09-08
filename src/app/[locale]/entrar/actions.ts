@@ -124,6 +124,33 @@ export async function criarContaAction(
   redirect("/entrar?cadastro=confirme-email");
 }
 
+const esqueciSenhaSchema = z.object({
+  email: z.string().trim().email("E-mail inválido."),
+});
+
+export async function esqueciSenhaAction(
+  _estado: EstadoFormEntrar,
+  formData: FormData,
+): Promise<EstadoFormEntrar> {
+  const parsed = esqueciSenhaSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { erro: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+
+  const supabase = await createClient();
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${site}/redefinir-senha`,
+  });
+
+  // Não revela se o e-mail existe ou não — evita enumerar contas.
+  if (error) {
+    console.error("[esqueciSenhaAction] erro:", error.message);
+  }
+
+  redirect("/entrar?recuperacao=enviada");
+}
+
 export async function sairAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();

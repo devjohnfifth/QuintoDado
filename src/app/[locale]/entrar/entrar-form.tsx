@@ -14,6 +14,7 @@ import {
   entrarComEmailAction,
   entrarComProvedorAction,
   criarContaAction,
+  esqueciSenhaAction,
 } from "./actions";
 
 export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
@@ -80,6 +81,11 @@ export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
 function FormLogin() {
   const t = useTranslations("Entrar");
   const [estado, formAction, pending] = useActionState(entrarComEmailAction, null);
+  const [modo, setModo] = useState<"entrar" | "esqueci">("entrar");
+
+  if (modo === "esqueci") {
+    return <FormEsqueciSenha onVoltar={() => setModo("entrar")} />;
+  }
 
   return (
     <form action={formAction} className="space-y-4">
@@ -95,6 +101,40 @@ function FormLogin() {
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? t("entrando") : t("entrar")}
       </Button>
+      <button
+        type="button"
+        onClick={() => setModo("esqueci")}
+        className="w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
+      >
+        Esqueci minha senha
+      </button>
+    </form>
+  );
+}
+
+function FormEsqueciSenha({ onVoltar }: { onVoltar: () => void }) {
+  const [estado, formAction, pending] = useActionState(esqueciSenhaAction, null);
+
+  return (
+    <form action={formAction} className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Digite seu e-mail e mandamos um link pra você escolher uma senha nova.
+      </p>
+      <div className="space-y-2">
+        <Label htmlFor="email-recuperacao">E-mail</Label>
+        <Input id="email-recuperacao" name="email" type="email" required autoFocus />
+      </div>
+      {estado?.erro && <p className="text-sm text-destructive">{estado.erro}</p>}
+      <Button type="submit" disabled={pending} className="w-full">
+        {pending ? "Enviando..." : "Enviar link de recuperação"}
+      </Button>
+      <button
+        type="button"
+        onClick={onVoltar}
+        className="w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
+      >
+        Voltar pro login
+      </button>
     </form>
   );
 }

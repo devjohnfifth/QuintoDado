@@ -3,8 +3,8 @@ import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { PerfilSection } from "@/components/site/perfil-section";
 import { sairAction } from "../entrar/actions";
 
 export const metadata: Metadata = { title: "Minha conta — Quinto Dado", robots: { index: false } };
@@ -21,15 +21,6 @@ const STATUS_LABEL: Record<string, string> = {
   reembolsada: "Reembolsada",
   concluida: "Concluída",
 };
-
-function iniciais(nome: string) {
-  return nome
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
-}
 
 export default async function ContaPage({
   params,
@@ -53,11 +44,14 @@ export default async function ContaPage({
     return null;
   }
 
-  const { data: perfil } = await supabase
-    .from("profiles")
-    .select("username, nome_exibicao, avatar_url, papel")
-    .eq("id", user.id)
-    .single();
+  const [{ data: perfil }, { data: sistemas }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos")
+      .eq("id", user.id)
+      .single(),
+    supabase.from("sistemas").select("id, nome").eq("ativo", true).order("nome"),
+  ]);
 
   const { data: inscricoes } = await supabase
     .from("inscricoes")
@@ -67,18 +61,14 @@ export default async function ContaPage({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
-      <div className="flex items-center gap-4">
-        <Avatar className="size-14">
-          <AvatarImage src={perfil?.avatar_url ?? undefined} alt="" />
-          <AvatarFallback className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-lg font-semibold text-white">
-            {iniciais(perfil?.nome_exibicao ?? "?")}
-          </AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="font-heading text-xl font-bold">{perfil?.nome_exibicao}</h1>
-          <p className="text-sm text-muted-foreground">@{perfil?.username}</p>
-        </div>
-      </div>
+      <PerfilSection
+        nomeExibicao={perfil?.nome_exibicao ?? "?"}
+        username={perfil?.username ?? ""}
+        bio={perfil?.bio ?? null}
+        avatarUrl={perfil?.avatar_url ?? null}
+        sistemasFavoritos={perfil?.sistemas_favoritos ?? []}
+        sistemas={sistemas ?? []}
+      />
 
       {perfil?.papel === "admin" && (
         <Link
