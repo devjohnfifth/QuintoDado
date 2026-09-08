@@ -1,9 +1,11 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BookOpen } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
+import emConstrucao from "@/assets/brand/em-construcao.png";
 
 export async function generateMetadata({
   params,
@@ -38,7 +40,8 @@ export default async function SuplementosPage({
 
       <Reveal className="mt-10">
         <div className="rounded-xl border border-dashed border-border py-16 text-center">
-          <p className="font-heading text-lg font-bold">{t("avisoTitulo")}</p>
+          <Image src={emConstrucao} alt="" className="mx-auto h-28 w-28" priority />
+          <p className="mt-4 font-heading text-lg font-bold">{t("avisoTitulo")}</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
             {t("avisoCorpo")}
           </p>

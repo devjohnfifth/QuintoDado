@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { BookOpen, Dices, MessageCircle, ShieldCheck, ArrowRight } from "lucide-react";
 import bannerOg from "@/assets/brand/banner-og.webp";
-import logo5d from "@/assets/brand/logo-5d.png";
+import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
 import { Reveal } from "@/components/site/reveal";
 
 export async function generateMetadata({
@@ -56,9 +56,9 @@ export default async function SobrePage({
             className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[#4F7DF3]/20 blur-2xl"
           />
           <Image
-            src={logo5d}
-            alt=""
-            className="h-16 w-16 rounded-xl ring-1 ring-border"
+            src={mestreQuintao}
+            alt="Mestre Quintão"
+            className="size-20 rounded-full object-cover object-top ring-1 ring-border"
             priority
           />
         </div>
