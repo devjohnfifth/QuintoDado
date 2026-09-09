@@ -138,6 +138,28 @@
   }
 }
 
+/*
+ * Foco visível garantido em qualquer elemento interativo — de propósito
+ * fora de @layer, porque CSS sem @layer sempre vence utilitários do
+ * Tailwind (incluindo `outline-none`, que o componente Button usa pra
+ * trocar o outline nativo por um ring próprio via box-shadow). Testado
+ * ao vivo: o ring do Button (`focus-visible:ring-3`) não estava
+ * renderizando nenhum box-shadow visível de verdade — provavelmente uma
+ * composição de camadas do Tailwind v4 que não fecha — então em vez de
+ * depender só do ring, isso cobre TODO elemento focável com um outline
+ * simples que sempre aparece, elemento com ring quebrado ou não.
+ */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
 @keyframes menu-item-in {
   from {
     opacity: 0;
