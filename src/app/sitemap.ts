@@ -20,10 +20,14 @@ async function buscarSlugsDeMesas() {
   if (!isSupabaseConfigured()) return [];
 
   const supabase = await createClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("mesas")
-    .select("slug, criado_em")
+    .select("slug, atualizado_em")
     .in("status", ["publicada", "confirmada", "em_andamento"]);
+
+  if (error) {
+    console.error("[sitemap] erro ao buscar mesas:", error.message);
+  }
 
   return data ?? [];
 }
@@ -55,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
     ...mesas.map((mesa) => ({
       url: `${site}/mesas/${mesa.slug}`,
-      lastModified: new Date(mesa.criado_em as string),
+      lastModified: new Date(mesa.atualizado_em as string),
       changeFrequency: "daily" as const,
       priority: 0.8,
     })),
