@@ -27,7 +27,11 @@ async function exigirAdmin() {
  * dono escreve) bloquearia um insert com o client normal — por isso usa
  * service_role aqui, igual `notificarMestre` faz pro caminho inverso.
  */
-async function notificarJogador(inscricaoId: string, tipo: "aprovado" | "recusado") {
+async function notificarJogador(
+  inscricaoId: string,
+  tipo: "aprovado" | "recusado",
+  motivo?: string,
+) {
   const admin = serviceRole();
 
   const { data: inscricao } = await admin
@@ -40,6 +44,10 @@ async function notificarJogador(inscricaoId: string, tipo: "aprovado" | "recusad
   const mesa = inscricao.mesas as unknown as { titulo: string; slug: string } | null;
   if (!mesa) return;
 
+  const corpoRecusa = motivo
+    ? `Sua candidatura pra "${mesa.titulo}" não foi aprovada dessa vez. Motivo: ${motivo}`
+    : `Sua candidatura pra "${mesa.titulo}" não foi aprovada dessa vez.`;
+
   const { error } = await admin.from("notificacoes").insert({
     usuario_id: inscricao.usuario_id,
     tipo: tipo === "aprovado" ? "candidatura_aprovada" : "candidatura_recusada",
@@ -47,7 +55,7 @@ async function notificarJogador(inscricaoId: string, tipo: "aprovado" | "recusad
     corpo:
       tipo === "aprovado"
         ? `Você foi aprovado pra "${mesa.titulo}"! Confira os detalhes.`
-        : `Sua candidatura pra "${mesa.titulo}" não foi aprovada dessa vez.`,
+        : corpoRecusa,
     url: `/mesas/${mesa.slug}`,
   });
 
@@ -108,7 +116,7 @@ export async function recusarInscricaoAction(
     throw new Error("Não deu pra recusar a candidatura.");
   }
 
-  await notificarJogador(inscricaoId, "recusado");
+  await notificarJogador(inscricaoId, "recusado", motivo);
 
   revalidatePath(`/admin/mesas/${mesaId}`);
   revalidatePath("/mesas");
