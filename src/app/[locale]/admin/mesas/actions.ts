@@ -8,6 +8,7 @@ import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
 import { notificarJogadoresAprovadosSobreCancelamento } from "@/lib/notificacoes/mesa-cancelada";
+import { notificarJogadoresAprovadosSobreReagendamento } from "@/lib/notificacoes/mesa-reagendada";
 
 async function exigirAdmin() {
   const supabase = await createClient();
@@ -232,12 +233,19 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
 
   const { data: mesaAtual } = await supabase
     .from("mesas")
-    .select("slug, vagas_preenchidas")
+    .select("slug, vagas_preenchidas, data_inicio, horario_inicio, horario_fim")
     .eq("id", mesaId)
     .single();
   if (!mesaAtual) {
     return { ok: false, error: "Mesa não encontrada." };
   }
+  // Postgres devolve horário com segundos ("08:22:00"), o form manda só
+  // HH:MM — sem normalizar os dois, toda edição pareceria uma mudança de
+  // horário e notificaria os aprovados à toa.
+  const horarioMudou =
+    mesaAtual.data_inicio !== d.dataInicio ||
+    mesaAtual.horario_inicio.slice(0, 5) !== d.horarioInicio ||
+    mesaAtual.horario_fim.slice(0, 5) !== d.horarioFim;
   if (d.vagasTotal < mesaAtual.vagas_preenchidas) {
     return {
       ok: false,
@@ -289,6 +297,10 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
   if (error) {
     console.error("[atualizarMesaAction] erro:", error.message);
     return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
+  }
+
+  if (horarioMudou) {
+    await notificarJogadoresAprovadosSobreReagendamento(mesaId);
   }
 
   revalidatePath("/admin/mesas");

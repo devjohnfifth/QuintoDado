@@ -7,6 +7,7 @@ import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
+import { notificarJogadoresAprovadosSobreReagendamento } from "@/lib/notificacoes/mesa-reagendada";
 
 /**
  * Sem isso, uma mesa presencial nova ficava em "aguardando_aprovacao"
@@ -190,12 +191,18 @@ export async function atualizarMesaPresencialAction(
 
   const { data: mesaAtual } = await supabase
     .from("mesas")
-    .select("slug, mestre_id, vagas_preenchidas")
+    .select("slug, mestre_id, vagas_preenchidas, data_inicio, horario_inicio, horario_fim")
     .eq("id", mesaId)
     .single();
   if (!mesaAtual || mesaAtual.mestre_id !== user.id) {
     return { ok: false, error: "Mesa não encontrada." };
   }
+  // Postgres devolve horário com segundos ("08:22:00"), o form manda só
+  // HH:MM — normaliza os dois antes de comparar.
+  const horarioMudou =
+    mesaAtual.data_inicio !== dados.dataInicio ||
+    mesaAtual.horario_inicio.slice(0, 5) !== dados.horarioInicio ||
+    mesaAtual.horario_fim.slice(0, 5) !== dados.horarioFim;
   if (dados.vagasTotal < mesaAtual.vagas_preenchidas) {
     return {
       ok: false,
@@ -243,6 +250,10 @@ export async function atualizarMesaPresencialAction(
   if (error) {
     console.error("[atualizarMesaPresencialAction] erro:", error.message);
     return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
+  }
+
+  if (horarioMudou) {
+    await notificarJogadoresAprovadosSobreReagendamento(mesaId);
   }
 
   revalidatePath("/presencial-bh");
