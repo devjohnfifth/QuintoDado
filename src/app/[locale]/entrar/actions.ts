@@ -73,7 +73,7 @@ const signupSchema = z
       .toLowerCase()
       .regex(
         /^[a-z0-9_-]{3,30}$/,
-        "Use só letras minúsculas, números, - ou _ (3 a 30 caracteres).",
+        "Nome de usuário: use só letras minúsculas, números, - ou _ (3 a 30 caracteres).",
       ),
     dataNascimento: z
       .string()

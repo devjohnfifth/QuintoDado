@@ -12,6 +12,12 @@ export function RedefinirSenhaGate() {
 
   useEffect(() => {
     const supabase = createClient();
+    // Cada chamada de processarLink() ganha um número. Uma resposta assíncrona
+    // só pode atualizar a tela se ainda for a chamada mais recente — assim,
+    // se dois links forem processados em sequência rápida, o que resolver
+    // por último não corre o risco de ser sobrescrito por uma resposta mais
+    // lenta de uma tentativa anterior já obsoleta.
+    let geracaoAtual = 0;
 
     // O e-mail de recuperação do Supabase sempre manda um link no formato
     // implícito (tokens no hash da URL, nunca chegam ao servidor). Mas o
@@ -20,38 +26,58 @@ export function RedefinirSenhaGate() {
     // rejeita qualquer callback implícito nesse modo e falha em silêncio,
     // sem nunca emitir o evento. Por isso lemos os tokens do hash na mão e
     // chamamos setSession() diretamente, sem depender da detecção automática.
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-    const accessToken = hashParams.get("access_token");
-    const refreshToken = hashParams.get("refresh_token");
-    const erroNoHash = hashParams.get("error_description");
-    const queryCode = new URLSearchParams(window.location.search).get("code");
+    function processarLink() {
+      const minhaGeracao = ++geracaoAtual;
+      setEstado("verificando");
 
-    if (erroNoHash) {
-      setEstado("invalido");
-      return;
-    }
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const erroNoHash = hashParams.get("error_description");
+      const queryCode = new URLSearchParams(window.location.search).get("code");
 
-    if (accessToken && refreshToken) {
-      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
-        window.history.replaceState(null, "", window.location.pathname);
-        setEstado(error ? "invalido" : "pronto");
+      if (erroNoHash) {
+        setEstado("invalido");
+        return;
+      }
+
+      if (accessToken && refreshToken) {
+        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+          if (minhaGeracao !== geracaoAtual) return;
+          window.history.replaceState(null, "", window.location.pathname);
+          setEstado(error ? "invalido" : "pronto");
+        });
+        return;
+      }
+
+      if (queryCode) {
+        supabase.auth.exchangeCodeForSession(queryCode).then(({ error }) => {
+          if (minhaGeracao !== geracaoAtual) return;
+          window.history.replaceState(null, "", window.location.pathname);
+          setEstado(error ? "invalido" : "pronto");
+        });
+        return;
+      }
+
+      // Sem link de recuperação na URL — só deixa passar se já houver sessão
+      // (ex.: usuário voltou pra essa página com a troca ainda em andamento).
+      supabase.auth.getSession().then(({ data }) => {
+        if (minhaGeracao !== geracaoAtual) return;
+        setEstado(data.session ? "pronto" : "invalido");
       });
-      return;
     }
 
-    if (queryCode) {
-      supabase.auth.exchangeCodeForSession(queryCode).then(({ error }) => {
-        window.history.replaceState(null, "", window.location.pathname);
-        setEstado(error ? "invalido" : "pronto");
-      });
-      return;
-    }
+    processarLink();
 
-    // Sem link de recuperação na URL — só deixa passar se já houver sessão
-    // (ex.: usuário voltou pra essa página com a troca ainda em andamento).
-    supabase.auth.getSession().then(({ data }) => {
-      setEstado(data.session ? "pronto" : "invalido");
-    });
+    // Colar um link novo na mesma aba (só o hash muda) não recarrega a
+    // página — o React nunca desmonta esse componente, então sem isso a
+    // tela ficava travada mostrando "inválido" da tentativa anterior pra
+    // sempre, mesmo que o link novo fosse perfeitamente válido.
+    window.addEventListener("hashchange", processarLink);
+    return () => {
+      geracaoAtual++; // invalida qualquer resposta pendente após desmontar
+      window.removeEventListener("hashchange", processarLink);
+    };
   }, []);
 
   if (estado === "verificando") {
