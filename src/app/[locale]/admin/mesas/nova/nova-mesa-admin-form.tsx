@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
 import type { Sistema } from "@/lib/mesas/types";
-import { criarMesaAdmin } from "../actions";
+import { criarMesaAdmin, atualizarMesaAction } from "../actions";
 
 const TIPO_LABEL: Record<string, string> = {
   one_shot: "One-shot",
@@ -45,21 +45,59 @@ const NIVEL_LABEL: Record<string, string> = {
   avancado: "Avançado",
 };
 
-export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
+export type MesaExistente = {
+  titulo: string;
+  sistemaId: string;
+  sistemaOutroNome: string | null;
+  sinopse: string;
+  tipo: string;
+  modalidade: "online" | "presencial";
+  cidadeUf: string | null;
+  plataformaVtt: string | null;
+  plataformaVoz: string | null;
+  frequencia: string;
+  qtdSessoes: number | null;
+  dataInicio: string;
+  horarioInicio: string;
+  horarioFim: string;
+  vagasTotal: number;
+  minJogadores: number;
+  classificacao: string;
+  nivelExperiencia: string;
+  gratuita: boolean;
+  valorReais: number | null;
+  cobrancaGerenciadaPeloSite: boolean;
+  bannerUrl: string | null;
+};
+
+export function NovaMesaAdminForm({
+  sistemas,
+  mesaId,
+  mesaExistente,
+}: {
+  sistemas: Sistema[];
+  mesaId?: string;
+  mesaExistente?: MesaExistente;
+}) {
+  const editando = Boolean(mesaId && mesaExistente);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
-  const [sistemaId, setSistemaId] = useState("");
-  const [sistemaOutroNome, setSistemaOutroNome] = useState("");
-  const [tipo, setTipo] = useState("one_shot");
-  const [modalidade, setModalidade] = useState<"online" | "presencial">("online");
-  const [frequencia, setFrequencia] = useState("unica");
-  const [classificacao, setClassificacao] = useState("livre");
-  const [nivelExperiencia, setNivelExperiencia] = useState("todos");
-  const [gratuita, setGratuita] = useState(false);
-  const [cobrancaGerenciadaPeloSite, setCobrancaGerenciadaPeloSite] = useState(true);
+  const [sistemaId, setSistemaId] = useState(mesaExistente?.sistemaId ?? "");
+  const [sistemaOutroNome, setSistemaOutroNome] = useState(mesaExistente?.sistemaOutroNome ?? "");
+  const [tipo, setTipo] = useState(mesaExistente?.tipo ?? "one_shot");
+  const [modalidade, setModalidade] = useState<"online" | "presencial">(
+    mesaExistente?.modalidade ?? "online",
+  );
+  const [frequencia, setFrequencia] = useState(mesaExistente?.frequencia ?? "unica");
+  const [classificacao, setClassificacao] = useState(mesaExistente?.classificacao ?? "livre");
+  const [nivelExperiencia, setNivelExperiencia] = useState(mesaExistente?.nivelExperiencia ?? "todos");
+  const [gratuita, setGratuita] = useState(mesaExistente?.gratuita ?? false);
+  const [cobrancaGerenciadaPeloSite, setCobrancaGerenciadaPeloSite] = useState(
+    mesaExistente?.cobrancaGerenciadaPeloSite ?? true,
+  );
   const [publicarAgora, setPublicarAgora] = useState(true);
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
@@ -95,12 +133,14 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
     };
 
     startTransition(async () => {
-      const resultado = await criarMesaAdmin(input);
+      const resultado = editando
+        ? await atualizarMesaAction(mesaId!, input)
+        : await criarMesaAdmin(input);
       if (!resultado.ok) {
         setErro(resultado.error);
         return;
       }
-      router.push("/admin/mesas");
+      router.push(editando ? `/admin/mesas/${mesaId}` : "/admin/mesas");
       router.refresh();
     });
   }
@@ -109,7 +149,7 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
     <form onSubmit={onSubmit} className="mt-6 space-y-6">
       <div className="space-y-2">
         <Label htmlFor="titulo">Título da mesa</Label>
-        <Input id="titulo" name="titulo" required maxLength={120} />
+        <Input id="titulo" name="titulo" required maxLength={120} defaultValue={mesaExistente?.titulo} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -165,7 +205,14 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
 
       <div className="space-y-2">
         <Label htmlFor="sinopse">Sinopse</Label>
-        <Textarea id="sinopse" name="sinopse" required maxLength={2000} rows={4} />
+        <Textarea
+          id="sinopse"
+          name="sinopse"
+          required
+          maxLength={2000}
+          rows={4}
+          defaultValue={mesaExistente?.sinopse}
+        />
       </div>
 
       <div className="space-y-2">
@@ -188,17 +235,29 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
         {modalidade === "presencial" ? (
           <div className="space-y-2">
             <Label htmlFor="cidadeUf">Cidade</Label>
-            <Input id="cidadeUf" name="cidadeUf" maxLength={80} />
+            <Input id="cidadeUf" name="cidadeUf" maxLength={80} defaultValue={mesaExistente?.cidadeUf ?? ""} />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="plataformaVtt">Plataforma de VTT</Label>
-              <Input id="plataformaVtt" name="plataformaVtt" placeholder="Foundry VTT" maxLength={80} />
+              <Input
+                id="plataformaVtt"
+                name="plataformaVtt"
+                placeholder="Foundry VTT"
+                maxLength={80}
+                defaultValue={mesaExistente?.plataformaVtt ?? ""}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="plataformaVoz">Plataforma de voz</Label>
-              <Input id="plataformaVoz" name="plataformaVoz" placeholder="Discord" maxLength={80} />
+              <Input
+                id="plataformaVoz"
+                name="plataformaVoz"
+                placeholder="Discord"
+                maxLength={80}
+                defaultValue={mesaExistente?.plataformaVoz ?? ""}
+              />
             </div>
           </div>
         )}
@@ -213,15 +272,28 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
             type="date"
             min={new Date().toISOString().slice(0, 10)}
             required
+            defaultValue={mesaExistente?.dataInicio}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioInicio">Início</Label>
-          <Input id="horarioInicio" name="horarioInicio" type="time" required />
+          <Input
+            id="horarioInicio"
+            name="horarioInicio"
+            type="time"
+            required
+            defaultValue={mesaExistente?.horarioInicio}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioFim">Término</Label>
-          <Input id="horarioFim" name="horarioFim" type="time" required />
+          <Input
+            id="horarioFim"
+            name="horarioFim"
+            type="time"
+            required
+            defaultValue={mesaExistente?.horarioFim}
+          />
         </div>
       </div>
 
@@ -244,7 +316,15 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
           {frequencia !== "unica" && (
             <div className="space-y-2">
               <Label htmlFor="qtdSessoes">Nº de sessões previstas</Label>
-              <Input id="qtdSessoes" name="qtdSessoes" type="number" min={1} max={999} placeholder="Deixe em branco se for campanha aberta" />
+              <Input
+                id="qtdSessoes"
+                name="qtdSessoes"
+                type="number"
+                min={1}
+                max={999}
+                placeholder="Deixe em branco se for campanha aberta"
+                defaultValue={mesaExistente?.qtdSessoes ?? undefined}
+              />
             </div>
           )}
         </div>
@@ -253,11 +333,26 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="vagasTotal">Vagas totais</Label>
-          <Input id="vagasTotal" name="vagasTotal" type="number" min={1} max={12} defaultValue={5} required />
+          <Input
+            id="vagasTotal"
+            name="vagasTotal"
+            type="number"
+            min={1}
+            max={12}
+            defaultValue={mesaExistente?.vagasTotal ?? 5}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="minJogadores">Mínimo de jogadores</Label>
-          <Input id="minJogadores" name="minJogadores" type="number" min={1} defaultValue={3} required />
+          <Input
+            id="minJogadores"
+            name="minJogadores"
+            type="number"
+            min={1}
+            defaultValue={mesaExistente?.minJogadores ?? 3}
+            required
+          />
         </div>
       </div>
 
@@ -304,7 +399,15 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
           <>
             <div className="space-y-2">
               <Label htmlFor="valorReais">Valor (R$)</Label>
-              <Input id="valorReais" name="valorReais" type="number" min={5} max={9999} step="0.01" />
+              <Input
+                id="valorReais"
+                name="valorReais"
+                type="number"
+                min={5}
+                max={9999}
+                step="0.01"
+                defaultValue={mesaExistente?.valorReais ?? undefined}
+              />
             </div>
             <div className="flex items-center gap-2">
               <Checkbox
@@ -320,21 +423,23 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        <Checkbox
-          id="publicarAgora"
-          checked={publicarAgora}
-          onCheckedChange={(v) => setPublicarAgora(v === true)}
-        />
-        <Label htmlFor="publicarAgora" className="font-normal">
-          Publicar agora (senão fica como rascunho)
-        </Label>
-      </div>
+      {!editando && (
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="publicarAgora"
+            checked={publicarAgora}
+            onCheckedChange={(v) => setPublicarAgora(v === true)}
+          />
+          <Label htmlFor="publicarAgora" className="font-normal">
+            Publicar agora (senão fica como rascunho)
+          </Label>
+        </div>
+      )}
 
       {erro && <p className="text-sm text-destructive">{erro}</p>}
 
       <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-        {pending ? "Criando..." : "Criar mesa"}
+        {pending ? (editando ? "Salvando..." : "Criando...") : editando ? "Salvar alterações" : "Criar mesa"}
       </Button>
     </form>
   );

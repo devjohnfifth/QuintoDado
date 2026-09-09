@@ -51,11 +51,16 @@ export default async function AdminMesaDetalhePage({
           ← Voltar pra mesas
         </Link>
       </p>
-      <div className="mt-2 flex items-center justify-between">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <h1 className="font-heading text-2xl font-bold">{mesa.titulo}</h1>
-        <Link href={`/mesas/${mesa.slug}`} className="text-sm text-primary hover:underline">
-          Ver página pública →
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href={`/admin/mesas/${id}/editar`} className="text-sm text-primary hover:underline">
+            Editar mesa
+          </Link>
+          <Link href={`/mesas/${mesa.slug}`} className="text-sm text-primary hover:underline">
+            Ver página pública →
+          </Link>
+        </div>
       </div>
 
       <h2 className="mt-8 font-heading text-lg font-bold">

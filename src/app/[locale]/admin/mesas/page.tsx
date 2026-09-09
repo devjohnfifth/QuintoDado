@@ -91,7 +91,15 @@ export default async function AdminMesasPage() {
                     </span>
                   </td>
                   <td className="py-3 pr-4 text-right">
-                    <MesaRowActions mesaId={mesa.id} status={mesa.status} />
+                    <div className="flex items-center justify-end gap-3">
+                      <Link
+                        href={`/admin/mesas/${mesa.id}/editar`}
+                        className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                      >
+                        Editar
+                      </Link>
+                      <MesaRowActions mesaId={mesa.id} status={mesa.status} />
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -207,3 +207,91 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
   revalidatePath("/mesas");
   return { ok: true, slug };
 }
+
+export type AtualizarMesaResult = { ok: true; slug: string } | { ok: false; error: string };
+
+/**
+ * Edita os dados de uma mesa já existente — o site não tinha NENHUMA forma
+ * de corrigir um erro de digitação ou ajustar data/vagas sem cancelar e
+ * recriar a mesa do zero, o que perderia todas as candidaturas já
+ * recebidas (novo id = novas inscricoes). Não mexe em `status`,
+ * `aprovada_por`, `aprovada_em` nem `slug` — isso continua só pelas ações
+ * dedicadas de aprovar/cancelar, e o slug fica estável pra não quebrar
+ * link já compartilhado.
+ */
+export async function atualizarMesaAction(mesaId: string, input: unknown): Promise<AtualizarMesaResult> {
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+  const d = parsed.data;
+
+  const { supabase } = await exigirAdmin();
+
+  const { data: mesaAtual } = await supabase
+    .from("mesas")
+    .select("slug, vagas_preenchidas")
+    .eq("id", mesaId)
+    .single();
+  if (!mesaAtual) {
+    return { ok: false, error: "Mesa não encontrada." };
+  }
+  if (d.vagasTotal < mesaAtual.vagas_preenchidas) {
+    return {
+      ok: false,
+      error: `Já tem ${mesaAtual.vagas_preenchidas} jogador(es) aprovado(s) — não dá pra reduzir o total de vagas abaixo disso.`,
+    };
+  }
+
+  const precoCentavos = d.gratuita ? 0 : Math.round((d.valorReais ?? 0) * 100);
+  if (!d.gratuita && precoCentavos > 0 && precoCentavos < 500) {
+    return { ok: false, error: "O valor precisa ser R$5,00 ou mais (ou marque como gratuita)." };
+  }
+
+  const { data: sistemaEscolhido } = await supabase
+    .from("sistemas")
+    .select("slug")
+    .eq("id", d.sistemaId)
+    .single();
+  if (sistemaEscolhido?.slug === "outro" && !d.sistemaOutroNome) {
+    return { ok: false, error: "Escreva o nome do sistema." };
+  }
+
+  const { error } = await supabase
+    .from("mesas")
+    .update({
+      titulo: d.titulo,
+      sinopse: d.sinopse,
+      sistema_id: d.sistemaId,
+      sistema_outro: sistemaEscolhido?.slug === "outro" ? d.sistemaOutroNome : null,
+      tipo: d.tipo,
+      modalidade: d.modalidade,
+      cidade_uf: d.modalidade === "presencial" ? d.cidadeUf : null,
+      plataforma_vtt: d.plataformaVtt || null,
+      plataforma_voz: d.plataformaVoz || null,
+      classificacao: d.classificacao,
+      nivel_experiencia: d.nivelExperiencia,
+      vagas_total: d.vagasTotal,
+      min_jogadores: d.minJogadores,
+      preco_centavos: precoCentavos,
+      cobranca_gerenciada_pelo_site: d.cobrancaGerenciadaPeloSite,
+      frequencia: d.frequencia,
+      qtd_sessoes: d.qtdSessoes ?? null,
+      data_inicio: d.dataInicio,
+      horario_inicio: d.horarioInicio,
+      horario_fim: d.horarioFim,
+      banner_url: d.bannerUrl || null,
+    })
+    .eq("id", mesaId);
+
+  if (error) {
+    console.error("[atualizarMesaAction] erro:", error.message);
+    return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
+  }
+
+  revalidatePath("/admin/mesas");
+  revalidatePath(`/admin/mesas/${mesaId}`);
+  revalidatePath(`/mesas/${mesaAtual.slug}`);
+  revalidatePath("/mesas");
+  return { ok: true, slug: mesaAtual.slug };
+}
