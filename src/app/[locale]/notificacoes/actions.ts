@@ -51,3 +51,19 @@ export async function marcarNotificacaoLidaAction(id: string) {
 
   revalidatePath("/");
 }
+
+export async function marcarTodasLidasAction() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("notificacoes")
+    .update({ lida_em: new Date().toISOString() })
+    .eq("usuario_id", user.id)
+    .is("lida_em", null);
+
+  revalidatePath("/");
+}

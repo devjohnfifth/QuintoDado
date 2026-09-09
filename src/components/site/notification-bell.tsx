@@ -13,7 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { buscarNotificacoesAction, marcarNotificacaoLidaAction } from "@/app/[locale]/notificacoes/actions";
+import {
+  buscarNotificacoesAction,
+  marcarNotificacaoLidaAction,
+  marcarTodasLidasAction,
+} from "@/app/[locale]/notificacoes/actions";
 
 type Notificacao = {
   id: string;
@@ -47,6 +51,14 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
     if (n.url) router.push(n.url);
   }
 
+  function marcarTodas(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setNaoLidas(0);
+    setNotificacoes((prev) => prev?.map((n) => ({ ...n, lida_em: n.lida_em ?? new Date().toISOString() })) ?? prev);
+    marcarTodasLidasAction();
+  }
+
   return (
     <DropdownMenu onOpenChange={aoAbrir}>
       <DropdownMenuTrigger
@@ -62,7 +74,18 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>Notificações</DropdownMenuLabel>
+          <div className="flex items-center justify-between px-2 py-1.5">
+            <DropdownMenuLabel className="p-0">Notificações</DropdownMenuLabel>
+            {naoLidas > 0 && (
+              <button
+                type="button"
+                onClick={marcarTodas}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Marcar todas como lidas
+              </button>
+            )}
+          </div>
           <DropdownMenuSeparator />
           {pending && (
             <p className="px-2 py-3 text-center text-sm text-muted-foreground">Carregando...</p>
