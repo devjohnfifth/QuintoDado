@@ -172,12 +172,37 @@ export default async function MesaDetalhePage({
     },
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: site },
+      { "@type": "ListItem", position: 2, name: "Mesas", item: `${site}/mesas` },
+      { "@type": "ListItem", position: 3, name: mesa.titulo, item: `${site}/mesas/${slug}` },
+    ],
+  };
+
   return (
     <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+      />
+      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Link href="/" className="hover:text-foreground hover:underline">
+          Início
+        </Link>
+        <span aria-hidden>/</span>
+        <Link href="/mesas" className="hover:text-foreground hover:underline">
+          Mesas
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="truncate text-foreground/80">{mesa.titulo}</span>
+      </nav>
       {mesa.banner_url && (
         <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
           <Image
