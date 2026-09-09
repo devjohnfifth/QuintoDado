@@ -17,6 +17,7 @@ import {
 } from "@/lib/mesas/labels";
 import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
+import { ShareButton } from "./share-button";
 import bannerOg from "@/assets/brand/banner-og.webp";
 
 type MesaDetalhe = {
@@ -215,9 +216,12 @@ export default async function MesaDetalhePage({
           />
         </div>
       )}
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {mesa.sistema_outro || mesa.sistemas?.nome || "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {mesa.sistema_outro || mesa.sistemas?.nome || "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
+        </p>
+        <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
+      </div>
       <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
       {mesa.profiles?.nome_exibicao && (
         <p className="mt-1 text-sm text-muted-foreground">
