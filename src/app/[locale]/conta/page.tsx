@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { Button } from "@/components/ui/button";
 import { PerfilSection } from "@/components/site/perfil-section";
+import { TrocarSenhaForm } from "@/components/site/trocar-senha-form";
 import { CancelarMesaMestreButton } from "./cancelar-mesa-mestre-button";
 import { sairAction } from "../entrar/actions";
 
@@ -111,6 +112,8 @@ export default async function ContaPage({
         sistemasFavoritos={perfil?.sistemas_favoritos ?? []}
         sistemas={sistemas ?? []}
       />
+
+      <TrocarSenhaForm />
 
       {perfil?.papel === "admin" && (
         <Link

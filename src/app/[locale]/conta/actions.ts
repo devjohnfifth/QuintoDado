@@ -46,3 +46,46 @@ export async function atualizarPerfilAction(input: unknown): Promise<AtualizarPe
   revalidatePath("/conta");
   return { ok: true };
 }
+
+const schemaSenha = z
+  .object({
+    senhaAtual: z.string().min(1, "Digite sua senha atual."),
+    novaSenha: z.string().min(8, "A nova senha precisa ter pelo menos 8 caracteres."),
+  });
+
+export type TrocarSenhaResult = { ok: true } | { ok: false; error: string };
+
+export async function trocarSenhaAction(input: unknown): Promise<TrocarSenhaResult> {
+  const parsed = schemaSenha.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+  const { senhaAtual, novaSenha } = parsed.data;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || !user.email) {
+    return { ok: false, error: "Você precisa estar logado." };
+  }
+
+  // Confirma a senha atual antes de trocar — sem isso, uma sessão
+  // esquecida aberta (ex.: computador compartilhado) deixaria qualquer
+  // um trocar a senha sem saber a atual.
+  const { error: reautenticaError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: senhaAtual,
+  });
+  if (reautenticaError) {
+    return { ok: false, error: "Senha atual incorreta." };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: novaSenha });
+  if (error) {
+    console.error("[trocarSenhaAction] erro:", error.message);
+    return { ok: false, error: "Não deu pra trocar a senha. Tente de novo." };
+  }
+
+  return { ok: true };
+}
