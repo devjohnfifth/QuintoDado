@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 
@@ -23,6 +24,29 @@ async function exigirAdmin() {
   return { supabase, adminId: user.id };
 }
 
+/**
+ * Só avisa o mestre dono se ele não for o próprio admin agindo (o admin
+ * sabe muito bem que acabou de aprovar/cancelar a própria mesa — a
+ * notificação existe pra quando é a mesa presencial de OUTRO mestre).
+ */
+async function notificarMestreDaMesa(mesaId: string, adminId: string, tipo: "aprovada" | "cancelada") {
+  const admin = serviceRole();
+  const { data: mesa } = await admin.from("mesas").select("titulo, slug, mestre_id").eq("id", mesaId).single();
+  if (!mesa || mesa.mestre_id === adminId) return;
+
+  const { error } = await admin.from("notificacoes").insert({
+    usuario_id: mesa.mestre_id,
+    tipo: tipo === "aprovada" ? "mesa_aprovada" : "mesa_cancelada",
+    titulo: tipo === "aprovada" ? "Sua mesa foi aprovada!" : "Sua mesa foi cancelada",
+    corpo:
+      tipo === "aprovada"
+        ? `"${mesa.titulo}" já está publicada e pode receber candidaturas.`
+        : `"${mesa.titulo}" foi cancelada pelo admin.`,
+    url: `/mesas/${mesa.slug}`,
+  });
+  if (error) console.error("[notificarMestreDaMesa] erro:", error.message);
+}
+
 export async function aprovarMesaAction(mesaId: string) {
   const { supabase, adminId } = await exigirAdmin();
 
@@ -37,13 +61,15 @@ export async function aprovarMesaAction(mesaId: string) {
     throw new Error("Não deu pra aprovar a mesa.");
   }
 
+  await notificarMestreDaMesa(mesaId, adminId, "aprovada");
+
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
   revalidatePath("/presencial-bh");
 }
 
 export async function cancelarMesaAction(mesaId: string) {
-  const { supabase } = await exigirAdmin();
+  const { supabase, adminId } = await exigirAdmin();
 
   const { error } = await supabase
     .from("mesas")
@@ -54,6 +80,8 @@ export async function cancelarMesaAction(mesaId: string) {
     console.error("[cancelarMesaAction] erro:", error.message);
     throw new Error("Não deu pra cancelar a mesa.");
   }
+
+  await notificarMestreDaMesa(mesaId, adminId, "cancelada");
 
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
