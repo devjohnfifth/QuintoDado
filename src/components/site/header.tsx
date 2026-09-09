@@ -19,19 +19,19 @@ async function buscarSessao() {
     } = await supabase.auth.getUser();
     if (!user) return null;
 
-    const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [{ data: perfil }, { count: naoLidas }] = await Promise.all([
       supabase
         .from("profiles")
         .select("username, nome_exibicao, avatar_url, papel")
         .eq("id", user.id)
         .maybeSingle(),
+      // Sem janela de tempo — ver buscarNotificacoesAction pro motivo:
+      // não lida é não lida, não pode expirar sozinha.
       supabase
         .from("notificacoes")
         .select("id", { count: "exact", head: true })
         .eq("usuario_id", user.id)
-        .is("lida_em", null)
-        .gte("criado_em", umDiaAtras),
+        .is("lida_em", null),
     ]);
 
     if (!perfil) return null;
