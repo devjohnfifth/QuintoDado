@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,12 +80,29 @@ export function CandidaturaForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {perguntas.map((pergunta) => (
-        <div key={pergunta.id} className="space-y-2">
-          <Label htmlFor={pergunta.id}>
+      {perguntas.map((pergunta) => {
+        const ehLinhasEVeus = pergunta.enunciado.startsWith("Linhas e véus");
+        return (
+        <div
+          key={pergunta.id}
+          className={
+            ehLinhasEVeus
+              ? "space-y-2 rounded-xl border border-primary/30 bg-primary/[0.03] p-4"
+              : "space-y-2"
+          }
+        >
+          <Label htmlFor={pergunta.id} className={ehLinhasEVeus ? "flex items-center gap-1.5" : undefined}>
+            {ehLinhasEVeus && <ShieldCheck className="size-4 shrink-0 text-primary" aria-hidden />}
             {pergunta.enunciado}
             {pergunta.obrigatoria && <span className="text-destructive"> *</span>}
           </Label>
+          {ehLinhasEVeus && (
+            <p className="text-xs text-muted-foreground">
+              Linhas são temas que não entram na sessão de jeito nenhum; véus são coisas que podem
+              acontecer, mas sem detalhe explícito. Fica à vontade pra deixar em branco se não tiver
+              nada a vetar — o mestre leva isso a sério de qualquer forma.
+            </p>
+          )}
           {pergunta.tipo === "escolha_unica" && pergunta.opcoes ? (
             <Select
               value={escolhas[pergunta.id] ?? ""}
@@ -107,7 +125,8 @@ export function CandidaturaForm({
             <Textarea id={pergunta.id} name={pergunta.id} required={pergunta.obrigatoria} rows={3} />
           )}
         </div>
-      ))}
+        );
+      })}
 
       {erro && <p className="text-sm text-destructive">{erro}</p>}
 
