@@ -89,6 +89,12 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
     );
     if (respostasError) {
       console.error("[criarCandidatura] erro ao salvar respostas:", respostasError.message);
+      // As respostas incluem linhas e véus — não pode reportar sucesso e
+      // deixar isso silenciosamente sem salvar. Desfaz a inscrição (sem
+      // isso o jogador fica "candidatado" mas o mestre nunca vê a ficha)
+      // e pede pra tentar de novo, em vez de mentir que deu certo.
+      await supabase.from("inscricoes").delete().eq("id", inscricao.id);
+      return { ok: false, error: "Não deu pra salvar suas respostas. Tente de novo em instantes." };
     }
   }
 
