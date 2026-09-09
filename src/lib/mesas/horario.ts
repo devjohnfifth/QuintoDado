@@ -1,5 +1,14 @@
 import { FREQUENCIA_LABEL } from "./labels";
 
+/**
+ * "Hoje" no fuso de Brasília, em YYYY-MM-DD. O servidor (Vercel) roda em
+ * UTC — usar `new Date()` puro pra decidir "hoje" vira amanhã 3h mais
+ * cedo do que devia (21h de Brasília já é meia-noite UTC).
+ */
+export function hojeNoBrasil(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
 const DIA_SEMANA = [
   "domingo",
   "segunda-feira",
@@ -19,8 +28,7 @@ export function diaSemanaAbreviado(dataInicio: string) {
 
 /** Dias completos até `dataInicio` (0 = hoje, negativo = já passou). */
 export function diasParaComeco(dataInicio: string) {
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
+  const hoje = new Date(`${hojeNoBrasil()}T00:00:00`);
   const inicio = new Date(`${dataInicio}T00:00:00`);
   return Math.round((inicio.getTime() - hoje.getTime()) / 86_400_000);
 }

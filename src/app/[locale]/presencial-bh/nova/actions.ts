@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
+import { hojeNoBrasil } from "@/lib/mesas/horario";
 
 const schema = z
   .object({
@@ -27,6 +28,10 @@ const schema = z
   .refine((d) => d.minJogadores <= d.vagasTotal, {
     message: "O mínimo de jogadores não pode passar do total de vagas.",
     path: ["minJogadores"],
+  })
+  .refine((d) => d.dataInicio >= hojeNoBrasil(), {
+    message: "A data de início não pode ser no passado.",
+    path: ["dataInicio"],
   });
 
 export type CriarMesaPresencialResult =

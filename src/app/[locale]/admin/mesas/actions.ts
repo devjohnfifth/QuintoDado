@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
+import { hojeNoBrasil } from "@/lib/mesas/horario";
 
 async function exigirAdmin() {
   const supabase = await createClient();
@@ -121,6 +122,10 @@ const schema = z
   .refine((d) => d.modalidade !== "presencial" || Boolean(d.cidadeUf), {
     message: "Cidade é obrigatória pra mesa presencial.",
     path: ["cidadeUf"],
+  })
+  .refine((d) => d.dataInicio >= hojeNoBrasil(), {
+    message: "A data de início não pode ser no passado.",
+    path: ["dataInicio"],
   });
 
 export type CriarMesaAdminResult = { ok: true; slug: string } | { ok: false; error: string };
