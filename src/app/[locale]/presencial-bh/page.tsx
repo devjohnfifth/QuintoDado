@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
@@ -113,7 +114,10 @@ export default async function PresencialBhPage({
       <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6">
         {mesas.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <p className="font-heading text-lg font-bold">{t("vazioTitulo")}</p>
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
+              <MapPin className="size-6" aria-hidden />
+            </div>
+            <p className="mt-4 font-heading text-lg font-bold">{t("vazioTitulo")}</p>
             <p className="mt-2 text-sm text-muted-foreground">{t("vazioCorpo")}</p>
           </div>
         ) : (
