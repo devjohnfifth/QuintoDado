@@ -59,6 +59,18 @@ async function notificarJogador(inscricaoId: string, tipo: "aprovado" | "recusad
 export async function aprovarInscricaoAction(inscricaoId: string, mesaId: string) {
   const { supabase } = await exigirAdmin();
 
+  // Segunda trava contra lotar além da conta — a candidatura já barra vaga
+  // esgotada na hora de enviar, mas isso não protege contra duas
+  // candidaturas concorrentes sendo aprovadas quase ao mesmo tempo.
+  const { data: mesa } = await supabase
+    .from("mesas")
+    .select("vagas_total, vagas_preenchidas")
+    .eq("id", mesaId)
+    .single();
+  if (mesa && mesa.vagas_preenchidas >= mesa.vagas_total) {
+    throw new Error("Essa mesa já está com todas as vagas preenchidas.");
+  }
+
   const { error } = await supabase
     .from("inscricoes")
     .update({ status: "aprovado", aprovado_em: new Date().toISOString() })
