@@ -22,6 +22,19 @@ async function exigirAdmin() {
 }
 
 /**
+ * E-mail não fica em `profiles` (só em `auth.users`, que RLS normal não
+ * alcança) — busca sob demanda via service_role só quando o admin
+ * realmente clica pra ver, em vez de expor de cara pra cada candidato.
+ */
+export async function buscarEmailCandidatoAction(usuarioId: string): Promise<string | null> {
+  await exigirAdmin();
+  const admin = serviceRole();
+  const { data, error } = await admin.auth.admin.getUserById(usuarioId);
+  if (error || !data.user) return null;
+  return data.user.email ?? null;
+}
+
+/**
  * O jogador nunca é dono da notificação que a gente cria pra ele (é o
  * admin/mestre que aciona), então a policy `notificacao_propria` (só o
  * dono escreve) bloquearia um insert com o client normal — por isso usa

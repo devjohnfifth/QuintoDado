@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InscricaoActions } from "./inscricao-actions";
+import { RevelarEmailButton } from "./revelar-email-button";
 
 const STATUS_LABEL: Record<string, string> = {
   candidatura_enviada: "Candidatura enviada",
@@ -38,7 +39,7 @@ export default async function AdminMesaDetalhePage({
   const { data: inscricoes } = await supabase
     .from("inscricoes")
     .select(
-      "id, status, criado_em, profiles!inscricoes_usuario_id_fkey(nome_exibicao, username, avatar_url), inscricao_respostas(resposta, mesa_perguntas(enunciado, ordem))",
+      "id, status, criado_em, usuario_id, profiles!inscricoes_usuario_id_fkey(nome_exibicao, username, avatar_url), inscricao_respostas(resposta, mesa_perguntas(enunciado, ordem))",
     )
     .eq("mesa_id", id)
     .order("criado_em", { ascending: true });
@@ -103,6 +104,7 @@ export default async function AdminMesaDetalhePage({
                     <div>
                       <p className="font-medium">{perfil?.nome_exibicao ?? "Jogador"}</p>
                       <p className="text-xs text-muted-foreground">@{perfil?.username}</p>
+                      <RevelarEmailButton usuarioId={inscricao.usuario_id} />
                     </div>
                   </div>
                   <span className="rounded-full border border-border px-2 py-0.5 text-xs">
