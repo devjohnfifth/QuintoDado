@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus } from "lucide-react";
+import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
@@ -31,7 +31,10 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
   const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
   const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
-  const faltam = mesa.min_jogadores - mesa.vagas_preenchidas;
+  const faltamPraAbrir = mesa.min_jogadores - mesa.vagas_preenchidas;
+  const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
+  const lotada = vagasLivres <= 0;
+  const ultimaVaga = !lotada && vagasLivres === 1;
   const jogadores = mesa.jogadores_aprovados ?? [];
   const jogadoresVisiveis = jogadores.slice(0, 4);
   const extras = jogadores.length - jogadoresVisiveis.length;
@@ -79,7 +82,13 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
                 {MODALIDADE_LABEL[mesa.modalidade]}
                 {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
               </span>
-              <span className="shrink-0 font-semibold text-foreground">
+              <span
+                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
+                  mesa.preco_centavos === 0
+                    ? "bg-emerald-500/15 text-emerald-400"
+                    : "bg-primary/15 text-primary"
+                }`}
+              >
                 {mesa.preco_centavos === 0 ? "Gratuita" : formatBRL(mesa.preco_centavos)}
               </span>
             </div>
@@ -147,17 +156,33 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
 
         <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-2 sm:top-2">
-          {dias >= 0 && dias <= 14 && (
-            <span className="flex items-center gap-1 rounded-full bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-              <Flame className="size-2.5 shrink-0" aria-hidden />
-              {dias === 0 ? "Hoje" : `${dias}d`}
+          {lotada ? (
+            <span className="flex items-center gap-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+              <Lock className="size-2.5 shrink-0" aria-hidden />
+              Lotada
             </span>
-          )}
-          {faltam > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-              <UserPlus className="size-2.5 shrink-0" aria-hidden />
-              Falta {faltam}
-            </span>
+          ) : (
+            <>
+              {dias >= 0 && dias <= 14 && (
+                <span className="flex items-center gap-1 rounded-full bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+                  <Flame className="size-2.5 shrink-0" aria-hidden />
+                  {dias === 0 ? "Hoje" : `${dias}d`}
+                </span>
+              )}
+              {ultimaVaga ? (
+                <span className="flex animate-pulse items-center gap-1 rounded-full bg-red-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+                  <UserPlus className="size-2.5 shrink-0" aria-hidden />
+                  Última vaga!
+                </span>
+              ) : (
+                faltamPraAbrir > 0 && (
+                  <span className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+                    <UserPlus className="size-2.5 shrink-0" aria-hidden />
+                    Falta {faltamPraAbrir}
+                  </span>
+                )
+              )}
+            </>
           )}
         </div>
 

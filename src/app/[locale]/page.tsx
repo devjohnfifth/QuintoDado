@@ -1,16 +1,77 @@
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BookOpen, Dices, MessageCircle, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
+import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
 
-export default function HomePage() {
-  const t = useTranslations("Home");
+const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": `${site}/#pessoa`,
+      name: "Mestre Quintão",
+      alternateName: "Quinto Dado",
+      description:
+        "Criador e mestre de RPG brasileiro. Mesas de Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart, além de material autoral gratuito.",
+      url: site,
+      image: `${site}${mestreQuintao.src}`,
+      sameAs: [SITE_LINKS.instagram, SITE_LINKS.mesaquest].filter(Boolean),
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${site}/#site`,
+      name: "Quinto Dado",
+      url: site,
+      inLanguage: "pt-BR",
+      publisher: { "@id": `${site}/#pessoa` },
+    },
+  ],
+};
+
+async function buscarMesasAbertas(): Promise<MesaCardData[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("mesas")
+    .select(
+      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
+    )
+    .in("status", ["publicada", "confirmada", "em_andamento"])
+    .order("data_inicio", { ascending: true })
+    .limit(3);
+
+  if (error) {
+    console.error("[home] erro ao buscar mesas abertas:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as unknown as MesaCardData[];
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const [t, mesasAbertas] = await Promise.all([getTranslations("Home"), buscarMesasAbertas()]);
+  const perguntasFaq = t.raw("faq.perguntas") as { pergunta: string; resposta: string }[];
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Bloco 1 — herói */}
       <section className="relative overflow-hidden px-4 py-24 sm:px-6 sm:py-32">
         <div
@@ -105,6 +166,39 @@ export default function HomePage() {
         </div>
       </Reveal>
 
+      {/* Bloco 4 — mesas abertas de verdade, some se não houver nenhuma */}
+      {mesasAbertas.length > 0 && (
+        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
+          <div className="mx-auto max-w-4xl">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="font-heading text-2xl font-bold">{t("mesasAbertas.titulo")}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{t("mesasAbertas.subtitulo")}</p>
+              </div>
+              <Link
+                href="/mesas"
+                className="hidden shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline sm:inline-flex"
+              >
+                {t("mesasAbertas.verTodas")}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </div>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {mesasAbertas.map((mesa) => (
+                <MesaCard key={mesa.slug} mesa={mesa} />
+              ))}
+            </div>
+            <Link
+              href="/mesas"
+              className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden"
+            >
+              {t("mesasAbertas.verTodas")}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </Reveal>
+      )}
+
       {/* Blocos 4 e 5 — suplementos e mesas, lado a lado pra quebrar a pilha vertical */}
       <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
@@ -145,6 +239,41 @@ export default function HomePage() {
       </Reveal>
 
       {/* Bloco 6 — prova social entra quando depoimentos existirem no banco */}
+
+      {/* FAQ — também vira dado estruturado FAQPage logo abaixo */}
+      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="font-heading text-2xl font-bold">{t("faq.titulo")}</h2>
+          <div className="mt-6 divide-y divide-border/60 rounded-2xl border border-border">
+            {perguntasFaq.map((item) => (
+              <details key={item.pergunta} className="group px-5 py-4 open:pb-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium marker:content-none">
+                  {item.pergunta}
+                  <ArrowRight
+                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-90"
+                    aria-hidden
+                  />
+                </summary>
+                <p className="mt-2 text-sm text-muted-foreground">{item.resposta}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </Reveal>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: perguntasFaq.map((item) => ({
+              "@type": "Question",
+              name: item.pergunta,
+              acceptedAnswer: { "@type": "Answer", text: item.resposta },
+            })),
+          }),
+        }}
+      />
 
       {/* Bloco 4' — comunidade */}
       <Reveal className="relative overflow-hidden border-t border-border/60 px-4 py-16 sm:px-6">

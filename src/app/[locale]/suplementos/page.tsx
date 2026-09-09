@@ -16,7 +16,12 @@ export async function generateMetadata({
   const title = "Material para a sua mesa — Quinto Dado";
   const description =
     "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas pro seu RPG. Catálogo em construção.";
-  return { title, description, openGraph: { title, description, locale, type: "website" } };
+  return {
+    title,
+    description,
+    alternates: { canonical: "/suplementos" },
+    openGraph: { title, description, locale, type: "website" },
+  };
 }
 
 export default async function SuplementosPage({

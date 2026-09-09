@@ -9,7 +9,6 @@ import {
   Music2,
   PlayCircle,
   MapPin,
-  Coffee,
   ArrowUpRight,
   ChevronRight,
   type LucideIcon,
@@ -19,7 +18,9 @@ import logo5d from "@/assets/brand/logo-5d.png";
 
 export const metadata: Metadata = {
   title: "Quinto Dado — Links",
-  description: "Todos os links do Quinto Dado em um só lugar.",
+  description:
+    "Todos os links do Mestre Quintão: comunidade no WhatsApp, mesas abertas, suplementos gratuitos de RPG e redes sociais, em um só lugar.",
+  alternates: { canonical: "/links" },
 };
 
 /**
@@ -34,7 +35,6 @@ const linksEstaticos: { chave: string; href: string | null; Icon: LucideIcon }[]
   { chave: "tiktok", href: SITE_LINKS.tiktok, Icon: Music2 },
   { chave: "youtube", href: SITE_LINKS.youtube, Icon: PlayCircle },
   { chave: "presencialBh", href: "/presencial-bh", Icon: MapPin },
-  { chave: "apoie", href: "/apoie", Icon: Coffee },
 ];
 
 export default async function LinksPage({

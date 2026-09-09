@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegalPage } from "@/components/site/legal-page";
 
-export const metadata: Metadata = { title: "Licença de uso do material — Quinto Dado" };
+export const metadata: Metadata = {
+  title: "Licença de uso do material — Quinto Dado",
+  description:
+    "Condições de uso e redistribuição das tabelas, mapas e homebrews gratuitos publicados pelo Quinto Dado.",
+  alternates: { canonical: "/licenca-de-uso" },
+};
 
 export default async function LicencaDeUsoPage({
   params,

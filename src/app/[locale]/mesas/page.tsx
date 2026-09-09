@@ -13,20 +13,27 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const title = "Mesas de RPG abertas — Quinto Dado";
+  const title = "RPG de mesa: mesas abertas — Quinto Dado";
   const description =
-    "One-shots online e mesas presenciais com o Quinto Dado. Vagas limitadas, linhas e véus combinados antes de começar.";
-  return { title, description, openGraph: { title, description, locale, type: "website" } };
+    "Encontre uma mesa de RPG de mesa aberta com o Mestre Quintão: one-shots online e presenciais. Vagas limitadas, linhas e véus combinados antes de começar.";
+  return {
+    title,
+    description,
+    alternates: { canonical: "/mesas" },
+    openGraph: { title, description, locale, type: "website" },
+  };
 }
 
-async function buscarMesas(): Promise<MesaCardData[]> {
+type Filtros = { sistema?: string; modalidade?: string; preco?: string };
+
+async function buscarMesas(filtros: Filtros): Promise<MesaCardData[]> {
   if (!isSupabaseConfigured()) {
     console.warn("[/mesas] Supabase não configurado — mostrando estado vazio (ver .env.example).");
     return [];
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("mesas")
     .select(
       "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
@@ -34,12 +41,44 @@ async function buscarMesas(): Promise<MesaCardData[]> {
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
 
+  if (filtros.sistema) query = query.eq("sistemas.slug", filtros.sistema);
+  if (filtros.modalidade === "online" || filtros.modalidade === "presencial") {
+    query = query.eq("modalidade", filtros.modalidade);
+  }
+  if (filtros.preco === "gratis") query = query.eq("preco_centavos", 0);
+  if (filtros.preco === "pago") query = query.gt("preco_centavos", 0);
+
+  const { data, error } = await query;
+
   if (error) {
     console.error("[/mesas] erro ao buscar mesas:", error.message);
     return [];
   }
 
-  return (data ?? []) as unknown as MesaCardData[];
+  // O filtro por sistemas.slug acima é um inner-join implícito do PostgREST
+  // só quando a FK é obrigatória; como sistema_id aceita null (mesa "outro"),
+  // filtra de novo em memória pra garantir que só sobra o sistema escolhido.
+  const filtradas = filtros.sistema
+    ? (data ?? []).filter((m) => (m as unknown as MesaCardData).sistemas?.slug === filtros.sistema)
+    : (data ?? []);
+
+  return filtradas as unknown as MesaCardData[];
+}
+
+async function buscarSistemasComMesaAberta(): Promise<{ nome: string; slug: string }[]> {
+  if (!isSupabaseConfigured()) return [];
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mesas")
+    .select("sistemas(nome, slug)")
+    .in("status", ["publicada", "confirmada", "em_andamento"]);
+
+  const vistos = new Map<string, { nome: string; slug: string }>();
+  for (const linha of data ?? []) {
+    const sistema = (linha as unknown as { sistemas: { nome: string; slug: string } | null }).sistemas;
+    if (sistema && !vistos.has(sistema.slug)) vistos.set(sistema.slug, sistema);
+  }
+  return [...vistos.values()].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 }
 
 async function ehAdmin() {
@@ -59,13 +98,21 @@ async function ehAdmin() {
 
 export default async function MesasPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Filtros>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const filtros = await searchParams;
   const t = await getTranslations("Mesas");
-  const [mesas, admin] = await Promise.all([buscarMesas(), ehAdmin()]);
+  const [mesas, admin, sistemas] = await Promise.all([
+    buscarMesas(filtros),
+    ehAdmin(),
+    buscarSistemasComMesaAberta(),
+  ]);
+  const temFiltroAtivo = Boolean(filtros.sistema || filtros.modalidade || filtros.preco);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
@@ -89,11 +136,64 @@ export default async function MesasPage({
         </div>
       </Reveal>
 
-      <Reveal className="mt-10">
+      <Reveal className="mt-8">
+        <form className="flex flex-wrap gap-3" aria-label={t("filtros.label")}>
+          <select
+            name="sistema"
+            defaultValue={filtros.sistema ?? ""}
+            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+          >
+            <option value="">{t("filtros.todosSistemas")}</option>
+            {sistemas.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.nome}
+              </option>
+            ))}
+          </select>
+          <select
+            name="modalidade"
+            defaultValue={filtros.modalidade ?? ""}
+            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+          >
+            <option value="">{t("filtros.todasModalidades")}</option>
+            <option value="online">{t("filtros.online")}</option>
+            <option value="presencial">{t("filtros.presencial")}</option>
+          </select>
+          <select
+            name="preco"
+            defaultValue={filtros.preco ?? ""}
+            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+          >
+            <option value="">{t("filtros.qualquerPreco")}</option>
+            <option value="gratis">{t("filtros.gratuitas")}</option>
+            <option value="pago">{t("filtros.pagas")}</option>
+          </select>
+          <button
+            type="submit"
+            className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-2 text-sm font-medium text-white"
+          >
+            {t("filtros.filtrar")}
+          </button>
+          {temFiltroAtivo && (
+            <Link
+              href="/mesas"
+              className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              {t("filtros.limpar")}
+            </Link>
+          )}
+        </form>
+      </Reveal>
+
+      <Reveal className="mt-6">
         {mesas.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <p className="font-heading text-lg font-bold">{t("vazioTitulo")}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{t("vazioCorpo")}</p>
+            <p className="font-heading text-lg font-bold">
+              {temFiltroAtivo ? t("filtros.semResultadoTitulo") : t("vazioTitulo")}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {temFiltroAtivo ? t("filtros.semResultadoCorpo") : t("vazioCorpo")}
+            </p>
           </div>
         ) : (
           <ul className="space-y-4">

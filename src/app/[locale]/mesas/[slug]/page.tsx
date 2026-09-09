@@ -17,6 +17,7 @@ import {
 } from "@/lib/mesas/labels";
 import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
+import bannerOg from "@/assets/brand/banner-og.webp";
 
 type MesaDetalhe = {
   id: string;
@@ -103,11 +104,19 @@ export async function generateMetadata({
   if (!resultado) return { title: "Mesa não encontrada — Quinto Dado" };
 
   const { mesa } = resultado;
+  const sistema = mesa.sistema_outro || mesa.sistemas?.nome;
   const title = `${mesa.titulo} — Quinto Dado`;
+  const description = sistema ? `${mesa.sinopse} Sistema: ${sistema}.` : mesa.sinopse;
+  const imagem = mesa.banner_url
+    ? [{ url: mesa.banner_url, width: 1200, height: 514 }]
+    : [{ url: bannerOg.src, width: bannerOg.width, height: bannerOg.height }];
+
   return {
     title,
-    description: mesa.sinopse,
-    openGraph: { title, description: mesa.sinopse, locale, type: "website" },
+    description,
+    alternates: { canonical: `/mesas/${slug}` },
+    openGraph: { title, description, locale, type: "website", images: imagem },
+    twitter: { card: "summary_large_image", title, description, images: imagem.map((i) => i.url) },
   };
 }
 
@@ -129,13 +138,51 @@ export default async function MesaDetalhePage({
     { day: "2-digit", month: "long", year: "numeric" },
   );
 
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: mesa.titulo,
+    description: mesa.sinopse,
+    startDate: `${mesa.data_inicio}T${mesa.horario_inicio}`,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode:
+      mesa.modalidade === "online"
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : "https://schema.org/OfflineEventAttendanceMode",
+    location:
+      mesa.modalidade === "online"
+        ? { "@type": "VirtualLocation", url: `${site}/mesas/${slug}` }
+        : {
+            "@type": "Place",
+            name: mesa.cidade_uf ?? "Belo Horizonte",
+            address: mesa.cidade_uf ?? "Belo Horizonte, MG",
+          },
+    image: mesa.banner_url ? [mesa.banner_url] : [`${site}${bannerOg.src}`],
+    organizer: { "@type": "Person", name: "Mestre Quintão", url: site },
+    offers: {
+      "@type": "Offer",
+      price: (mesa.preco_centavos / 100).toFixed(2),
+      priceCurrency: "BRL",
+      availability:
+        mesa.vagas_preenchidas < mesa.vagas_total
+          ? "https://schema.org/InStock"
+          : "https://schema.org/SoldOut",
+      url: `${site}/mesas/${slug}`,
+    },
+  };
+
   return (
     <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {mesa.banner_url && (
         <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
           <Image
             src={mesa.banner_url}
-            alt=""
+            alt={mesa.titulo}
             fill
             className="object-cover"
             sizes="(min-width: 672px) 672px, 100vw"

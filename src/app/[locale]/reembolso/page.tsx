@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LegalPage } from "@/components/site/legal-page";
 
-export const metadata: Metadata = { title: "Política de reembolso — Quinto Dado" };
+export const metadata: Metadata = {
+  title: "Política de reembolso — Quinto Dado",
+  description: "Regras de cancelamento e reembolso para mesas de RPG comissionadas no Quinto Dado.",
+  alternates: { canonical: "/reembolso" },
+};
 
 export default async function ReembolsoPage({
   params,
