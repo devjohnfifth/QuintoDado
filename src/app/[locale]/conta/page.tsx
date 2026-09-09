@@ -152,12 +152,20 @@ export default async function ContaPage({
                       {STATUS_MESA_LABEL[mesa.status] ?? mesa.status}
                     </span>
                     {mesa.modalidade === "presencial" && (
-                      <Link
-                        href={`/presencial-bh/${mesa.id}/editar`}
-                        className="text-xs text-primary hover:underline"
-                      >
-                        Editar
-                      </Link>
+                      <>
+                        <Link
+                          href={`/presencial-bh/${mesa.id}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Candidaturas
+                        </Link>
+                        <Link
+                          href={`/presencial-bh/${mesa.id}/editar`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Editar
+                        </Link>
+                      </>
                     )}
                   </div>
                 </li>

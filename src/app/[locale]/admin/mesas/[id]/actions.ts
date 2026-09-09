@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
+import { notificarJogadorSobreCandidatura } from "@/lib/notificacoes/candidatura";
 
 async function exigirAdmin() {
   const supabase = await createClient();
@@ -34,49 +35,6 @@ export async function buscarEmailCandidatoAction(usuarioId: string): Promise<str
   return data.user.email ?? null;
 }
 
-/**
- * O jogador nunca é dono da notificação que a gente cria pra ele (é o
- * admin/mestre que aciona), então a policy `notificacao_propria` (só o
- * dono escreve) bloquearia um insert com o client normal — por isso usa
- * service_role aqui, igual `notificarMestre` faz pro caminho inverso.
- */
-async function notificarJogador(
-  inscricaoId: string,
-  tipo: "aprovado" | "recusado",
-  motivo?: string,
-) {
-  const admin = serviceRole();
-
-  const { data: inscricao } = await admin
-    .from("inscricoes")
-    .select("usuario_id, mesas(titulo, slug)")
-    .eq("id", inscricaoId)
-    .single();
-  if (!inscricao) return;
-
-  const mesa = inscricao.mesas as unknown as { titulo: string; slug: string } | null;
-  if (!mesa) return;
-
-  const corpoRecusa = motivo
-    ? `Sua candidatura pra "${mesa.titulo}" não foi aprovada dessa vez. Motivo: ${motivo}`
-    : `Sua candidatura pra "${mesa.titulo}" não foi aprovada dessa vez.`;
-
-  const { error } = await admin.from("notificacoes").insert({
-    usuario_id: inscricao.usuario_id,
-    tipo: tipo === "aprovado" ? "candidatura_aprovada" : "candidatura_recusada",
-    titulo: tipo === "aprovado" ? "Candidatura aprovada!" : "Candidatura não aprovada",
-    corpo:
-      tipo === "aprovado"
-        ? `Você foi aprovado pra "${mesa.titulo}"! Confira os detalhes.`
-        : corpoRecusa,
-    url: `/mesas/${mesa.slug}`,
-  });
-
-  if (error) {
-    console.error("[notificarJogador] erro ao criar notificação:", error.message);
-  }
-}
-
 export async function aprovarInscricaoAction(inscricaoId: string, mesaId: string) {
   const { supabase } = await exigirAdmin();
 
@@ -102,7 +60,7 @@ export async function aprovarInscricaoAction(inscricaoId: string, mesaId: string
     throw new Error("Não deu pra aprovar a candidatura.");
   }
 
-  await notificarJogador(inscricaoId, "aprovado");
+  await notificarJogadorSobreCandidatura(inscricaoId, "aprovado");
 
   revalidatePath(`/admin/mesas/${mesaId}`);
   revalidatePath("/mesas");
@@ -129,7 +87,7 @@ export async function recusarInscricaoAction(
     throw new Error("Não deu pra recusar a candidatura.");
   }
 
-  await notificarJogador(inscricaoId, "recusado", motivo);
+  await notificarJogadorSobreCandidatura(inscricaoId, "recusado", motivo);
 
   revalidatePath(`/admin/mesas/${mesaId}`);
   revalidatePath("/mesas");

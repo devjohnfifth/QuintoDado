@@ -11,8 +11,10 @@ export default function robots(): MetadataRoute.Robots {
         "/admin",
         "/conta",
         "/completar-cadastro",
-        "/presencial-bh/nova",
-        "/presencial-bh/*/editar",
+        // Cobre /presencial-bh/nova, /presencial-bh/[id] (revisão de
+        // candidaturas do mestre) e /presencial-bh/[id]/editar de uma vez —
+        // tudo que não é a listagem pública em si.
+        "/presencial-bh/*",
       ],
     },
     sitemap: `${site}/sitemap.xml`,
