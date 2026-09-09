@@ -34,6 +34,7 @@ type MesaDetalhe = {
   qtd_sessoes: number | null;
   data_inicio: string;
   horario_inicio: string;
+  horario_fim: string;
   vagas_total: number;
   sistemas: { nome: string } | null;
   sistema_outro: string | null;
@@ -50,7 +51,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas, banner_url, jogadores_aprovados",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas, banner_url, jogadores_aprovados",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -146,6 +147,7 @@ export default async function MesaDetalhePage({
     name: mesa.titulo,
     description: mesa.sinopse,
     startDate: `${mesa.data_inicio}T${mesa.horario_inicio}`,
+    endDate: `${mesa.data_inicio}T${mesa.horario_fim}`,
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode:
       mesa.modalidade === "online"
@@ -241,6 +243,12 @@ export default async function MesaDetalhePage({
         <div>
           <dt className="text-muted-foreground">{t("data")}</dt>
           <dd className="font-medium">{dataFormatada}</dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Horário</dt>
+          <dd className="font-medium">
+            {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
+          </dd>
         </div>
         <div>
           <dt className="text-muted-foreground">Frequência</dt>
