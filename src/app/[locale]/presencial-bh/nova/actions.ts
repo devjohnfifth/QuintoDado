@@ -3,9 +3,35 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
+
+/**
+ * Sem isso, uma mesa presencial nova ficava em "aguardando_aprovacao"
+ * sem avisar ninguém — o admin só descobria olhando o painel por
+ * conta própria. Notifica todo profile com papel admin (hoje só tem
+ * um, mas não trava em um id fixo).
+ */
+async function notificarAdminsSobreMesaPendente(mesaId: string, titulo: string, mestreNome: string) {
+  const admin = serviceRole();
+  const { data: admins } = await admin.from("profiles").select("id").eq("papel", "admin");
+  if (!admins || admins.length === 0) return;
+
+  const { error } = await admin.from("notificacoes").insert(
+    admins.map((a) => ({
+      usuario_id: a.id,
+      tipo: "mesa_aguardando_aprovacao",
+      titulo: "Mesa nova aguardando aprovação",
+      corpo: `${mestreNome} criou "${titulo}" — precisa da sua aprovação pra ficar pública.`,
+      url: `/admin/mesas/${mesaId}`,
+    })),
+  );
+  if (error) {
+    console.error("[notificarAdminsSobreMesaPendente] erro:", error.message);
+  }
+}
 
 const schema = z
   .object({
@@ -58,7 +84,7 @@ export async function criarMesaPresencial(
 
   const { data: perfil } = await supabase
     .from("profiles")
-    .select("papel")
+    .select("papel, nome_exibicao")
     .eq("id", user.id)
     .single();
 
@@ -126,6 +152,8 @@ export async function criarMesaPresencial(
   if (perguntasError) {
     console.error("[criarMesaPresencial] erro ao semear perguntas fixas:", perguntasError.message);
   }
+
+  await notificarAdminsSobreMesaPendente(mesa.id, dados.titulo, perfil.nome_exibicao);
 
   revalidatePath("/presencial-bh");
   return { ok: true, slug };
