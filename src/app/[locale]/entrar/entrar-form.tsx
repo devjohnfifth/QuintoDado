@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -9,13 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
 import { sanitizarUsername } from "@/lib/username";
-import googleIcon from "@/assets/brand/google-icon.png";
-import {
-  entrarComEmailAction,
-  entrarComProvedorAction,
-  criarContaAction,
-  esqueciSenhaAction,
-} from "./actions";
+import { entrarComEmailAction, criarContaAction, esqueciSenhaAction } from "./actions";
 
 export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
   const t = useTranslations("Entrar");
@@ -28,22 +21,6 @@ export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
           {mensagemInicial}
         </p>
       )}
-
-      <div className="space-y-3">
-        <form action={entrarComProvedorAction}>
-          <input type="hidden" name="provider" value="google" />
-          <Button type="submit" variant="outline" className="w-full gap-2">
-            <Image src={googleIcon} alt="" width={20} height={20} className="rounded-sm" />
-            {t("continuarGoogle")}
-          </Button>
-        </form>
-      </div>
-
-      <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-        <div className="h-px flex-1 bg-border" />
-        {t("ou")}
-        <div className="h-px flex-1 bg-border" />
-      </div>
 
       <div className="mb-6 flex rounded-lg border border-border p-1 text-sm">
         <button

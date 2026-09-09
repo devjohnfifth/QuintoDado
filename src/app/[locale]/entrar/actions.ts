@@ -15,26 +15,6 @@ export type EstadoFormEntrar = {
   valores?: Record<string, string>;
 } | null;
 
-export async function entrarComProvedorAction(formData: FormData) {
-  const provider = formData.get("provider");
-  if (provider !== "google") {
-    redirect("/entrar?erro=provedor-invalido");
-  }
-
-  const supabase = await createClient();
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: { redirectTo: `${site}/api/auth/callback` },
-  });
-
-  if (error || !data.url) {
-    redirect("/entrar?erro=oauth");
-  }
-
-  redirect(data.url);
-}
-
 const loginSchema = z.object({
   email: z.string().trim().email("E-mail inválido."),
   senha: z.string().min(1, "Digite sua senha."),
