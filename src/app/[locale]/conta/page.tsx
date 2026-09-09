@@ -22,6 +22,16 @@ const STATUS_LABEL: Record<string, string> = {
   concluida: "Concluída",
 };
 
+const STATUS_COR: Record<string, string> = {
+  aprovado: "border-emerald-500/40 text-emerald-400",
+  concluida: "border-emerald-500/40 text-emerald-400",
+  recusado: "border-destructive/40 text-destructive",
+  cancelada_jogador: "border-border text-muted-foreground",
+  cancelada_mestre: "border-destructive/40 text-destructive",
+  expirada: "border-border text-muted-foreground",
+  reembolsada: "border-border text-muted-foreground",
+};
+
 export default async function ContaPage({
   params,
 }: {
@@ -93,12 +103,16 @@ export default async function ContaPage({
             return (
               <li
                 key={inscricao.id}
-                className="flex items-center justify-between rounded-xl border border-border bg-card/60 p-4 text-sm"
+                className="flex items-center justify-between rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
               >
                 <Link href={`/mesas/${mesa?.slug}`} className="font-medium hover:underline">
                   {mesa?.titulo ?? "Mesa"}
                 </Link>
-                <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-xs ${
+                    STATUS_COR[inscricao.status] ?? "border-border text-muted-foreground"
+                  }`}
+                >
                   {STATUS_LABEL[inscricao.status] ?? inscricao.status}
                 </span>
               </li>
