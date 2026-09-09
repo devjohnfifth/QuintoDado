@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       // Storage do Supabase (capas de mesa, avatares) — trocar/complementar
       // com o bucket do Cloudflare R2 quando ele existir de verdade.
