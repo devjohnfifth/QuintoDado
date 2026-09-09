@@ -646,7 +646,7 @@ Extraída da logo: gradiente **azul → roxo**, monograma "5D" branco, padrão d
 
 **Tema escuro é o padrão** (D8). **Mobile-first obrigatório**, com layout desktop trabalhado, não apenas esticado.
 
-**Referências:** MesaQuest e Tavernaria para estrutura. Para tom, algo mais pessoal e autoral que ambos — é o site de uma pessoa, não de um marketplace.
+**Referências:** MesaQuest e Tavernaria para estrutura; StartPlaying (startplaying.games) como maior referência estrangeira. Para tom, algo mais pessoal e autoral que todas — é o site de uma pessoa, não de um marketplace.
 
 ---
 

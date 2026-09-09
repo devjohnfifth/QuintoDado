@@ -338,7 +338,7 @@ Extraída da logo: gradiente **azul → roxo**, monograma "5D" branco, padrão d
 
 Tipografia: display com personalidade nos títulos (Cinzel, Sora ou Space Grotesk), sans neutra e legível no corpo (Inter). Cantos suaves, superfícies com leve transparência, o padrão de d20 usado como textura discreta de fundo — nunca competindo com o conteúdo.
 
-**Mobile-first obrigatório** (9.5), com layout desktop trabalhado, não apenas esticado. Referência de estrutura: MesaQuest e Tavernaria. Referência de tom: mais pessoal e autoral que ambos — é o site de uma pessoa, não de um marketplace.
+**Mobile-first obrigatório** (9.5), com layout desktop trabalhado, não apenas esticado. Referência de estrutura: MesaQuest e Tavernaria; StartPlaying (startplaying.games) como maior referência estrangeira. Referência de tom: mais pessoal e autoral que todas — é o site de uma pessoa, não de um marketplace.
 
 ---
 
