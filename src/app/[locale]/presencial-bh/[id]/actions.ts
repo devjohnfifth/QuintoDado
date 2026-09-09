@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { notificarJogadorSobreCandidatura } from "@/lib/notificacoes/candidatura";
+import { notificarJogadoresAprovadosSobreCancelamento } from "@/lib/notificacoes/mesa-cancelada";
 
 /**
  * Confere que o usuário logado é dono da mesa (ou admin). A UPDATE em
@@ -94,6 +95,8 @@ export async function cancelarMesaMestreAction(mesaId: string) {
     console.error("[cancelarMesaMestreAction] erro:", error.message);
     throw new Error("Não deu pra cancelar a mesa.");
   }
+
+  await notificarJogadoresAprovadosSobreCancelamento(mesaId);
 
   revalidatePath("/conta");
   revalidatePath("/presencial-bh");

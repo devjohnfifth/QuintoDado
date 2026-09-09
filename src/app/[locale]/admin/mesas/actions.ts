@@ -7,6 +7,7 @@ import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
+import { notificarJogadoresAprovadosSobreCancelamento } from "@/lib/notificacoes/mesa-cancelada";
 
 async function exigirAdmin() {
   const supabase = await createClient();
@@ -83,6 +84,7 @@ export async function cancelarMesaAction(mesaId: string) {
   }
 
   await notificarMestreDaMesa(mesaId, adminId, "cancelada");
+  await notificarJogadoresAprovadosSobreCancelamento(mesaId);
 
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
