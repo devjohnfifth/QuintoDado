@@ -18,7 +18,22 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      // Scripts utilitários avulsos (ex.: processar imagem uma vez via CLI),
+      // não fazem parte do app — CommonJS aqui é o formato certo, não um
+      // erro do TypeScript/no-require-imports.
+      "scripts/**",
     ],
+  },
+  {
+    rules: {
+      // Convenção do projeto: prefixo `_` marca uma variável desestruturada
+      // só pra excluir do resto do objeto (ex.: `const { senha: _senha,
+      // ...seguro } = bruto`), não uma variável esquecida de verdade.
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+    },
   },
 ];
 

@@ -50,6 +50,14 @@ export function CandidaturaForm({
       }))
       .filter((r) => r.resposta.trim().length > 0);
 
+    const faltaObrigatoria = perguntas.some(
+      (p) => p.obrigatoria && p.tipo === "escolha_unica" && !escolhas[p.id]?.trim(),
+    );
+    if (faltaObrigatoria) {
+      setErro("Preencha todas as respostas obrigatórias.");
+      return;
+    }
+
     startTransition(async () => {
       const resultado = await criarCandidatura({ mesaId, slug, respostas });
       if (!resultado.ok) {

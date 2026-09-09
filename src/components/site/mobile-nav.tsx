@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-export function MobileNav() {
+export function MobileNav({ logado }: { logado: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const [aberto, setAberto] = useState(false);
@@ -64,16 +64,18 @@ export function MobileNav() {
             );
           })}
         </nav>
-        <SheetFooter>
-          <Link
-            href="/entrar"
-            onClick={() => setAberto(false)}
-            style={{ animationDelay: `${links.length * 50}ms` }}
-            className="motion-safe:animate-[reveal-up_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards] w-full rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2.5 text-center text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02]"
-          >
-            {t("entrar")}
-          </Link>
-        </SheetFooter>
+        {!logado && (
+          <SheetFooter>
+            <Link
+              href="/entrar"
+              onClick={() => setAberto(false)}
+              style={{ animationDelay: `${links.length * 50}ms` }}
+              className="motion-safe:animate-[reveal-up_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards] w-full rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2.5 text-center text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02]"
+            >
+              {t("entrar")}
+            </Link>
+          </SheetFooter>
+        )}
       </SheetContent>
     </Sheet>
   );

@@ -31,18 +31,34 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
     return { ok: false, error: "Você precisa estar logado pra se candidatar." };
   }
 
-  const [{ data: mesa }, { data: perfil }] = await Promise.all([
+  const [{ data: mesa }, { data: perfil }, { data: perguntas }] = await Promise.all([
     supabase.from("mesas").select("classificacao").eq("id", mesaId).single(),
     supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+    supabase.from("mesa_perguntas").select("id, obrigatoria").eq("mesa_id", mesaId),
   ]);
 
-  const limite = mesa ? limiteIdadeClassificacao(mesa.classificacao) : 0;
+  if (!mesa) {
+    // Sem conseguir ler a classificação da mesa, não dá pra confirmar a
+    // idade mínima — nunca deixa passar nesse caso (gating no servidor
+    // tem que falhar fechado, nunca aberto).
+    return { ok: false, error: "Não deu pra confirmar essa mesa agora. Tente de novo em instantes." };
+  }
+
+  const limite = limiteIdadeClassificacao(mesa.classificacao);
   const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
   if (limite > 0 && idade < limite) {
     return {
       ok: false,
       error: `Esta mesa é classificada para +${limite} anos. Sua conta não atende essa idade mínima.`,
     };
+  }
+
+  const idsRespondidos = new Set(respostas.map((r) => r.perguntaId));
+  const faltaObrigatoria = (perguntas ?? []).some(
+    (p) => p.obrigatoria && !idsRespondidos.has(p.id),
+  );
+  if (faltaObrigatoria) {
+    return { ok: false, error: "Preencha todas as respostas obrigatórias." };
   }
 
   const { data: inscricao, error: inscricaoError } = await supabase

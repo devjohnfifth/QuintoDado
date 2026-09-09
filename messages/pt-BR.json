@@ -1,9 +1,18 @@
 {
   "Metadata": {
     "home": {
-      "title": "Quinto Dado — Mesas de RPG online e material gratuito para mestres",
-      "description": "Mesas de RPG com o Mestre Quintão: Ordem Paranormal, Tormenta 20, Vaesen e mais. Tabelas de encontros, mapas e homebrews gratuitos, material novo toda semana."
+      "title": "Quinto Dado — RPG de mesa online e presencial com o Mestre Quintão",
+      "description": "RPG de mesa com o Mestre Quintão: mesas online e presenciais de Ordem Paranormal, Tormenta 20, Vaesen e mais. Tabelas de encontros, mapas e homebrews gratuitos, material novo toda semana."
     }
+  },
+  "Erro": {
+    "titulo": "Algo deu errado",
+    "corpo": "Não deu pra carregar essa página agora. Tenta de novo em instantes.",
+    "tentarNovamente": "Tentar de novo",
+    "voltarHome": "Voltar pra home",
+    "naoEncontradoTitulo": "Página não encontrada",
+    "naoEncontradoCorpo": "Esse endereço não existe ou foi movido. Confere o link ou volta pra home.",
+    "naoEncontradoCta": "Voltar pra home"
   },
   "Nav": {
     "suplementos": "Suplementos",
@@ -46,15 +55,49 @@
   },
   "Home": {
     "hero": {
-      "eyebrow": "RPG online e presencial",
+      "eyebrow": "RPG de mesa online e presencial",
       "titulo": "Quinto Dado",
-      "subtitulo": "Mesas de RPG, mapas e material autoral para quem quer viver a história, não só rolar o dado.",
+      "subtitulo": "RPG de mesa com o Mestre Quintão: mesas, mapas e material autoral para quem quer viver a história, não só rolar o dado.",
       "ctaComunidade": "Entrar na comunidade",
       "ctaMesas": "Ver mesas abertas"
     },
     "apresentacao": {
       "corpo": "Sou o João, o Mestre Quintão. Mestro Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart — em português ou inglês, no Discord com Foundry VTT.\n\nGosto tanto de construir mundo quanto de jogar nele: se der, eu faço o cardápio da taverna e o mapa interativo antes da sessão começar. Aqui você encontra minhas mesas abertas e todo o material que produzo pelo caminho — a maior parte de graça.",
       "ctaSobre": "Conheça o Quinto Dado"
+    },
+    "mesasAbertas": {
+      "titulo": "Mesas abertas",
+      "subtitulo": "RPG de mesa online e presencial com vaga aberta agora.",
+      "verTodas": "Ver todas as mesas"
+    },
+    "faq": {
+      "titulo": "Perguntas frequentes",
+      "perguntas": [
+        {
+          "pergunta": "O que é o Quinto Dado?",
+          "resposta": "Uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério."
+        },
+        {
+          "pergunta": "Como funciona a candidatura pra uma mesa?",
+          "resposta": "Você escolhe uma mesa aberta, responde uma ficha rápida (incluindo linhas e véus) e o mestre responsável aprova ou recusa. Sem pagamento nas mesas do Quinto Dado nesta fase."
+        },
+        {
+          "pergunta": "Quanto custa jogar?",
+          "resposta": "Depende da mesa — muitas são gratuitas. Mesas presenciais em BH podem ter um valor combinado direto com o mestre, só pra cobrir handouts."
+        },
+        {
+          "pergunta": "Nunca joguei RPG de mesa antes, posso participar?",
+          "resposta": "Pode! Cada mesa mostra o nível de experiência esperado, e várias aceitam iniciantes de boa vontade."
+        },
+        {
+          "pergunta": "O que são linhas e véus?",
+          "resposta": "É a pergunta obrigatória em toda mesa sobre o que pode e o que não pode aparecer na sessão. Classificação etária também é levada a sério, não é só um selo decorativo."
+        },
+        {
+          "pergunta": "Dá pra jogar presencial em Belo Horizonte?",
+          "resposta": "Dá — mestres cadastrados publicam suas próprias mesas presenciais em BH, além das mesas online do Mestre Quintão."
+        }
+      ]
     },
     "suplementos": {
       "titulo": "Material para a sua mesa",
@@ -99,14 +142,27 @@
     "instagram": "Instagram",
     "tiktok": "TikTok",
     "youtube": "YouTube",
-    "presencialBh": "Mesas presenciais em BH",
-    "apoie": "Apoiar o projeto"
+    "presencialBh": "Mesas presenciais em BH"
   },
   "Mesas": {
     "titulo": "Mesas abertas",
     "subtitulo": "One-shots online e presenciais com o Quinto Dado. Vagas limitadas, linhas e véus combinados antes de começar.",
     "vazioTitulo": "Nenhuma mesa aberta no momento",
     "vazioCorpo": "Assim que uma mesa nova for publicada, ela aparece aqui. Entra na comunidade pra saber em primeira mão.",
+    "filtros": {
+      "label": "Filtrar mesas",
+      "todosSistemas": "Todos os sistemas",
+      "todasModalidades": "Online e presencial",
+      "online": "Online",
+      "presencial": "Presencial",
+      "qualquerPreco": "Qualquer valor",
+      "gratuitas": "Gratuitas",
+      "pagas": "Pagas",
+      "filtrar": "Filtrar",
+      "limpar": "Limpar filtros",
+      "semResultadoTitulo": "Nenhuma mesa com esse filtro",
+      "semResultadoCorpo": "Tenta limpar algum filtro ou volta mais tarde — mesa nova pode abrir a qualquer momento."
+    },
     "gratuita": "Gratuita",
     "vagas": "{vagas, plural, one {# vaga} other {# vagas}}",
     "vagasDisponiveis": "{vagas, plural, one {# vaga disponível} other {# vagas disponíveis}}",

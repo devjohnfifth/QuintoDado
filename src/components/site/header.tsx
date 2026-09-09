@@ -12,38 +12,44 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 async function buscarSessao() {
   if (!isSupabaseConfigured()) return null;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
 
-  const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: perfil }, { count: naoLidas }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("username, nome_exibicao, avatar_url, papel")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
-      .from("notificacoes")
-      .select("id", { count: "exact", head: true })
-      .eq("usuario_id", user.id)
-      .is("lida_em", null)
-      .gte("criado_em", umDiaAtras),
-  ]);
+    const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const [{ data: perfil }, { count: naoLidas }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("username, nome_exibicao, avatar_url, papel")
+        .eq("id", user.id)
+        .maybeSingle(),
+      supabase
+        .from("notificacoes")
+        .select("id", { count: "exact", head: true })
+        .eq("usuario_id", user.id)
+        .is("lida_em", null)
+        .gte("criado_em", umDiaAtras),
+    ]);
 
-  if (!perfil) return null;
+    if (!perfil) return null;
 
-  return {
-    perfil: {
-      username: perfil.username as string,
-      nomeExibicao: perfil.nome_exibicao as string,
-      avatarUrl: perfil.avatar_url as string | null,
-      papel: perfil.papel as string,
-    },
-    naoLidas: naoLidas ?? 0,
-  };
+    return {
+      perfil: {
+        username: perfil.username as string,
+        nomeExibicao: perfil.nome_exibicao as string,
+        avatarUrl: perfil.avatar_url as string | null,
+        papel: perfil.papel as string,
+      },
+      naoLidas: naoLidas ?? 0,
+    };
+  } catch {
+    // Uma falha ao buscar sessão (ex.: instabilidade do Supabase) não pode
+    // derrubar o site inteiro — cai pra visão de deslogado.
+    return null;
+  }
 }
 
 export async function SiteHeader() {
@@ -84,7 +90,7 @@ export async function SiteHeader() {
               {t("entrar")}
             </Link>
           )}
-          <MobileNav />
+          <MobileNav logado={Boolean(sessao)} />
         </div>
       </div>
     </header>
