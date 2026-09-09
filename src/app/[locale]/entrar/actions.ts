@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { idadeEmAnos } from "@/lib/idade";
+import { sanitizarUsername } from "@/lib/username";
 
 export type EstadoFormEntrar = {
   erro?: string;
@@ -95,7 +96,11 @@ export async function criarContaAction(
 ): Promise<EstadoFormEntrar> {
   const bruto = {
     nomeExibicao: String(formData.get("nomeExibicao") ?? ""),
-    username: String(formData.get("username") ?? ""),
+    // Sanitiza de novo aqui, não só no cliente: autofill e gerenciadores de
+    // senha às vezes preenchem o campo sem disparar o evento que aciona a
+    // limpeza em tempo real no navegador, e o valor "cru" (maiúsculas, @,
+    // espaço) chegava direto pro servidor e caía sempre no erro de regex.
+    username: sanitizarUsername(String(formData.get("username") ?? "")),
     dataNascimento: String(formData.get("dataNascimento") ?? ""),
     email: String(formData.get("email") ?? ""),
     senha: String(formData.get("senha") ?? ""),

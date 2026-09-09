@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { idadeEmAnos } from "@/lib/idade";
+import { sanitizarUsername } from "@/lib/username";
 
 export type EstadoCompletarCadastro = {
   erro?: string;
@@ -43,7 +44,9 @@ export async function completarCadastroAction(
 ): Promise<EstadoCompletarCadastro> {
   const bruto = {
     nomeExibicao: String(formData.get("nomeExibicao") ?? ""),
-    username: String(formData.get("username") ?? ""),
+    // Sanitiza de novo aqui, não só no cliente — ver comentário equivalente
+    // em entrar/actions.ts sobre autofill pulando a limpeza em tempo real.
+    username: sanitizarUsername(String(formData.get("username") ?? "")),
     dataNascimento: String(formData.get("dataNascimento") ?? ""),
     aceiteTermos: formData.get("aceiteTermos"),
   };
