@@ -171,6 +171,7 @@
     "verStatus": "Ver status da candidatura",
     "precisaEntrar": "Entre na sua conta pra se candidatar a esta mesa.",
     "idadeInsuficiente": "Esta mesa é classificada para {classificacao}. Sua conta não atende essa idade mínima.",
+    "mesaLotada": "Essa mesa já está com todas as vagas preenchidas. Fica de olho — se alguém desistir, uma vaga pode abrir de novo.",
     "campoLinhasVeus": "Linhas e véus: o que não pode aparecer nessa mesa?",
     "campoExperiencia": "Qual sua experiência com o sistema?",
     "enviar": "Enviar candidatura",

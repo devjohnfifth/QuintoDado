@@ -321,6 +321,10 @@ export default async function MesaDetalhePage({
         <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
           {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
         </p>
+      ) : mesa.vagas_preenchidas >= mesa.vagas_total ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+          {t("mesaLotada")}
+        </p>
       ) : (
         <div className="mt-4">
           <CandidaturaForm mesaId={mesa.id} slug={slug} perguntas={perguntas} />
