@@ -32,6 +32,7 @@ type MesaDetalhe = {
   horario_inicio: string;
   vagas_total: number;
   sistemas: { nome: string } | null;
+  sistema_outro: string | null;
   profiles: { nome_exibicao: string } | null;
   vagas_preenchidas: number;
 };
@@ -43,7 +44,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -127,7 +128,7 @@ export default async function MesaDetalhePage({
   return (
     <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {mesa.sistemas?.nome ?? "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
+        {mesa.sistema_outro || mesa.sistemas?.nome || "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
       </p>
       <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
       {mesa.profiles?.nome_exibicao && (

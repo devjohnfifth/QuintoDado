@@ -5,7 +5,7 @@ export default async function NovaMesaAdminPage() {
   const supabase = await createClient();
   const { data: sistemas } = await supabase
     .from("sistemas")
-    .select("id, nome")
+    .select("id, nome, slug")
     .eq("ativo", true)
     .order("nome");
 

@@ -64,6 +64,7 @@ const schema = z
   .object({
     titulo: z.string().trim().min(3).max(120),
     sistemaId: z.string().uuid("Escolha um sistema."),
+    sistemaOutroNome: z.string().trim().max(60).optional(),
     sinopse: z.string().trim().min(10).max(2000),
     tipo: z.enum(["one_shot", "aventura", "campanha"]),
     modalidade: z.enum(["online", "presencial"]),
@@ -110,6 +111,17 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
     return { ok: false, error: "O valor precisa ser R$5,00 ou mais (ou marque como gratuita)." };
   }
 
+  // "Outro" é uma linha real em `sistemas` (sem logo fixo) — confere pelo
+  // slug no servidor, não confia só no que o cliente disse ser "outro".
+  const { data: sistemaEscolhido } = await supabase
+    .from("sistemas")
+    .select("slug")
+    .eq("id", d.sistemaId)
+    .single();
+  if (sistemaEscolhido?.slug === "outro" && !d.sistemaOutroNome) {
+    return { ok: false, error: "Escreva o nome do sistema." };
+  }
+
   const slug = `${slugify(d.titulo)}-${Math.random().toString(36).slice(2, 7)}`;
   const agora = new Date().toISOString();
 
@@ -121,6 +133,7 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
       titulo: d.titulo,
       sinopse: d.sinopse,
       sistema_id: d.sistemaId,
+      sistema_outro: sistemaEscolhido?.slug === "outro" ? d.sistemaOutroNome : null,
       tipo: d.tipo,
       modalidade: d.modalidade,
       cidade_uf: d.modalidade === "presencial" ? d.cidadeUf : null,

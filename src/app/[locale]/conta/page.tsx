@@ -50,7 +50,9 @@ export default async function ContaPage({
       .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos")
       .eq("id", user.id)
       .single(),
-    supabase.from("sistemas").select("id, nome").eq("ativo", true).order("nome"),
+    // "Outro" não faz sentido como sistema favorito fixo — só existe pra
+    // deixar quem cria mesa apontar um sistema fora do catálogo.
+    supabase.from("sistemas").select("id, nome").eq("ativo", true).neq("slug", "outro").order("nome"),
   ]);
 
   const { data: inscricoes } = await supabase

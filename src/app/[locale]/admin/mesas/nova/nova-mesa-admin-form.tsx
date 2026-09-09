@@ -15,9 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
+import type { Sistema } from "@/lib/mesas/types";
 import { criarMesaAdmin } from "../actions";
-
-type Sistema = { id: string; nome: string };
 
 const TIPO_LABEL: Record<string, string> = {
   one_shot: "One-shot",
@@ -51,6 +50,7 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [sistemaId, setSistemaId] = useState("");
+  const [sistemaOutroNome, setSistemaOutroNome] = useState("");
   const [tipo, setTipo] = useState("one_shot");
   const [modalidade, setModalidade] = useState<"online" | "presencial">("online");
   const [frequencia, setFrequencia] = useState("unica");
@@ -61,6 +61,8 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
   const [publicarAgora, setPublicarAgora] = useState(true);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
+  const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
+
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErro(null);
@@ -69,6 +71,7 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
     const input = {
       titulo: formData.get("titulo"),
       sistemaId,
+      sistemaOutroNome: ehOutro ? sistemaOutroNome : undefined,
       sinopse: formData.get("sinopse"),
       tipo,
       modalidade,
@@ -126,6 +129,17 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
               ))}
             </SelectContent>
           </Select>
+          {ehOutro && (
+            <Input
+              id="sistemaOutroNome"
+              name="sistemaOutroNome"
+              placeholder="Qual sistema?"
+              required
+              maxLength={60}
+              value={sistemaOutroNome}
+              onChange={(e) => setSistemaOutroNome(e.target.value)}
+            />
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="tipo">Tipo</Label>

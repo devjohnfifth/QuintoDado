@@ -23,11 +23,13 @@ export type MesaCardData = {
   vagas_preenchidas: number;
   banner_url: string | null;
   sistemas: { nome: string; slug: string } | null;
+  sistema_outro: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
 };
 
 export function MesaCard({ mesa }: { mesa: MesaCardData }) {
   const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
+  const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
   const faltam = mesa.min_jogadores - mesa.vagas_preenchidas;
   const jogadores = mesa.jogadores_aprovados ?? [];
@@ -47,7 +49,7 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
         <div className="flex h-full flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 sm:p-5">
           {logo && (
             <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
-              <Image src={logo} alt={mesa.sistemas?.nome ?? ""} fill className="object-cover" sizes="96px" />
+              <Image src={logo} alt={nomeSistema} fill className="object-cover" sizes="96px" />
             </div>
           )}
 
@@ -55,7 +57,7 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
             {mesa.titulo}
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
-            {mesa.sistemas?.nome ?? "—"}
+            {nomeSistema}
           </p>
 
           <div className="mt-4 space-y-2 text-xs text-muted-foreground sm:text-sm">

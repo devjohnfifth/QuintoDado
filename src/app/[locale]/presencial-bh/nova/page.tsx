@@ -74,7 +74,7 @@ export default async function NovaMesaPresencialPage({
 
     const { data: sistemas } = await supabase
       .from("sistemas")
-      .select("id, nome")
+      .select("id, nome, slug")
       .eq("ativo", true)
       .order("nome");
 

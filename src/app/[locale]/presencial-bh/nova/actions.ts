@@ -10,6 +10,7 @@ const schema = z
   .object({
     titulo: z.string().trim().min(3, "Título muito curto.").max(120),
     sistemaId: z.string().uuid("Escolha um sistema."),
+    sistemaOutroNome: z.string().trim().max(60).optional(),
     sinopse: z.string().trim().min(10, "Conte um pouco mais sobre a mesa.").max(2000),
     cidadeUf: z.string().trim().min(3, "Informe a cidade.").max(80),
     dataInicio: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Data inválida."),
@@ -68,6 +69,17 @@ export async function criarMesaPresencial(
     };
   }
 
+  // "Outro" é uma linha real em `sistemas` (sem logo fixo) — confere pelo
+  // slug no servidor, não confia só no que o cliente disse ser "outro".
+  const { data: sistemaEscolhido } = await supabase
+    .from("sistemas")
+    .select("slug")
+    .eq("id", dados.sistemaId)
+    .single();
+  if (sistemaEscolhido?.slug === "outro" && !dados.sistemaOutroNome) {
+    return { ok: false, error: "Escreva o nome do sistema." };
+  }
+
   const slug = `${slugify(dados.titulo)}-${Math.random().toString(36).slice(2, 7)}`;
 
   const { data: mesa, error: mesaError } = await supabase
@@ -78,6 +90,7 @@ export async function criarMesaPresencial(
       titulo: dados.titulo,
       sinopse: dados.sinopse,
       sistema_id: dados.sistemaId,
+      sistema_outro: sistemaEscolhido?.slug === "outro" ? dados.sistemaOutroNome : null,
       tipo: "one_shot",
       modalidade: "presencial",
       cidade_uf: dados.cidadeUf,

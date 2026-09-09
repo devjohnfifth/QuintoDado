@@ -18,7 +18,7 @@ export default async function AdminMesasPage() {
   const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data: mesas, error } = await supabase
     .from("mesas")
-    .select("id, slug, titulo, status, modalidade, cidade_uf, tipo, data_inicio, sistemas(nome)")
+    .select("id, slug, titulo, status, modalidade, cidade_uf, tipo, data_inicio, sistemas(nome), sistema_outro")
     .or(`status.neq.cancelada,cancelado_em.gte.${umDiaAtras}`)
     .order("criado_em", { ascending: false });
 
@@ -64,7 +64,9 @@ export default async function AdminMesasPage() {
                     </Link>
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">
-                    {(mesa.sistemas as unknown as { nome: string } | null)?.nome ?? "—"}
+                    {mesa.sistema_outro ||
+                      (mesa.sistemas as unknown as { nome: string } | null)?.nome ||
+                      "—"}
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">
                     {MODALIDADE_LABEL[mesa.modalidade]}

@@ -16,9 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
+import type { Sistema } from "@/lib/mesas/types";
 import { criarMesaPresencial } from "./actions";
-
-type Sistema = { id: string; nome: string };
 
 export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
   const t = useTranslations("PresencialBhNova");
@@ -27,9 +26,12 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
   const [erro, setErro] = useState<string | null>(null);
   const [gratuita, setGratuita] = useState(true);
   const [sistemaId, setSistemaId] = useState("");
+  const [sistemaOutroNome, setSistemaOutroNome] = useState("");
   const [classificacao, setClassificacao] = useState("livre");
   const [nivelExperiencia, setNivelExperiencia] = useState("todos");
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+
+  const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +41,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
     const input = {
       titulo: formData.get("titulo"),
       sistemaId,
+      sistemaOutroNome: ehOutro ? sistemaOutroNome : undefined,
       sinopse: formData.get("sinopse"),
       cidadeUf: formData.get("cidadeUf"),
       dataInicio: formData.get("dataInicio"),
@@ -87,6 +90,17 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
             ))}
           </SelectContent>
         </Select>
+        {ehOutro && (
+          <Input
+            id="sistemaOutroNome"
+            name="sistemaOutroNome"
+            placeholder={t("campoSistemaOutro")}
+            required
+            maxLength={60}
+            value={sistemaOutroNome}
+            onChange={(e) => setSistemaOutroNome(e.target.value)}
+          />
+        )}
       </div>
 
       <div className="space-y-2">
