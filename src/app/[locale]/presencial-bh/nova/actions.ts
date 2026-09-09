@@ -8,6 +8,7 @@ import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
 import { notificarJogadoresAprovadosSobreReagendamento } from "@/lib/notificacoes/mesa-reagendada";
+import { notificarAdminsSobreSolicitacaoMestre } from "@/lib/notificacoes/solicitacao-mestre";
 
 /**
  * Sem isso, uma mesa presencial nova ficava em "aguardando_aprovacao"
@@ -259,4 +260,44 @@ export async function atualizarMesaPresencialAction(
   revalidatePath("/presencial-bh");
   revalidatePath(`/mesas/${mesaAtual.slug}`);
   return { ok: true, slug: mesaAtual.slug };
+}
+
+export type SolicitarMestreResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * CTA no gate de /presencial-bh/nova pra quem ainda não é mestre. Não
+ * promove ninguém sozinho — só avisa os admins, que promovem pelo
+ * painel (/admin/usuarios) depois de conferir o perfil.
+ */
+export async function solicitarMestreAction(): Promise<SolicitarMestreResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Você precisa estar logado." };
+
+  const { data: perfil } = await supabase
+    .from("profiles")
+    .select("papel, nome_exibicao, mestre_solicitado_em")
+    .eq("id", user.id)
+    .single();
+
+  if (!perfil) return { ok: false, error: "Perfil não encontrado." };
+  if (perfil.papel !== "usuario") return { ok: false, error: "Você já tem acesso pra criar mesas." };
+  if (perfil.mestre_solicitado_em) return { ok: true };
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ mestre_solicitado_em: new Date().toISOString() })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("[solicitarMestreAction] erro:", error.message);
+    return { ok: false, error: "Não deu pra enviar o pedido. Tente de novo." };
+  }
+
+  await notificarAdminsSobreSolicitacaoMestre(perfil.nome_exibicao);
+
+  revalidatePath("/presencial-bh/nova");
+  return { ok: true };
 }

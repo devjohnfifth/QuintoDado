@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { NovaMesaForm } from "./nova-mesa-form";
+import { SolicitarMestreButton } from "./solicitar-mestre-button";
 
 export const metadata: Metadata = {
   title: "Criar mesa presencial em BH — Quinto Dado",
@@ -57,7 +58,7 @@ export default async function NovaMesaPresencialPage({
 
     const { data: perfil } = await supabase
       .from("profiles")
-      .select("papel")
+      .select("papel, mestre_solicitado_em")
       .eq("id", user.id)
       .single();
 
@@ -68,6 +69,7 @@ export default async function NovaMesaPresencialPage({
           <Link href="/links" className="text-primary hover:underline">
             Falar com a comunidade
           </Link>
+          <SolicitarMestreButton jaSolicitado={Boolean(perfil?.mestre_solicitado_em)} />
         </Aviso>
       );
     }
@@ -84,8 +86,8 @@ export default async function NovaMesaPresencialPage({
 
 function Aviso({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-8 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+    <div className="mt-8 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
       {children}
-    </p>
+    </div>
   );
 }

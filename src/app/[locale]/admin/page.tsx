@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { ClipboardList, Dices, UserCheck } from "lucide-react";
+import { ClipboardList, Dices, UserCheck, Users } from "lucide-react";
 
 async function buscarNumeros() {
   if (!isSupabaseConfigured()) return { aguardandoAprovacao: 0, candidaturasPendentes: 0, mesasAbertas: 0 };
@@ -73,11 +73,23 @@ export default async function AdminHomePage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Link
           href="/admin/mesas"
-          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-accent"
+          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <p className="font-heading font-bold transition-colors group-hover:text-primary">Mesas</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
             Criar mesas, aprovar mesas presenciais enviadas por mestres.
+          </p>
+        </Link>
+        <Link
+          href="/admin/usuarios"
+          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+        >
+          <p className="flex items-center gap-1.5 font-heading font-bold transition-colors group-hover:text-primary">
+            <Users className="size-4" aria-hidden />
+            Usuários
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
+            Ver quem tá cadastrado, promover a mestre ou excluir uma conta.
           </p>
         </Link>
       </div>
