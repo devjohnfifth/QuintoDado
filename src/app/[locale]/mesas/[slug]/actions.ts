@@ -129,7 +129,7 @@ export async function sairDaMesaAction(
   const admin = serviceRole();
   const { data: inscricao } = await admin
     .from("inscricoes")
-    .select("usuario_id, status")
+    .select("usuario_id, status, mesa_id")
     .eq("id", inscricaoId)
     .single();
 
@@ -150,6 +150,8 @@ export async function sairDaMesaAction(
     return { ok: false, error: "Não deu pra sair da mesa agora. Tente de novo em instantes." };
   }
 
+  await notificarMestre(inscricao.mesa_id, slug, user.id, "jogador_saiu");
+
   revalidatePath(`/mesas/${slug}`);
   revalidatePath("/conta");
   return { ok: true };
@@ -159,9 +161,15 @@ export async function sairDaMesaAction(
  * O jogador não tem (nem deveria ter) permissão de RLS pra inserir uma
  * notificação na conta de outra pessoa (o mestre) — daí o service_role
  * aqui: é uma notificação de sistema disparada por uma ação já validada
- * acima (candidatura criada de verdade), não conteúdo livre do jogador.
+ * acima (candidatura criada/cancelada de verdade), não conteúdo livre do
+ * jogador.
  */
-async function notificarMestre(mesaId: string, slug: string, candidatoId: string) {
+async function notificarMestre(
+  mesaId: string,
+  slug: string,
+  candidatoId: string,
+  tipo: "nova_candidatura" | "jogador_saiu" = "nova_candidatura",
+) {
   const admin = serviceRole();
 
   const { data: mesa } = await admin
@@ -177,12 +185,16 @@ async function notificarMestre(mesaId: string, slug: string, candidatoId: string
     .eq("id", candidatoId)
     .single();
 
+  const nome = candidato?.nome_exibicao ?? "Alguém";
   const { error } = await admin.from("notificacoes").insert({
     usuario_id: mesa.mestre_id,
-    tipo: "nova_candidatura",
-    titulo: "Nova candidatura",
-    corpo: `${candidato?.nome_exibicao ?? "Alguém"} se candidatou pra "${mesa.titulo}".`,
-    url: `/admin/mesas/${mesaId}`,
+    tipo,
+    titulo: tipo === "nova_candidatura" ? "Nova candidatura" : "Uma vaga abriu",
+    corpo:
+      tipo === "nova_candidatura"
+        ? `${nome} se candidatou pra "${mesa.titulo}".`
+        : `${nome} saiu de "${mesa.titulo}" — uma vaga abriu de novo.`,
+    url: tipo === "nova_candidatura" ? `/admin/mesas/${mesaId}` : `/mesas/${slug}`,
   });
 
   if (error) {
