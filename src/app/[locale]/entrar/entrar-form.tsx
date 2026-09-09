@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link } from "@/i18n/navigation";
 import { sanitizarUsername } from "@/lib/username";
-import discordIcon from "@/assets/brand/discord-icon.png";
 import googleIcon from "@/assets/brand/google-icon.png";
 import {
   entrarComEmailAction,
@@ -31,13 +30,6 @@ export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
       )}
 
       <div className="space-y-3">
-        <form action={entrarComProvedorAction}>
-          <input type="hidden" name="provider" value="discord" />
-          <Button type="submit" variant="outline" className="w-full gap-2">
-            <Image src={discordIcon} alt="" width={20} height={20} className="rounded-sm" />
-            {t("continuarDiscord")}
-          </Button>
-        </form>
         <form action={entrarComProvedorAction}>
           <input type="hidden" name="provider" value="google" />
           <Button type="submit" variant="outline" className="w-full gap-2">

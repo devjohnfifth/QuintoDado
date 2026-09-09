@@ -17,7 +17,7 @@ export type EstadoFormEntrar = {
 
 export async function entrarComProvedorAction(formData: FormData) {
   const provider = formData.get("provider");
-  if (provider !== "google" && provider !== "discord") {
+  if (provider !== "google") {
     redirect("/entrar?erro=provedor-invalido");
   }
 

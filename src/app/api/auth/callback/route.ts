@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Volta do redirect OAuth (Google/Discord). Depois de trocar o code pela
+ * Volta do redirect OAuth (Google). Depois de trocar o code pela
  * sessão, checa se o profile já existe — login social não passa pelo
  * trigger que cria o profile (falta data_nascimento), então manda pra
  * /completar-cadastro quando ainda não existir.
