@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock } from "lucide-react";
+import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
@@ -7,6 +7,7 @@ import { diaSemanaAbreviado, diasParaComeco } from "@/lib/mesas/horario";
 import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
 
 export type MesaCardData = {
+  sistema_id?: string | null;
   slug: string;
   titulo: string;
   modalidade: "online" | "presencial";
@@ -27,7 +28,7 @@ export type MesaCardData = {
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
 };
 
-export function MesaCard({ mesa }: { mesa: MesaCardData }) {
+export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favorito?: boolean }) {
   const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
   const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
@@ -50,11 +51,24 @@ export function MesaCard({ mesa }: { mesa: MesaCardData }) {
         <span className="absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background" />
         <span className="absolute -bottom-3 -right-3 z-10 size-6 rounded-full bg-background" />
         <div className="flex h-full flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 sm:p-5">
-          {logo && (
-            <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
-              <Image src={logo} alt={nomeSistema} fill className="object-cover" sizes="96px" />
-            </div>
-          )}
+          <div className="flex items-start justify-between gap-2">
+            {logo ? (
+              <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
+                <Image src={logo} alt={nomeSistema} fill className="object-cover" sizes="96px" />
+              </div>
+            ) : (
+              <span />
+            )}
+            {favorito && (
+              <span
+                title="Sistema favorito"
+                className="flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-500"
+              >
+                <Star className="size-3 fill-current" aria-hidden />
+                Favorito
+              </span>
+            )}
+          </div>
 
           <h3 className="mt-3 font-heading text-base font-bold leading-tight sm:text-lg">
             {mesa.titulo}

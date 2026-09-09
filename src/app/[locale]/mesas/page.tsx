@@ -26,7 +26,23 @@ export async function generateMetadata({
 
 type Filtros = { sistema?: string; modalidade?: string; preco?: string };
 
-async function buscarMesas(filtros: Filtros): Promise<MesaCardData[]> {
+async function buscarSistemasFavoritos(): Promise<Set<string>> {
+  if (!isSupabaseConfigured()) return new Set();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return new Set();
+
+  const { data: perfil } = await supabase
+    .from("profiles")
+    .select("sistemas_favoritos")
+    .eq("id", user.id)
+    .maybeSingle();
+  return new Set(perfil?.sistemas_favoritos ?? []);
+}
+
+async function buscarMesas(filtros: Filtros, favoritos: Set<string>): Promise<MesaCardData[]> {
   if (!isSupabaseConfigured()) {
     console.warn("[/mesas] Supabase não configurado — mostrando estado vazio (ver .env.example).");
     return [];
@@ -36,7 +52,7 @@ async function buscarMesas(filtros: Filtros): Promise<MesaCardData[]> {
   let query = supabase
     .from("mesas")
     .select(
-      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
+      "sistema_id, slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
     )
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
@@ -58,11 +74,24 @@ async function buscarMesas(filtros: Filtros): Promise<MesaCardData[]> {
   // O filtro por sistemas.slug acima é um inner-join implícito do PostgREST
   // só quando a FK é obrigatória; como sistema_id aceita null (mesa "outro"),
   // filtra de novo em memória pra garantir que só sobra o sistema escolhido.
-  const filtradas = filtros.sistema
-    ? (data ?? []).filter((m) => (m as unknown as MesaCardData).sistemas?.slug === filtros.sistema)
-    : (data ?? []);
+  const filtradas = (
+    filtros.sistema
+      ? (data ?? []).filter((m) => (m as unknown as MesaCardData).sistemas?.slug === filtros.sistema)
+      : (data ?? [])
+  ) as unknown as MesaCardData[];
 
-  return filtradas as unknown as MesaCardData[];
+  // Mesas dos sistemas favoritos do usuário logado sobem pro topo — a data
+  // continua sendo o critério de ordem dentro de cada grupo (favorita ou
+  // não), já que .sort() é estável.
+  if (favoritos.size > 0) {
+    filtradas.sort((a, b) => {
+      const aFav = a.sistema_id && favoritos.has(a.sistema_id) ? 0 : 1;
+      const bFav = b.sistema_id && favoritos.has(b.sistema_id) ? 0 : 1;
+      return aFav - bFav;
+    });
+  }
+
+  return filtradas;
 }
 
 async function buscarSistemasComMesaAberta(): Promise<{ nome: string; slug: string }[]> {
@@ -107,8 +136,9 @@ export default async function MesasPage({
   setRequestLocale(locale);
   const filtros = await searchParams;
   const t = await getTranslations("Mesas");
+  const sistemasFavoritos = await buscarSistemasFavoritos();
   const [mesas, admin, sistemas] = await Promise.all([
-    buscarMesas(filtros),
+    buscarMesas(filtros, sistemasFavoritos),
     ehAdmin(),
     buscarSistemasComMesaAberta(),
   ]);
@@ -202,7 +232,10 @@ export default async function MesasPage({
           <ul className="space-y-4">
             {mesas.map((mesa) => (
               <li key={mesa.slug}>
-                <MesaCard mesa={mesa} />
+                <MesaCard
+                  mesa={mesa}
+                  favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
+                />
               </li>
             ))}
           </ul>
