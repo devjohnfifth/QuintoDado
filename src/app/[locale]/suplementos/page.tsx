@@ -5,7 +5,7 @@ import { BookOpen } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
-import emConstrucao from "@/assets/brand/em-construcao.png";
+import emConstrucao from "@/assets/brand/em-construcao.svg";
 
 export async function generateMetadata({
   params,
