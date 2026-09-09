@@ -78,9 +78,17 @@ export default async function LocaleLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
+          <a
+            href="#conteudo"
+            className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-medium focus-visible:text-primary-foreground"
+          >
+            Pular pro conteúdo
+          </a>
           <div className="flex min-h-screen flex-col">
             <SiteHeader />
-            <main className="flex-1">{children}</main>
+            <main id="conteudo" className="flex-1">
+              {children}
+            </main>
             <SiteFooter />
           </div>
         </NextIntlClientProvider>
