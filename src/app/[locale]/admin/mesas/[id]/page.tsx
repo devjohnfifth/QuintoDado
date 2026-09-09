@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InscricaoActions } from "./inscricao-actions";
@@ -37,7 +38,7 @@ export default async function AdminMesaDetalhePage({
   const { data: inscricoes } = await supabase
     .from("inscricoes")
     .select(
-      "id, status, criado_em, profiles!inscricoes_usuario_id_fkey(nome_exibicao, username), inscricao_respostas(resposta, mesa_perguntas(enunciado, ordem))",
+      "id, status, criado_em, profiles!inscricoes_usuario_id_fkey(nome_exibicao, username, avatar_url), inscricao_respostas(resposta, mesa_perguntas(enunciado, ordem))",
     )
     .eq("mesa_id", id)
     .order("criado_em", { ascending: true });
@@ -70,6 +71,7 @@ export default async function AdminMesaDetalhePage({
             const perfil = inscricao.profiles as unknown as {
               nome_exibicao: string;
               username: string;
+              avatar_url: string | null;
             } | null;
             const respostas = (
               inscricao.inscricao_respostas as unknown as {
@@ -79,11 +81,29 @@ export default async function AdminMesaDetalhePage({
             ).sort((a, b) => (a.mesa_perguntas?.ordem ?? 0) - (b.mesa_perguntas?.ordem ?? 0));
 
             return (
-              <li key={inscricao.id} className="rounded-xl border border-border bg-card/60 p-5">
+              <li
+                key={inscricao.id}
+                className="rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/30"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="font-medium">{perfil?.nome_exibicao ?? "Jogador"}</p>
-                    <p className="text-xs text-muted-foreground">@{perfil?.username}</p>
+                  <div className="flex items-center gap-3">
+                    {perfil?.avatar_url ? (
+                      <Image
+                        src={perfil.avatar_url}
+                        alt={perfil.nome_exibicao}
+                        width={36}
+                        height={36}
+                        className="size-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
+                        {(perfil?.nome_exibicao ?? "?").charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <div>
+                      <p className="font-medium">{perfil?.nome_exibicao ?? "Jogador"}</p>
+                      <p className="text-xs text-muted-foreground">@{perfil?.username}</p>
+                    </div>
                   </div>
                   <span className="rounded-full border border-border px-2 py-0.5 text-xs">
                     {STATUS_LABEL[inscricao.status] ?? inscricao.status}

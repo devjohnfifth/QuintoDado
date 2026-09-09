@@ -57,7 +57,12 @@ export default async function AdminMesasPage() {
             </thead>
             <tbody>
               {mesas.map((mesa) => (
-                <tr key={mesa.id} className="border-b border-border/60">
+                <tr
+                  key={mesa.id}
+                  className={`border-b border-border/60 transition-colors duration-200 hover:bg-accent/40 ${
+                    mesa.status === "aguardando_aprovacao" ? "bg-primary/[0.04]" : ""
+                  }`}
+                >
                   <td className="py-3 pr-4 font-medium">
                     <Link href={`/mesas/${mesa.slug}`} className="hover:underline">
                       {mesa.titulo}
@@ -75,7 +80,13 @@ export default async function AdminMesasPage() {
                     {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
                   </td>
                   <td className="py-3 pr-4">
-                    <span className="rounded-full border border-border px-2 py-0.5 text-xs">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs ${
+                        mesa.status === "aguardando_aprovacao"
+                          ? "border-primary/40 text-primary"
+                          : "border-border"
+                      }`}
+                    >
                       {STATUS_LABEL[mesa.status] ?? mesa.status}
                     </span>
                   </td>
