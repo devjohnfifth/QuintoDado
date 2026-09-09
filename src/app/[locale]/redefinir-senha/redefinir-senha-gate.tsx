@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { RedefinirSenhaForm } from "./redefinir-senha-form";
 import { RedefinirSenhaCodigoForm } from "./redefinir-senha-codigo-form";
@@ -116,18 +115,7 @@ export function RedefinirSenhaGate() {
   }
 
   if (estado === "invalido") {
-    return (
-      <>
-        <p className="mt-8 rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
-          Esse link de recuperação é inválido ou expirou.{" "}
-          <Link href="/entrar" className="text-primary hover:underline">
-            Peça um novo
-          </Link>
-          .
-        </p>
-        <RedefinirSenhaCodigoForm />
-      </>
-    );
+    return <RedefinirSenhaCodigoForm />;
   }
 
   return <RedefinirSenhaForm />;
