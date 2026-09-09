@@ -81,3 +81,21 @@ export async function recusarInscricaoMestreAction(
   revalidatePath(`/presencial-bh/${mesaId}`);
   revalidatePath("/mesas");
 }
+
+export async function cancelarMesaMestreAction(mesaId: string) {
+  const { supabase } = await exigirDonoDaMesa(mesaId);
+
+  const { error } = await supabase
+    .from("mesas")
+    .update({ status: "cancelada", cancelado_em: new Date().toISOString() })
+    .eq("id", mesaId);
+
+  if (error) {
+    console.error("[cancelarMesaMestreAction] erro:", error.message);
+    throw new Error("Não deu pra cancelar a mesa.");
+  }
+
+  revalidatePath("/conta");
+  revalidatePath("/presencial-bh");
+  revalidatePath("/mesas");
+}

@@ -5,7 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { Button } from "@/components/ui/button";
 import { PerfilSection } from "@/components/site/perfil-section";
+import { CancelarMesaMestreButton } from "./cancelar-mesa-mestre-button";
 import { sairAction } from "../entrar/actions";
+
+const STATUS_MESA_CANCELAVEL = ["aguardando_aprovacao", "publicada", "confirmada", "em_andamento"];
 
 export const metadata: Metadata = { title: "Minha conta — Quinto Dado", robots: { index: false } };
 
@@ -165,6 +168,9 @@ export default async function ContaPage({
                         >
                           Editar
                         </Link>
+                        {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
+                          <CancelarMesaMestreButton mesaId={mesa.id} />
+                        )}
                       </>
                     )}
                   </div>
