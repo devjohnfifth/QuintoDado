@@ -188,7 +188,10 @@ export default async function MesasPage({
       <Reveal className="mt-6">
         {mesas.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <p className="font-heading text-lg font-bold">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
+              <Dices className="size-6" aria-hidden />
+            </div>
+            <p className="mt-4 font-heading text-lg font-bold">
               {temFiltroAtivo ? t("filtros.semResultadoTitulo") : t("vazioTitulo")}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
