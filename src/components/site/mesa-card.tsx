@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star } from "lucide-react";
+import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star, Wallet } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
@@ -86,18 +86,10 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
               vagas preenchidas
             </p>
 
-            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-              <span className="flex items-center gap-1.5">
-                {mesa.modalidade === "online" ? (
-                  <Globe className="size-3.5 shrink-0 text-primary" aria-hidden />
-                ) : (
-                  <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
-                )}
-                {MODALIDADE_LABEL[mesa.modalidade]}
-                {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
-              </span>
+            <div className="flex items-center gap-1.5">
+              <Wallet className="size-3.5 shrink-0 text-primary" aria-hidden />
               <span
-                className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
+                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
                   mesa.preco_centavos === 0
                     ? "bg-emerald-500/15 text-emerald-400"
                     : "bg-primary/15 text-primary"
@@ -106,6 +98,16 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
                 {mesa.preco_centavos === 0 ? "Gratuita" : formatBRL(mesa.preco_centavos)}
               </span>
             </div>
+
+            <p className="flex items-center gap-1.5">
+              {mesa.modalidade === "online" ? (
+                <Globe className="size-3.5 shrink-0 text-primary" aria-hidden />
+              ) : (
+                <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
+              )}
+              {MODALIDADE_LABEL[mesa.modalidade]}
+              {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
+            </p>
 
             <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
               <span className="flex items-center gap-1.5">
