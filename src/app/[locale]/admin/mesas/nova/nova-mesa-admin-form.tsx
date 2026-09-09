@@ -207,7 +207,13 @@ export function NovaMesaAdminForm({ sistemas }: { sistemas: Sistema[] }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="dataInicio">Data</Label>
-          <Input id="dataInicio" name="dataInicio" type="date" required />
+          <Input
+            id="dataInicio"
+            name="dataInicio"
+            type="date"
+            min={new Date().toISOString().slice(0, 10)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioInicio">Início</Label>
