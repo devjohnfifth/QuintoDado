@@ -69,6 +69,7 @@ export async function aprovarMesaAction(mesaId: string) {
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
   revalidatePath("/presencial-bh");
+  revalidatePath("/conta");
 }
 
 export async function cancelarMesaAction(mesaId: string) {

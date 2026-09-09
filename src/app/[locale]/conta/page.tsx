@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PerfilSection } from "@/components/site/perfil-section";
 import { TrocarSenhaForm } from "@/components/site/trocar-senha-form";
 import { CancelarMesaMestreButton } from "./cancelar-mesa-mestre-button";
+import { AprovarMesaAdminButton } from "./aprovar-mesa-admin-button";
 import { sairAction } from "../entrar/actions";
 
 const STATUS_MESA_CANCELAVEL = ["aguardando_aprovacao", "publicada", "confirmada", "em_andamento"];
@@ -171,6 +172,9 @@ export default async function ContaPage({
                         >
                           Editar
                         </Link>
+                        {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
+                          <AprovarMesaAdminButton mesaId={mesa.id} />
+                        )}
                         {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
                           <CancelarMesaMestreButton mesaId={mesa.id} />
                         )}
