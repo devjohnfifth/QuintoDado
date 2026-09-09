@@ -130,3 +130,94 @@ export async function criarMesaPresencial(
   revalidatePath("/presencial-bh");
   return { ok: true, slug };
 }
+
+export type AtualizarMesaPresencialResult =
+  | { ok: true; slug: string }
+  | { ok: false; error: string };
+
+/**
+ * Só o próprio mestre dono edita a mesa dele por aqui (não o admin — o
+ * admin já tem /admin/mesas/[id]/editar, que cobre toda mesa,
+ * presencial ou não). Assim como a versão do admin: não mexe em
+ * status/aprovada_por/slug, e não deixa reduzir vagas abaixo de quem já
+ * foi aprovado.
+ */
+export async function atualizarMesaPresencialAction(
+  mesaId: string,
+  input: unknown,
+): Promise<AtualizarMesaPresencialResult> {
+  const parsed = schema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  }
+  const dados = parsed.data;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { ok: false, error: "Você precisa estar logado." };
+  }
+
+  const { data: mesaAtual } = await supabase
+    .from("mesas")
+    .select("slug, mestre_id, vagas_preenchidas")
+    .eq("id", mesaId)
+    .single();
+  if (!mesaAtual || mesaAtual.mestre_id !== user.id) {
+    return { ok: false, error: "Mesa não encontrada." };
+  }
+  if (dados.vagasTotal < mesaAtual.vagas_preenchidas) {
+    return {
+      ok: false,
+      error: `Já tem ${mesaAtual.vagas_preenchidas} jogador(es) aprovado(s) — não dá pra reduzir o total de vagas abaixo disso.`,
+    };
+  }
+
+  const precoCentavos = dados.gratuita ? 0 : Math.round((dados.valorReais ?? 0) * 100);
+  if (!dados.gratuita && precoCentavos > 0 && precoCentavos < 500) {
+    return {
+      ok: false,
+      error: "O valor sugerido precisa ser R$5,00 ou mais (ou marque como gratuita).",
+    };
+  }
+
+  const { data: sistemaEscolhido } = await supabase
+    .from("sistemas")
+    .select("slug")
+    .eq("id", dados.sistemaId)
+    .single();
+  if (sistemaEscolhido?.slug === "outro" && !dados.sistemaOutroNome) {
+    return { ok: false, error: "Escreva o nome do sistema." };
+  }
+
+  const { error } = await supabase
+    .from("mesas")
+    .update({
+      titulo: dados.titulo,
+      sinopse: dados.sinopse,
+      sistema_id: dados.sistemaId,
+      sistema_outro: sistemaEscolhido?.slug === "outro" ? dados.sistemaOutroNome : null,
+      cidade_uf: dados.cidadeUf,
+      classificacao: dados.classificacao,
+      nivel_experiencia: dados.nivelExperiencia,
+      vagas_total: dados.vagasTotal,
+      min_jogadores: dados.minJogadores,
+      preco_centavos: precoCentavos,
+      data_inicio: dados.dataInicio,
+      horario_inicio: dados.horarioInicio,
+      horario_fim: dados.horarioFim,
+      banner_url: dados.bannerUrl || null,
+    })
+    .eq("id", mesaId);
+
+  if (error) {
+    console.error("[atualizarMesaPresencialAction] erro:", error.message);
+    return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
+  }
+
+  revalidatePath("/presencial-bh");
+  revalidatePath(`/mesas/${mesaAtual.slug}`);
+  return { ok: true, slug: mesaAtual.slug };
+}

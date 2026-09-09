@@ -32,6 +32,24 @@ const STATUS_COR: Record<string, string> = {
   reembolsada: "border-border text-muted-foreground",
 };
 
+const STATUS_MESA_LABEL: Record<string, string> = {
+  rascunho: "Rascunho",
+  aguardando_aprovacao: "Aguardando aprovação",
+  publicada: "Publicada",
+  confirmada: "Confirmada",
+  em_andamento: "Em andamento",
+  concluida: "Concluída",
+  cancelada: "Cancelada",
+};
+
+const STATUS_MESA_COR: Record<string, string> = {
+  aguardando_aprovacao: "border-primary/40 text-primary",
+  publicada: "border-emerald-500/40 text-emerald-400",
+  confirmada: "border-emerald-500/40 text-emerald-400",
+  em_andamento: "border-emerald-500/40 text-emerald-400",
+  cancelada: "border-destructive/40 text-destructive",
+};
+
 export default async function ContaPage({
   params,
 }: {
@@ -65,11 +83,20 @@ export default async function ContaPage({
     supabase.from("sistemas").select("id, nome").eq("ativo", true).neq("slug", "outro").order("nome"),
   ]);
 
-  const { data: inscricoes } = await supabase
-    .from("inscricoes")
-    .select("id, status, criado_em, mesas(titulo, slug, data_inicio)")
-    .eq("usuario_id", user.id)
-    .order("criado_em", { ascending: false });
+  const [{ data: inscricoes }, { data: mesasCriadas }] = await Promise.all([
+    supabase
+      .from("inscricoes")
+      .select("id, status, criado_em, mesas(titulo, slug, data_inicio)")
+      .eq("usuario_id", user.id)
+      .order("criado_em", { ascending: false }),
+    ["mestre", "admin"].includes(perfil?.papel ?? "")
+      ? supabase
+          .from("mesas")
+          .select("id, slug, titulo, status, modalidade")
+          .eq("mestre_id", user.id)
+          .order("criado_em", { ascending: false })
+      : Promise.resolve({ data: null }),
+  ]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
@@ -89,6 +116,55 @@ export default async function ContaPage({
         >
           Ir para o painel admin
         </Link>
+      )}
+
+      {mesasCriadas && (
+        <>
+          <div className="mt-10 flex items-center justify-between">
+            <h2 className="font-heading text-lg font-bold">Minhas mesas</h2>
+            <Link
+              href="/presencial-bh/nova"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              + Nova mesa
+            </Link>
+          </div>
+          {mesasCriadas.length === 0 ? (
+            <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              Você ainda não criou nenhuma mesa.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-3">
+              {mesasCriadas.map((mesa) => (
+                <li
+                  key={mesa.id}
+                  className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+                >
+                  <Link href={`/mesas/${mesa.slug}`} className="font-medium hover:underline">
+                    {mesa.titulo}
+                  </Link>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs ${
+                        STATUS_MESA_COR[mesa.status] ?? "border-border text-muted-foreground"
+                      }`}
+                    >
+                      {STATUS_MESA_LABEL[mesa.status] ?? mesa.status}
+                    </span>
+                    {mesa.modalidade === "presencial" && (
+                      <Link
+                        href={`/presencial-bh/${mesa.id}/editar`}
+                        className="text-xs text-primary hover:underline"
+                      >
+                        Editar
+                      </Link>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
       )}
 
       <h2 className="mt-10 font-heading text-lg font-bold">Minhas candidaturas</h2>

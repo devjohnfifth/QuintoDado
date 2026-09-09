@@ -17,19 +17,46 @@ import {
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
 import type { Sistema } from "@/lib/mesas/types";
-import { criarMesaPresencial } from "./actions";
+import { criarMesaPresencial, atualizarMesaPresencialAction } from "./actions";
 
-export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
+export type MesaPresencialExistente = {
+  titulo: string;
+  sistemaId: string;
+  sistemaOutroNome: string | null;
+  sinopse: string;
+  cidadeUf: string;
+  dataInicio: string;
+  horarioInicio: string;
+  horarioFim: string;
+  vagasTotal: number;
+  minJogadores: number;
+  classificacao: string;
+  nivelExperiencia: string;
+  gratuita: boolean;
+  valorReais: number | null;
+  bannerUrl: string | null;
+};
+
+export function NovaMesaForm({
+  sistemas,
+  mesaId,
+  mesaExistente,
+}: {
+  sistemas: Sistema[];
+  mesaId?: string;
+  mesaExistente?: MesaPresencialExistente;
+}) {
+  const editando = Boolean(mesaId && mesaExistente);
   const t = useTranslations("PresencialBhNova");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
-  const [gratuita, setGratuita] = useState(true);
-  const [sistemaId, setSistemaId] = useState("");
-  const [sistemaOutroNome, setSistemaOutroNome] = useState("");
-  const [classificacao, setClassificacao] = useState("livre");
-  const [nivelExperiencia, setNivelExperiencia] = useState("todos");
-  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [gratuita, setGratuita] = useState(mesaExistente?.gratuita ?? true);
+  const [sistemaId, setSistemaId] = useState(mesaExistente?.sistemaId ?? "");
+  const [sistemaOutroNome, setSistemaOutroNome] = useState(mesaExistente?.sistemaOutroNome ?? "");
+  const [classificacao, setClassificacao] = useState(mesaExistente?.classificacao ?? "livre");
+  const [nivelExperiencia, setNivelExperiencia] = useState(mesaExistente?.nivelExperiencia ?? "todos");
+  const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
@@ -57,7 +84,9 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
     };
 
     startTransition(async () => {
-      const resultado = await criarMesaPresencial(input);
+      const resultado = editando
+        ? await atualizarMesaPresencialAction(mesaId!, input)
+        : await criarMesaPresencial(input);
       if (!resultado.ok) {
         setErro(resultado.error);
         return;
@@ -71,7 +100,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
     <form onSubmit={onSubmit} className="mt-8 space-y-6">
       <div className="space-y-2">
         <Label htmlFor="titulo">{t("campoTitulo")}</Label>
-        <Input id="titulo" name="titulo" required maxLength={120} />
+        <Input id="titulo" name="titulo" required maxLength={120} defaultValue={mesaExistente?.titulo} />
       </div>
 
       <div className="space-y-2">
@@ -105,7 +134,14 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
 
       <div className="space-y-2">
         <Label htmlFor="sinopse">{t("campoSinopse")}</Label>
-        <Textarea id="sinopse" name="sinopse" required maxLength={2000} rows={4} />
+        <Textarea
+          id="sinopse"
+          name="sinopse"
+          required
+          maxLength={2000}
+          rows={4}
+          defaultValue={mesaExistente?.sinopse}
+        />
       </div>
 
       <div className="space-y-2">
@@ -119,7 +155,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
           id="cidadeUf"
           name="cidadeUf"
           required
-          defaultValue="Belo Horizonte - MG"
+          defaultValue={mesaExistente?.cidadeUf ?? "Belo Horizonte - MG"}
           maxLength={80}
         />
       </div>
@@ -133,15 +169,28 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
             type="date"
             min={new Date().toISOString().slice(0, 10)}
             required
+            defaultValue={mesaExistente?.dataInicio}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioInicio">{t("campoHorarioInicio")}</Label>
-          <Input id="horarioInicio" name="horarioInicio" type="time" required />
+          <Input
+            id="horarioInicio"
+            name="horarioInicio"
+            type="time"
+            required
+            defaultValue={mesaExistente?.horarioInicio}
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioFim">{t("campoHorarioFim")}</Label>
-          <Input id="horarioFim" name="horarioFim" type="time" required />
+          <Input
+            id="horarioFim"
+            name="horarioFim"
+            type="time"
+            required
+            defaultValue={mesaExistente?.horarioFim}
+          />
         </div>
       </div>
 
@@ -154,7 +203,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
             type="number"
             min={1}
             max={12}
-            defaultValue={5}
+            defaultValue={mesaExistente?.vagasTotal ?? 5}
             required
           />
         </div>
@@ -165,7 +214,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
             name="minJogadores"
             type="number"
             min={1}
-            defaultValue={3}
+            defaultValue={mesaExistente?.minJogadores ?? 3}
             required
           />
         </div>
@@ -238,6 +287,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
               max={999}
               step="0.01"
               placeholder="20,00"
+              defaultValue={mesaExistente?.valorReais ?? undefined}
             />
             <p className="text-xs text-muted-foreground">{t("campoValorAjuda")}</p>
           </div>
@@ -247,7 +297,7 @@ export function NovaMesaForm({ sistemas }: { sistemas: Sistema[] }) {
       {erro && <p className="text-sm text-destructive">{erro}</p>}
 
       <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-        {pending ? t("enviando") : t("enviar")}
+        {pending ? t("enviando") : editando ? "Salvar alterações" : t("enviar")}
       </Button>
     </form>
   );

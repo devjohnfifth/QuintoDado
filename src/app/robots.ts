@@ -7,7 +7,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/conta", "/completar-cadastro", "/presencial-bh/nova"],
+      disallow: [
+        "/admin",
+        "/conta",
+        "/completar-cadastro",
+        "/presencial-bh/nova",
+        "/presencial-bh/*/editar",
+      ],
     },
     sitemap: `${site}/sitemap.xml`,
   };
