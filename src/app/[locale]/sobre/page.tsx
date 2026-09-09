@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { BookOpen, Dices, MessageCircle, ShieldCheck, ArrowRight } from "lucide-react";
 import bannerOg from "@/assets/brand/banner-og.webp";
-import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
+import grupoJogandoRpg from "@/assets/brand/grupo-jogando-rpg.jpg";
 import { Reveal } from "@/components/site/reveal";
 
 export async function generateMetadata({
@@ -46,33 +46,31 @@ export default async function SobrePage({
     { titulo: t("pilarComunidadeTitulo"), corpo: t("pilarComunidadeCorpo"), Icon: MessageCircle },
   ];
 
-  const sistemas = t("sistemas").split(" · ");
-
   return (
     <article className="mx-auto max-w-2xl px-4 pb-16 sm:px-6">
       <Reveal>
-        <div className="relative aspect-[3/1] w-[calc(100%+2rem)] -translate-x-4 overflow-hidden bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] sm:aspect-[4/1] sm:w-[calc(100%+3rem)] sm:-translate-x-6 sm:rounded-b-2xl">
+        <div className="relative aspect-[16/10] w-[calc(100%+2rem)] -translate-x-4 overflow-hidden sm:aspect-[3/1] sm:w-[calc(100%+3rem)] sm:-translate-x-6 sm:rounded-b-2xl">
+          <Image
+            src={grupoJogandoRpg}
+            alt=""
+            fill
+            priority
+            className="object-cover"
+            sizes="(min-width: 672px) 720px, 100vw"
+          />
           <div
             aria-hidden
-            className="absolute inset-0 opacity-[0.12]"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1'/%3E%3C/svg%3E\")",
-              backgroundSize: "60px 69px",
-            }}
+            className="absolute inset-0 bg-gradient-to-br from-[#4F7DF3]/80 via-[#0B0B14]/50 to-[#A855F7]/70 mix-blend-multiply"
           />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0B0B14] via-transparent to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
+            <p className="font-heading text-3xl font-black uppercase tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-5xl">
+              Quinto Dado
+            </p>
+          </div>
         </div>
 
-        <div className="relative -mt-12 inline-block sm:-mt-14">
-          <Image
-            src={mestreQuintao}
-            alt="Mestre Quintão"
-            className="size-24 rounded-full border-4 border-background object-cover object-top sm:size-28"
-            priority
-          />
-        </div>
-
-        <h1 className="mt-4 font-heading text-4xl font-bold">{t("titulo")}</h1>
+        <h1 className="mt-6 font-heading text-4xl font-bold">{t("titulo")}</h1>
 
         <div className="group mt-6 border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary hover:bg-primary/[0.03]">
           <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
@@ -119,20 +117,6 @@ export default async function SobrePage({
           </div>
           <h2 className="mt-3 font-heading text-xl font-bold">{t("segurancaTitulo")}</h2>
           <p className="mt-2 text-muted-foreground">{t("segurancaCorpo")}</p>
-        </div>
-      </Reveal>
-
-      <Reveal className="mt-8">
-        <h2 className="font-heading text-xl font-bold">{t("sistemasTitulo")}</h2>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {sistemas.map((sistema) => (
-            <span
-              key={sistema}
-              className="rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground"
-            >
-              {sistema}
-            </span>
-          ))}
         </div>
       </Reveal>
 

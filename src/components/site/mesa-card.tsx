@@ -86,7 +86,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
               vagas preenchidas
             </p>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
               <span className="flex items-center gap-1.5">
                 {mesa.modalidade === "online" ? (
                   <Globe className="size-3.5 shrink-0 text-primary" aria-hidden />
@@ -97,7 +97,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
                 {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
               </span>
               <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
+                className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
                   mesa.preco_centavos === 0
                     ? "bg-emerald-500/15 text-emerald-400"
                     : "bg-primary/15 text-primary"
@@ -107,22 +107,22 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
               </span>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
               <span className="flex items-center gap-1.5">
                 <Repeat className="size-3.5 shrink-0 text-primary" aria-hidden />
                 {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
               </span>
-              <span className="shrink-0 font-semibold text-foreground">
+              <span className="whitespace-nowrap font-semibold text-foreground">
                 {diaSemanaAbreviado(mesa.data_inicio)}
               </span>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
               <span className="flex items-center gap-1.5">
                 <Calendar className="size-3.5 shrink-0 text-primary" aria-hidden />
                 {new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR")}
               </span>
-              <span className="flex shrink-0 items-center gap-1.5">
+              <span className="flex items-center gap-1.5 whitespace-nowrap">
                 <Clock className="size-3.5 shrink-0 text-primary" aria-hidden />
                 {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
               </span>
@@ -205,7 +205,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
         </p>
 
         {jogadoresVisiveis.length > 0 && (
-          <div className="absolute bottom-1.5 left-1.5 flex items-center -space-x-1.5 sm:bottom-2 sm:left-2">
+          <div className="absolute bottom-1.5 left-1.5 flex items-center -space-x-3 sm:bottom-2 sm:left-2 sm:-space-x-1.5">
             {jogadoresVisiveis.map((j, i) =>
               j.avatar_url ? (
                 <Image

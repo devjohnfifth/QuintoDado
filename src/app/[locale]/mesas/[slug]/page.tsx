@@ -18,6 +18,7 @@ import {
 import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
 import { ShareButton } from "./share-button";
+import { SinopseExpansivel } from "./sinopse-expansivel";
 import bannerOg from "@/assets/brand/banner-og.webp";
 
 type MesaDetalhe = {
@@ -230,7 +231,7 @@ export default async function MesaDetalhePage({
           Mestrado por {mesa.profiles.nome_exibicao}
         </p>
       )}
-      <p className="mt-4 text-muted-foreground">{mesa.sinopse}</p>
+      <SinopseExpansivel texto={mesa.sinopse} />
 
       <dl className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3">
         <div>
