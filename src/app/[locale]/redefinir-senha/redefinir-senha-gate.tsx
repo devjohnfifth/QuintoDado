@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { RedefinirSenhaForm } from "./redefinir-senha-form";
+import { RedefinirSenhaCodigoForm } from "./redefinir-senha-codigo-form";
 
 type Estado = "verificando" | "pronto" | "invalido";
 
@@ -42,11 +43,23 @@ export function RedefinirSenhaGate() {
       }
 
       if (accessToken && refreshToken) {
-        supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
-          if (minhaGeracao !== geracaoAtual) return;
-          window.history.replaceState(null, "", window.location.pathname);
-          setEstado(error ? "invalido" : "pronto");
-        });
+        // Uma tentativa via, com retentativa curta: alguns navegadores (Edge com
+        // proteção antirastreamento mais agressiva, por exemplo) atrasam ou
+        // derrubam a primeira chamada de rede pro domínio do Supabase logo após
+        // o redirecionamento do link de recuperação — mesmo com o token sendo
+        // válido. Uma segunda tentativa quase sempre resolve.
+        const tentar = (restam: number): void => {
+          supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+            if (minhaGeracao !== geracaoAtual) return;
+            if (error && restam > 0) {
+              setTimeout(() => tentar(restam - 1), 1200);
+              return;
+            }
+            window.history.replaceState(null, "", window.location.pathname);
+            setEstado(error ? "invalido" : "pronto");
+          });
+        };
+        tentar(1);
         return;
       }
 
@@ -74,9 +87,27 @@ export function RedefinirSenhaGate() {
     // tela ficava travada mostrando "inválido" da tentativa anterior pra
     // sempre, mesmo que o link novo fosse perfeitamente válido.
     window.addEventListener("hashchange", processarLink);
+
+    // Rede de segurança: em navegadores com proteção antirastreamento mais
+    // agressiva (ex.: Edge), a chamada de rede que confirma o token pode
+    // demorar ou falhar na primeira tentativa mesmo com o token sendo
+    // válido — aí o setSession() acima retorna erro e a tela mostra
+    // "inválido", mas o SDK consegue estabelecer a sessão de qualquer jeito
+    // logo em seguida (em segundo plano). Sem isso, a pessoa via o erro na
+    // tela mas já estava logada por baixo dos panos ao trocar de página.
+    // Esse listener garante que a tela sempre reflita a sessão real,
+    // mesmo quando ela se estabelece depois do que o setSession() direto
+    // relatou.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) setEstado("pronto");
+    });
+
     return () => {
       geracaoAtual++; // invalida qualquer resposta pendente após desmontar
       window.removeEventListener("hashchange", processarLink);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -86,13 +117,16 @@ export function RedefinirSenhaGate() {
 
   if (estado === "invalido") {
     return (
-      <p className="mt-8 rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
-        Esse link de recuperação é inválido ou expirou.{" "}
-        <Link href="/entrar" className="text-primary hover:underline">
-          Peça um novo
-        </Link>
-        .
-      </p>
+      <>
+        <p className="mt-8 rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+          Esse link de recuperação é inválido ou expirou.{" "}
+          <Link href="/entrar" className="text-primary hover:underline">
+            Peça um novo
+          </Link>
+          .
+        </p>
+        <RedefinirSenhaCodigoForm />
+      </>
     );
   }
 
