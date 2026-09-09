@@ -144,12 +144,12 @@ export default async function ContaPage({
               {mesasCriadas.map((mesa) => (
                 <li
                   key={mesa.id}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+                  className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
                 >
                   <Link href={`/mesas/${mesa.slug}`} className="font-medium hover:underline">
                     {mesa.titulo}
                   </Link>
-                  <div className="flex shrink-0 items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
                     <span
                       className={`rounded-full border px-2 py-0.5 text-xs ${
                         STATUS_MESA_COR[mesa.status] ?? "border-border text-muted-foreground"
@@ -196,7 +196,7 @@ export default async function ContaPage({
             return (
               <li
                 key={inscricao.id}
-                className="flex items-center justify-between rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
               >
                 <Link href={`/mesas/${mesa?.slug}`} className="font-medium hover:underline">
                   {mesa?.titulo ?? "Mesa"}
