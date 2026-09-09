@@ -97,11 +97,7 @@ export function CandidaturaForm({
             {pergunta.obrigatoria && <span className="text-destructive"> *</span>}
           </Label>
           {ehLinhasEVeus && (
-            <p className="text-xs text-muted-foreground">
-              Linhas são temas que não entram na sessão de jeito nenhum; véus são coisas que podem
-              acontecer, mas sem detalhe explícito. Fica à vontade pra deixar em branco se não tiver
-              nada a vetar — o mestre leva isso a sério de qualquer forma.
-            </p>
+            <p className="text-xs text-muted-foreground">{t("linhasEVeusExplicacao")}</p>
           )}
           {pergunta.tipo === "escolha_unica" && pergunta.opcoes ? (
             <Select

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Share2, Check } from "lucide-react";
 
 export function ShareButton({ titulo, url }: { titulo: string; url: string }) {
+  const t = useTranslations("Mesas");
   const [copiado, setCopiado] = useState(false);
 
   async function compartilhar() {
@@ -34,12 +36,12 @@ export function ShareButton({ titulo, url }: { titulo: string; url: string }) {
       {copiado ? (
         <>
           <Check className="size-3.5" aria-hidden />
-          Link copiado
+          {t("linkCopiado")}
         </>
       ) : (
         <>
           <Share2 className="size-3.5" aria-hidden />
-          Compartilhar
+          {t("compartilhar")}
         </>
       )}
     </button>
