@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
+import { SairDaMesaButton } from "./sair-da-mesa-button";
 import {
   TIPO_MESA_LABEL,
   MODALIDADE_LABEL,
@@ -35,6 +37,8 @@ type MesaDetalhe = {
   sistema_outro: string | null;
   profiles: { nome_exibicao: string } | null;
   vagas_preenchidas: number;
+  banner_url: string | null;
+  jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
 };
 
 async function buscarMesa(slug: string) {
@@ -44,7 +48,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas, banner_url, jogadores_aprovados",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -61,13 +65,13 @@ async function buscarMesa(slug: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let inscricao: { status: string } | null = null;
+  let inscricao: { id: string; status: string } | null = null;
   let idadeInsuficiente = false;
   if (user) {
     const [{ data: inscricaoData }, { data: perfil }] = await Promise.all([
       supabase
         .from("inscricoes")
-        .select("status")
+        .select("id, status")
         .eq("mesa_id", mesa.id)
         .eq("usuario_id", user.id)
         .maybeSingle(),
@@ -127,6 +131,18 @@ export default async function MesaDetalhePage({
 
   return (
     <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+      {mesa.banner_url && (
+        <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
+          <Image
+            src={mesa.banner_url}
+            alt=""
+            fill
+            className="object-cover"
+            sizes="(min-width: 672px) 672px, 100vw"
+            priority
+          />
+        </div>
+      )}
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {mesa.sistema_outro || mesa.sistemas?.nome || "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
       </p>
@@ -179,6 +195,34 @@ export default async function MesaDetalhePage({
         </div>
       </dl>
 
+      {mesa.jogadores_aprovados && mesa.jogadores_aprovados.length > 0 && (
+        <div className="mt-6">
+          <p className="text-sm font-medium text-muted-foreground">Quem já confirmou presença</p>
+          <div className="mt-2 flex items-center -space-x-2">
+            {mesa.jogadores_aprovados.map((jogador, i) =>
+              jogador.avatar_url ? (
+                <Image
+                  key={i}
+                  src={jogador.avatar_url}
+                  alt={jogador.nome}
+                  width={40}
+                  height={40}
+                  className="size-10 rounded-full border-2 border-background object-cover"
+                />
+              ) : (
+                <span
+                  key={i}
+                  className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white"
+                  title={jogador.nome}
+                >
+                  {jogador.nome.charAt(0).toUpperCase()}
+                </span>
+              ),
+            )}
+          </div>
+        </div>
+      )}
+
       <h2 className="mt-10 font-heading text-xl font-bold">{t("candidatar")}</h2>
 
       {!logado ? (
@@ -188,6 +232,11 @@ export default async function MesaDetalhePage({
             {t("candidatar")}
           </Link>
         </p>
+      ) : inscricao?.status === "aprovado" ? (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/60 p-5 text-sm">
+          <p>Você está confirmado nessa mesa!</p>
+          <SairDaMesaButton inscricaoId={inscricao.id} slug={slug} />
+        </div>
       ) : inscricao ? (
         <p className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
           {t("jaCandidatado")}

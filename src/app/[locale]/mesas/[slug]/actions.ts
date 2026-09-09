@@ -78,6 +78,57 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
   return { ok: true };
 }
 
+export type SairDaMesaResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * A policy de UPDATE em `inscricoes` só permite o mestre da mesa (ou admin)
+ * avaliar candidatura — de propósito, pra jogador não poder se auto-aprovar.
+ * Por isso o jogador sair da própria mesa também precisa de service_role:
+ * a checagem de "essa inscrição é mesmo sua, e está aprovada" acontece aqui
+ * no código antes de qualquer escrita, não fica pela RLS.
+ */
+export async function sairDaMesaAction(
+  inscricaoId: string,
+  slug: string,
+): Promise<SairDaMesaResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { ok: false, error: "Você precisa estar logado." };
+  }
+
+  const admin = serviceRole();
+  const { data: inscricao } = await admin
+    .from("inscricoes")
+    .select("usuario_id, status")
+    .eq("id", inscricaoId)
+    .single();
+
+  if (!inscricao || inscricao.usuario_id !== user.id) {
+    return { ok: false, error: "Candidatura não encontrada." };
+  }
+  if (inscricao.status !== "aprovado") {
+    return { ok: false, error: "Essa candidatura não está mais ativa." };
+  }
+
+  const { error } = await admin
+    .from("inscricoes")
+    .update({ status: "cancelada_jogador", cancelado_em: new Date().toISOString() })
+    .eq("id", inscricaoId);
+
+  if (error) {
+    console.error("[sairDaMesaAction] erro:", error.message);
+    return { ok: false, error: "Não deu pra sair da mesa agora. Tente de novo em instantes." };
+  }
+
+  revalidatePath(`/mesas/${slug}`);
+  revalidatePath("/conta");
+  return { ok: true };
+}
+
 /**
  * O jogador não tem (nem deveria ter) permissão de RLS pra inserir uma
  * notificação na conta de outra pessoa (o mestre) — daí o service_role
