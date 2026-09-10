@@ -192,11 +192,14 @@ export async function atualizarMesaPresencialAction(
 
   const { data: mesaAtual } = await supabase
     .from("mesas")
-    .select("slug, mestre_id, vagas_preenchidas, data_inicio, horario_inicio, horario_fim")
+    .select("slug, mestre_id, vagas_preenchidas, data_inicio, horario_inicio, horario_fim, status")
     .eq("id", mesaId)
     .single();
   if (!mesaAtual || mesaAtual.mestre_id !== user.id) {
     return { ok: false, error: "Mesa não encontrada." };
+  }
+  if (mesaAtual.status === "cancelada") {
+    return { ok: false, error: "Essa mesa já foi cancelada — não dá mais pra editar." };
   }
   // Postgres devolve horário com segundos ("08:22:00"), o form manda só
   // HH:MM — normaliza os dois antes de comparar.

@@ -160,18 +160,22 @@ export default async function ContaPage({
                     </span>
                     {mesa.modalidade === "presencial" && (
                       <>
-                        <Link
-                          href={`/presencial-bh/${mesa.id}`}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          Candidaturas
-                        </Link>
-                        <Link
-                          href={`/presencial-bh/${mesa.id}/editar`}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          Editar
-                        </Link>
+                        {mesa.status !== "cancelada" && (
+                          <>
+                            <Link
+                              href={`/presencial-bh/${mesa.id}`}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Candidaturas
+                            </Link>
+                            <Link
+                              href={`/presencial-bh/${mesa.id}/editar`}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              Editar
+                            </Link>
+                          </>
+                        )}
                         {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
                           <AprovarMesaAdminButton mesaId={mesa.id} />
                         )}

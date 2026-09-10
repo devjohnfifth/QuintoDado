@@ -32,7 +32,11 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
   }
 
   const [{ data: mesa }, { data: perfil }, { data: perguntas }] = await Promise.all([
-    supabase.from("mesas").select("classificacao, vagas_total, vagas_preenchidas").eq("id", mesaId).single(),
+    supabase
+      .from("mesas")
+      .select("classificacao, vagas_total, vagas_preenchidas, mestre_id")
+      .eq("id", mesaId)
+      .single(),
     supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
     supabase.from("mesa_perguntas").select("id, obrigatoria").eq("mesa_id", mesaId),
   ]);
@@ -42,6 +46,10 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
     // idade mínima — nunca deixa passar nesse caso (gating no servidor
     // tem que falhar fechado, nunca aberto).
     return { ok: false, error: "Não deu pra confirmar essa mesa agora. Tente de novo em instantes." };
+  }
+
+  if (mesa.mestre_id === user.id) {
+    return { ok: false, error: "Você é o mestre dessa mesa — não dá pra se candidatar a ela." };
   }
 
   if (mesa.vagas_preenchidas >= mesa.vagas_total) {

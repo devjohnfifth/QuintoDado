@@ -39,7 +39,8 @@ type MesaDetalhe = {
   vagas_total: number;
   sistemas: { nome: string } | null;
   sistema_outro: string | null;
-  profiles: { nome_exibicao: string } | null;
+  mestre_id: string;
+  profiles: { nome_exibicao: string; avatar_url: string | null } | null;
   vagas_preenchidas: number;
   banner_url: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
@@ -52,7 +53,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, profiles!mesas_mestre_id_fkey(nome_exibicao), vagas_preenchidas, banner_url, jogadores_aprovados",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -94,6 +95,7 @@ async function buscarMesa(slug: string) {
     logado: Boolean(user),
     inscricao,
     idadeInsuficiente,
+    ehMestre: Boolean(user && user.id === (mesa as unknown as MesaDetalhe).mestre_id),
   };
 }
 
@@ -134,7 +136,7 @@ export default async function MesaDetalhePage({
 
   const resultado = await buscarMesa(slug);
   if (!resultado) notFound();
-  const { mesa, perguntas, logado, inscricao, idadeInsuficiente } = resultado;
+  const { mesa, perguntas, logado, inscricao, idadeInsuficiente, ehMestre } = resultado;
 
   const dataFormatada = new Date(`${mesa.data_inicio}T${mesa.horario_inicio}`).toLocaleDateString(
     "pt-BR",
@@ -227,7 +229,20 @@ export default async function MesaDetalhePage({
       </div>
       <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
       {mesa.profiles?.nome_exibicao && (
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+          {mesa.profiles.avatar_url ? (
+            <Image
+              src={mesa.profiles.avatar_url}
+              alt=""
+              width={20}
+              height={20}
+              className="size-5 rounded-full object-cover"
+            />
+          ) : (
+            <span className="flex size-5 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[10px] font-bold text-white">
+              {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+            </span>
+          )}
           Mestrado por {mesa.profiles.nome_exibicao}
         </p>
       )}
@@ -308,36 +323,40 @@ export default async function MesaDetalhePage({
         </div>
       )}
 
-      <h2 className="mt-10 font-heading text-xl font-bold">{t("candidatar")}</h2>
+      {!ehMestre && (
+        <>
+          <h2 className="mt-10 font-heading text-xl font-bold">{t("candidatar")}</h2>
 
-      {!logado ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-          {t("precisaEntrar")}{" "}
-          <Link href="/entrar" className="text-primary hover:underline">
-            {t("candidatar")}
-          </Link>
-        </p>
-      ) : inscricao?.status === "aprovado" ? (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/60 p-5 text-sm">
-          <p>Você está confirmado nessa mesa!</p>
-          <SairDaMesaButton inscricaoId={inscricao.id} slug={slug} />
-        </div>
-      ) : inscricao ? (
-        <p className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
-          {t("jaCandidatado")}
-        </p>
-      ) : idadeInsuficiente ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-          {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
-        </p>
-      ) : mesa.vagas_preenchidas >= mesa.vagas_total ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-          {t("mesaLotada")}
-        </p>
-      ) : (
-        <div className="mt-4">
-          <CandidaturaForm mesaId={mesa.id} slug={slug} perguntas={perguntas} />
-        </div>
+          {!logado ? (
+            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              {t("precisaEntrar")}{" "}
+              <Link href="/entrar" className="text-primary hover:underline">
+                {t("candidatar")}
+              </Link>
+            </p>
+          ) : inscricao?.status === "aprovado" ? (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/60 p-5 text-sm">
+              <p>Você está confirmado nessa mesa!</p>
+              <SairDaMesaButton inscricaoId={inscricao.id} slug={slug} />
+            </div>
+          ) : inscricao ? (
+            <p className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
+              {t("jaCandidatado")}
+            </p>
+          ) : idadeInsuficiente ? (
+            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
+            </p>
+          ) : mesa.vagas_preenchidas >= mesa.vagas_total ? (
+            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              {t("mesaLotada")}
+            </p>
+          ) : (
+            <div className="mt-4">
+              <CandidaturaForm mesaId={mesa.id} slug={slug} perguntas={perguntas} />
+            </div>
+          )}
+        </>
       )}
     </article>
   );

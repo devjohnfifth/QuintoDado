@@ -32,7 +32,7 @@ export default async function EditarMesaPresencialPage({
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, cidade_uf, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, banner_url, mestre_id, modalidade",
+        "titulo, sistema_id, sistema_outro, sinopse, cidade_uf, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, banner_url, mestre_id, modalidade, status",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -42,7 +42,9 @@ export default async function EditarMesaPresencialPage({
   // Sem RLS de UPDATE em mesas pra jogador comum (só mestre_id = auth.uid()
   // via a policy mesa_mestre_edita), mas confere de novo aqui pra devolver
   // uma mensagem clara em vez de um erro de permissão genérico do banco.
-  if (!mesa || mesa.mestre_id !== user.id || mesa.modalidade !== "presencial") {
+  // Mesa cancelada também não edita mais — não faz sentido reabrir o
+  // formulário pra algo que já foi encerrado.
+  if (!mesa || mesa.mestre_id !== user.id || mesa.modalidade !== "presencial" || mesa.status === "cancelada") {
     notFound();
   }
 
