@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
-import { Carrossel } from "@/components/site/carrossel";
 import { ComprarIngressoButton } from "./comprar-ingresso-button";
 import { GaleriaLightbox } from "./galeria-lightbox";
 import bannerOg from "@/assets/brand/banner-og.webp";
@@ -289,38 +288,33 @@ export default async function EventoDetalhePage({
             Ainda não tem ingresso disponível pra esse evento.
           </p>
         ) : (
-          <div className="mt-4">
-            <Carrossel
-              itens={tipos.map((tipo) => ({
-                chave: tipo.id,
-                conteudo: (
-                  <div className="flex h-full flex-col rounded-xl border border-border bg-card/60 p-5">
-                    <p className="font-heading font-bold">{tipo.nome}</p>
-                    {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
-                    <p className="mt-3 font-heading text-2xl font-bold text-primary">
-                      {formatBRL(tipo.preco_centavos)}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {tipo.limite_mesas
-                        ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
-                        : "Candidatura em qualquer mesa do evento"}
-                    </p>
-                    <div className="mt-4">
-                      <ComprarIngressoButton
-                        eventoId={evento.id}
-                        tipoId={tipo.id}
-                        tipoNome={tipo.nome}
-                        precoCentavos={tipo.preco_centavos}
-                        slug={slug}
-                        chavePix={evento.chave_pix}
-                        whatsappConfirmacao={evento.whatsapp_confirmacao}
-                        nomeCompletoAtual={nomeCompletoAtual}
-                      />
-                    </div>
-                  </div>
-                ),
-              }))}
-            />
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {tipos.map((tipo) => (
+              <div key={tipo.id} className="flex flex-col rounded-xl border border-border bg-card/60 p-5">
+                <p className="font-heading font-bold">{tipo.nome}</p>
+                {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
+                <p className="mt-3 font-heading text-2xl font-bold text-primary">
+                  {formatBRL(tipo.preco_centavos)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {tipo.limite_mesas
+                    ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
+                    : "Candidatura em qualquer mesa do evento"}
+                </p>
+                <div className="mt-4">
+                  <ComprarIngressoButton
+                    eventoId={evento.id}
+                    tipoId={tipo.id}
+                    tipoNome={tipo.nome}
+                    precoCentavos={tipo.preco_centavos}
+                    slug={slug}
+                    chavePix={evento.chave_pix}
+                    whatsappConfirmacao={evento.whatsapp_confirmacao}
+                    nomeCompletoAtual={nomeCompletoAtual}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
