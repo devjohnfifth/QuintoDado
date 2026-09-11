@@ -64,10 +64,6 @@
       "ctaComunidade": "Entrar na comunidade",
       "ctaMesas": "Ver mesas abertas"
     },
-    "apresentacao": {
-      "corpo": "Sou o João, o Mestre Quintão. Mestro Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart — em português ou inglês, no Discord com Foundry VTT.\n\nGosto tanto de construir mundo quanto de jogar nele: se der, eu faço o cardápio da taverna e o mapa interativo antes da sessão começar. Aqui você encontra minhas mesas abertas e todo o material que produzo pelo caminho — a maior parte de graça.",
-      "ctaSobre": "Conheça o Quinto Dado"
-    },
     "eventos": {
       "titulo": "Eventos",
       "subtitulo": "Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.",
@@ -135,6 +131,8 @@
     "pilarComunidadeCorpo": "Um grupo no WhatsApp onde a galera fica sabendo de mesa nova, material novo, e combina jogo.",
     "segurancaTitulo": "Segurança em primeiro lugar",
     "segurancaCorpo": "Linhas e véus são pergunta obrigatória em toda mesa — o que pode e o que não pode aparecer na sessão. Classificação etária é levada a sério, não só um selo decorativo. Mesa boa é mesa em que todo mundo se sente seguro pra jogar.",
+    "mestreTitulo": "Quem sou eu",
+    "mestreCorpo": "Sou o João, o Mestre Quintão. Mestro Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart — em português ou inglês, no Discord com Foundry VTT.\n\nGosto tanto de construir mundo quanto de jogar nele: se der, eu faço o cardápio da taverna e o mapa interativo antes da sessão começar. Aqui você encontra minhas mesas abertas e todo o material que produzo pelo caminho — a maior parte de graça.",
     "sistemasTitulo": "Sistemas",
     "sistemas": "Ordem Paranormal e OP2 · Tormenta 20 · Vaesen · Fabula Ultima · Daggerheart · Sacramento RPG",
     "ctaMesas": "Ver mesas abertas",

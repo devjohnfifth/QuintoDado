@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { BookOpen, Dices, MessageCircle, ShieldCheck, ArrowRight } from "lucide-react";
 import bannerOg from "@/assets/brand/banner-og.webp";
 import grupoJogandoRpg from "@/assets/brand/grupo-jogando-rpg.jpg";
+import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
 import { Reveal } from "@/components/site/reveal";
 
 export async function generateMetadata({
@@ -117,6 +118,38 @@ export default async function SobrePage({
           </div>
           <h2 className="mt-3 font-heading text-xl font-bold">{t("segurancaTitulo")}</h2>
           <p className="mt-2 text-muted-foreground">{t("segurancaCorpo")}</p>
+        </div>
+      </Reveal>
+
+      <Reveal className="mt-10">
+        <div className="group flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="relative mx-auto size-28 shrink-0 sm:mx-0">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[#4F7DF3]/30 to-[#A855F7]/30 blur-xl"
+            />
+            <Image
+              src={mestreQuintao}
+              alt="Mestre Quintão"
+              className="size-28 rounded-full object-cover object-top"
+            />
+          </div>
+
+          <div className="border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:border-primary group-hover:bg-primary/[0.03]">
+            <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
+              <h2 className="font-heading text-xl font-bold">{t("mestreTitulo")}</h2>
+              {t("mestreCorpo")
+                .split("\n\n")
+                .map((paragrafo, i) => (
+                  <p
+                    key={i}
+                    className="mt-3 text-muted-foreground transition-colors duration-300 group-hover:text-foreground/90"
+                  >
+                    {paragrafo}
+                  </p>
+                ))}
+            </div>
+          </div>
         </div>
       </Reveal>
 

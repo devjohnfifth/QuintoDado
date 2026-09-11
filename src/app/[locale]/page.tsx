@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BookOpen, Dices, MessageCircle, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -150,46 +149,6 @@ export default async function HomePage({
           </div>
         </div>
       </section>
-
-      {/* Bloco 3 — apresentação curta */}
-      <Reveal className="px-4 py-16 sm:px-6">
-        <div className="group mx-auto flex max-w-2xl flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="relative mx-auto size-28 shrink-0 sm:mx-0">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[#4F7DF3]/30 to-[#A855F7]/30 blur-xl"
-            />
-            <Image
-              src={mestreQuintao}
-              alt="Mestre Quintão"
-              className="size-28 rounded-full object-cover object-top"
-              priority
-            />
-          </div>
-
-          <div className="border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:border-primary group-hover:bg-primary/[0.03]">
-            <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
-              {t("apresentacao.corpo")
-                .split("\n\n")
-                .map((paragrafo, i) => (
-                  <p
-                    key={i}
-                    className="mt-4 text-muted-foreground transition-colors duration-300 first:mt-0 group-hover:text-foreground/90"
-                  >
-                    {paragrafo}
-                  </p>
-                ))}
-              <Link
-                href="/sobre"
-                className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-              >
-                {t("apresentacao.ctaSobre")}
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </Reveal>
 
       {/* Bloco 3' — eventos publicados, some se não houver nenhum */}
       {eventosAbertos.length > 0 && (
