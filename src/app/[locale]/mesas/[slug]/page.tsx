@@ -204,7 +204,7 @@ export default async function MesaDetalhePage({
   };
 
   return (
-    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -231,7 +231,7 @@ export default async function MesaDetalhePage({
             alt={mesa.titulo}
             fill
             className="object-cover"
-            sizes="(min-width: 672px) 672px, 100vw"
+            sizes="(min-width: 1024px) 1024px, (min-width: 672px) 672px, 100vw"
             priority
           />
         </div>
@@ -271,7 +271,7 @@ export default async function MesaDetalhePage({
       )}
       <SinopseExpansivel texto={mesa.sinopse} />
 
-      <dl className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3">
+      <dl className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3 lg:grid-cols-4">
         <div>
           <dt className="text-muted-foreground">{t("modalidade")}</dt>
           <dd className="font-medium">

@@ -10,7 +10,7 @@ export function SinopseExpansivel({ texto }: { texto: string }) {
   const ehLongo = texto.length > 220;
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 max-w-2xl">
       <p className={`text-muted-foreground ${!aberto && ehLongo ? "line-clamp-3" : ""}`}>{texto}</p>
       {ehLongo && (
         <button

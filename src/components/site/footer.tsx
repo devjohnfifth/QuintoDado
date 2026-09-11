@@ -6,7 +6,7 @@ export function SiteFooter() {
 
   return (
     <footer className="border-t border-border/60 bg-background">
-      <div className="mx-auto max-w-5xl px-4 py-10 text-sm text-muted-foreground sm:px-6">
+      <div className="mx-auto max-w-5xl px-4 py-10 text-sm text-muted-foreground sm:px-6 lg:px-[10vw]">
         <p className="max-w-2xl">{t("avisoLegal")}</p>
         <nav className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
           <Link href="/termos" className="hover:text-foreground">

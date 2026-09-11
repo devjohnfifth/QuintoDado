@@ -14,7 +14,7 @@ export function LegalPage({
   const paragrafos = corpo.split("\n\n");
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-[10vw]">
       <h1 className="font-heading text-3xl font-bold sm:text-4xl">{titulo}</h1>
       <p className="mt-2 text-xs text-muted-foreground">{atualizadoEm}</p>
 

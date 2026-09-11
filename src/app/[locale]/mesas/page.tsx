@@ -145,7 +145,7 @@ export default async function MesasPage({
   const temFiltroAtivo = Boolean(filtros.sistema || filtros.modalidade || filtros.preco);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
       <Reveal>
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -229,7 +229,7 @@ export default async function MesasPage({
             </p>
           </div>
         ) : (
-          <ul className="space-y-4">
+          <ul className="grid gap-4 lg:grid-cols-2">
             {mesas.map((mesa) => (
               <li key={mesa.slug}>
                 <MesaCard

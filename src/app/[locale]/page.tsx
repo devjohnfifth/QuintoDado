@@ -193,8 +193,8 @@ export default async function HomePage({
 
       {/* Bloco 3' — eventos publicados, some se não houver nenhum */}
       {eventosAbertos.length > 0 && (
-        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
-          <div className="mx-auto max-w-4xl">
+        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
+          <div className="mx-auto max-w-4xl lg:max-w-5xl">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <h2 className="font-heading text-2xl font-bold">{t("eventos.titulo")}</h2>
@@ -224,8 +224,8 @@ export default async function HomePage({
 
       {/* Bloco 4 — mesas abertas de verdade, some se não houver nenhuma */}
       {mesasAbertas.length > 0 && (
-        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
-          <div className="mx-auto max-w-4xl">
+        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
+          <div className="mx-auto max-w-4xl lg:max-w-5xl">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <h2 className="font-heading text-2xl font-bold">{t("mesasAbertas.titulo")}</h2>
@@ -256,7 +256,7 @@ export default async function HomePage({
       )}
 
       {/* Blocos 4 e 5 — suplementos e mesas, lado a lado pra quebrar a pilha vertical */}
-      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
+      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
           <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
             <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
