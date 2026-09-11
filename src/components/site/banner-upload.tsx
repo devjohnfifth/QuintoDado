@@ -12,9 +12,11 @@ const TAMANHO_MAXIMO = 5 * 1024 * 1024;
 export function BannerUpload({
   value,
   onChange,
+  bucket = "mesa-banners",
 }: {
   value: string | null;
   onChange: (url: string | null) => void;
+  bucket?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
@@ -50,7 +52,7 @@ export function BannerUpload({
     const extensao = arquivo.name.split(".").pop() ?? "jpg";
     const caminho = `${user.id}/${Date.now()}.${extensao}`;
 
-    const { error } = await supabase.storage.from("mesa-banners").upload(caminho, arquivo, {
+    const { error } = await supabase.storage.from(bucket).upload(caminho, arquivo, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -61,7 +63,7 @@ export function BannerUpload({
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage.from("mesa-banners").getPublicUrl(caminho);
+    const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(caminho);
     onChange(publicUrlData.publicUrl);
     setEnviando(false);
   }
