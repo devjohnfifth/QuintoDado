@@ -55,6 +55,19 @@ const STATUS_MESA_COR: Record<string, string> = {
   cancelada: "border-destructive/40 text-destructive",
 };
 
+const STATUS_INGRESSO_LABEL: Record<string, string> = {
+  pendente: "Pendente",
+  aprovado: "Aprovado",
+  recusado: "Recusado",
+  cancelado: "Cancelado",
+};
+
+const STATUS_INGRESSO_COR: Record<string, string> = {
+  aprovado: "border-emerald-500/40 text-emerald-400",
+  recusado: "border-destructive/40 text-destructive",
+  cancelado: "border-border text-muted-foreground",
+};
+
 export default async function ContaPage({
   params,
 }: {
@@ -80,7 +93,7 @@ export default async function ContaPage({
   const [{ data: perfil }, { data: sistemas }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos")
+      .select("username, nome_exibicao, nome_completo, avatar_url, papel, bio, sistemas_favoritos")
       .eq("id", user.id)
       .single(),
     // "Outro" não faz sentido como sistema favorito fixo — só existe pra
@@ -88,7 +101,7 @@ export default async function ContaPage({
     supabase.from("sistemas").select("id, nome").eq("ativo", true).neq("slug", "outro").order("nome"),
   ]);
 
-  const [{ data: inscricoes }, { data: mesasCriadas }] = await Promise.all([
+  const [{ data: inscricoes }, { data: mesasCriadas }, { data: ingressos }] = await Promise.all([
     supabase
       .from("inscricoes")
       .select("id, status, criado_em, mesas(titulo, slug, data_inicio)")
@@ -101,12 +114,18 @@ export default async function ContaPage({
           .eq("mestre_id", user.id)
           .order("criado_em", { ascending: false })
       : Promise.resolve({ data: null }),
+    supabase
+      .from("evento_ingressos")
+      .select("id, status, eventos(titulo, slug), evento_ingresso_tipos(nome)")
+      .eq("usuario_id", user.id)
+      .order("criado_em", { ascending: false }),
   ]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <PerfilSection
         nomeExibicao={perfil?.nome_exibicao ?? "?"}
+        nomeCompleto={perfil?.nome_completo ?? null}
         username={perfil?.username ?? ""}
         bio={perfil?.bio ?? null}
         avatarUrl={perfil?.avatar_url ?? null}
@@ -220,6 +239,38 @@ export default async function ContaPage({
             );
           })}
         </ul>
+      )}
+
+      {ingressos && ingressos.length > 0 && (
+        <>
+          <h2 className="mt-10 font-heading text-lg font-bold">Meus ingressos</h2>
+          <ul className="mt-3 space-y-3">
+            {ingressos.map((ingresso) => {
+              const evento = ingresso.eventos as unknown as { titulo: string; slug: string } | null;
+              const tipo = ingresso.evento_ingresso_tipos as unknown as { nome: string } | null;
+              return (
+                <li
+                  key={ingresso.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+                >
+                  <div>
+                    <Link href={`/eventos/${evento?.slug}`} className="font-medium hover:underline">
+                      {evento?.titulo ?? "Evento"}
+                    </Link>
+                    {tipo && <p className="text-xs text-muted-foreground">{tipo.nome}</p>}
+                  </div>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-xs ${
+                      STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
+                    }`}
+                  >
+                    {STATUS_INGRESSO_LABEL[ingresso.status] ?? ingresso.status}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       <form action={sairAction} className="mt-10">

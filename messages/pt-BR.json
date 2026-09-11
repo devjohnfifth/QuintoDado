@@ -17,6 +17,7 @@
   "Nav": {
     "suplementos": "Suplementos",
     "mesas": "Mesas",
+    "eventos": "Eventos",
     "presencialBh": "Presencial BH",
     "sobre": "Sobre",
     "links": "Links",
@@ -46,6 +47,8 @@
     "titulo": "Só falta um passo",
     "subtitulo": "Sua conta social não manda esses dados — a gente precisa deles pra liberar o cadastro (a data de nascimento define o que você pode ver no site).",
     "campoNome": "Nome de exibição",
+    "campoNomeCompleto": "Nome completo (opcional)",
+    "campoNomeCompletoAjuda": "Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.",
     "campoUsername": "Nome de usuário",
     "campoNascimento": "Data de nascimento",
     "aceiteTermosPre": "Eu li e aceito os",
@@ -64,6 +67,11 @@
     "apresentacao": {
       "corpo": "Sou o João, o Mestre Quintão. Mestro Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima e Daggerheart — em português ou inglês, no Discord com Foundry VTT.\n\nGosto tanto de construir mundo quanto de jogar nele: se der, eu faço o cardápio da taverna e o mapa interativo antes da sessão começar. Aqui você encontra minhas mesas abertas e todo o material que produzo pelo caminho — a maior parte de graça.",
       "ctaSobre": "Conheça o Quinto Dado"
+    },
+    "eventos": {
+      "titulo": "Eventos",
+      "subtitulo": "Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.",
+      "verTodos": "Ver todos os eventos"
     },
     "mesasAbertas": {
       "titulo": "Mesas abertas",

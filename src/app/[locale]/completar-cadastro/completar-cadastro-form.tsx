@@ -15,6 +15,7 @@ export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }
   const [estado, formAction, pending] = useActionState(completarCadastroAction, null);
   const [valores, setValores] = useState({
     nomeExibicao: nomeSugerido,
+    nomeCompleto: "",
     username: "",
     dataNascimento: "",
   });
@@ -53,6 +54,17 @@ export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }
           value={valores.nomeExibicao}
           onChange={campo("nomeExibicao")}
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="nomeCompleto">{t("campoNomeCompleto")}</Label>
+        <Input
+          id="nomeCompleto"
+          name="nomeCompleto"
+          maxLength={160}
+          value={valores.nomeCompleto}
+          onChange={campo("nomeCompleto")}
+        />
+        <p className="text-xs text-muted-foreground">{t("campoNomeCompletoAjuda")}</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="username">{t("campoUsername")}</Label>

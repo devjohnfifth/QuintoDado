@@ -17,6 +17,7 @@ export type EstadoCompletarCadastro = {
 const schema = z
   .object({
     nomeExibicao: z.string().trim().min(2, "Nome muito curto.").max(80),
+    nomeCompleto: z.string().trim().max(160).optional(),
     username: z
       .string()
       .trim()
@@ -44,6 +45,7 @@ export async function completarCadastroAction(
 ): Promise<EstadoCompletarCadastro> {
   const bruto = {
     nomeExibicao: String(formData.get("nomeExibicao") ?? ""),
+    nomeCompleto: String(formData.get("nomeCompleto") ?? ""),
     // Sanitiza de novo aqui, não só no cliente — ver comentário equivalente
     // em entrar/actions.ts sobre autofill pulando a limpeza em tempo real.
     username: sanitizarUsername(String(formData.get("username") ?? "")),
@@ -75,6 +77,7 @@ export async function completarCadastroAction(
     id: user.id,
     username: d.username,
     nome_exibicao: d.nomeExibicao,
+    nome_completo: d.nomeCompleto || null,
     data_nascimento: d.dataNascimento,
   });
 

@@ -16,6 +16,7 @@ type Sistema = { id: string; nome: string };
 
 export function EditarPerfilForm({
   nomeExibicao,
+  nomeCompleto,
   bio,
   avatarUrl,
   sistemasFavoritos,
@@ -23,6 +24,7 @@ export function EditarPerfilForm({
   onCancelar,
 }: {
   nomeExibicao: string;
+  nomeCompleto: string | null;
   bio: string | null;
   avatarUrl: string | null;
   sistemasFavoritos: string[];
@@ -52,6 +54,7 @@ export function EditarPerfilForm({
     startTransition(async () => {
       const resultado = await atualizarPerfilAction({
         nomeExibicao: nome,
+        nomeCompleto: formData.get("nomeCompleto"),
         bio: formData.get("bio"),
         sistemasFavoritos: favoritos,
         avatarUrl: novoAvatar,
@@ -110,6 +113,14 @@ export function EditarPerfilForm({
             required
             maxLength={80}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="nomeCompleto">Nome completo (opcional)</Label>
+          <Input id="nomeCompleto" name="nomeCompleto" defaultValue={nomeCompleto ?? ""} maxLength={160} />
+          <p className="text-xs text-muted-foreground">
+            Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.
+          </p>
         </div>
 
         <div className="space-y-2">
