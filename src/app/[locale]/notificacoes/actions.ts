@@ -67,3 +67,15 @@ export async function marcarTodasLidasAction() {
 
   revalidatePath("/");
 }
+
+export async function limparLidasAction() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("notificacoes").delete().eq("usuario_id", user.id).not("lida_em", "is", null);
+
+  revalidatePath("/");
+}

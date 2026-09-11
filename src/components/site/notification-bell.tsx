@@ -17,6 +17,7 @@ import {
   buscarNotificacoesAction,
   marcarNotificacaoLidaAction,
   marcarTodasLidasAction,
+  limparLidasAction,
 } from "@/app/[locale]/notificacoes/actions";
 
 type Notificacao = {
@@ -59,6 +60,15 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
     marcarTodasLidasAction();
   }
 
+  function limparLidas(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setNotificacoes((prev) => prev?.filter((n) => !n.lida_em) ?? prev);
+    limparLidasAction();
+  }
+
+  const temLidas = notificacoes?.some((n) => n.lida_em) ?? false;
+
   return (
     <DropdownMenu onOpenChange={aoAbrir}>
       <DropdownMenuTrigger
@@ -76,15 +86,26 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
         <DropdownMenuGroup>
           <div className="flex items-center justify-between px-2 py-1.5">
             <DropdownMenuLabel className="p-0">Notificações</DropdownMenuLabel>
-            {naoLidas > 0 && (
-              <button
-                type="button"
-                onClick={marcarTodas}
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                Marcar todas como lidas
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {naoLidas > 0 && (
+                <button
+                  type="button"
+                  onClick={marcarTodas}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+              {temLidas && (
+                <button
+                  type="button"
+                  onClick={limparLidas}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline"
+                >
+                  Limpar lidas
+                </button>
+              )}
+            </div>
           </div>
           <DropdownMenuSeparator />
           {pending && (
