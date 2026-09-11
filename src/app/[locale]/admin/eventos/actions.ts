@@ -154,19 +154,22 @@ async function salvarExtras(
   eventoId: string,
   d: z.infer<typeof schema>,
 ) {
-  await Promise.all([
+  const deletes = await Promise.all([
     supabase.from("evento_imagens").delete().eq("evento_id", eventoId),
     supabase.from("evento_apoiadores").delete().eq("evento_id", eventoId),
     supabase.from("evento_atracoes").delete().eq("evento_id", eventoId),
     supabase.from("evento_mestres").delete().eq("evento_id", eventoId),
   ]);
+  for (const { error } of deletes) {
+    if (error) console.error("[salvarExtras] erro ao limpar dados antigos:", error.message);
+  }
 
-  await Promise.all([
+  const inserts = await Promise.all([
     d.imagens.length > 0
       ? supabase.from("evento_imagens").insert(
           d.imagens.map((img, i) => ({ evento_id: eventoId, url: img.url, ordem: i })),
         )
-      : Promise.resolve(),
+      : Promise.resolve({ error: null }),
     d.apoiadores.length > 0
       ? supabase.from("evento_apoiadores").insert(
           d.apoiadores.map((a, i) => ({
@@ -177,7 +180,7 @@ async function salvarExtras(
             ordem: i,
           })),
         )
-      : Promise.resolve(),
+      : Promise.resolve({ error: null }),
     d.atracoes.length > 0
       ? supabase.from("evento_atracoes").insert(
           d.atracoes.map((a, i) => ({
@@ -188,13 +191,17 @@ async function salvarExtras(
             ordem: i,
           })),
         )
-      : Promise.resolve(),
+      : Promise.resolve({ error: null }),
     d.mestres.length > 0
       ? supabase.from("evento_mestres").insert(
           d.mestres.map((m, i) => ({ evento_id: eventoId, usuario_id: m.usuarioId, ordem: i })),
         )
-      : Promise.resolve(),
+      : Promise.resolve({ error: null }),
   ]);
+  const rotulos = ["imagens", "apoiadores", "atrações", "mestres"];
+  inserts.forEach(({ error }, i) => {
+    if (error) console.error(`[salvarExtras] erro ao salvar ${rotulos[i]}:`, error.message);
+  });
 }
 
 /**
