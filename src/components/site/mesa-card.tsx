@@ -64,7 +64,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
       <div className="relative flex-1 overflow-hidden rounded-l-2xl">
         <span className="absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background" />
         <span className="absolute -bottom-3 -right-3 z-10 size-6 rounded-full bg-background" />
-        <div className="flex h-full flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 sm:p-5">
+        <div className="flex h-full flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-3.5 transition-colors duration-300 group-hover:border-primary/40 sm:p-4">
           <div className="flex items-start justify-between gap-2">
             {logo ? (
               <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
@@ -84,14 +84,14 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
             )}
           </div>
 
-          <h3 className="mt-3 font-heading text-base font-bold leading-tight sm:text-lg">
+          <h3 className="mt-2.5 font-heading text-base font-bold leading-tight sm:text-lg">
             {mesa.titulo}
           </h3>
           <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
             {nomeSistema}
           </p>
 
-          <div className="mt-4 space-y-2 text-xs text-muted-foreground sm:text-sm">
+          <div className="mt-3 space-y-1.5 text-xs text-muted-foreground sm:text-sm">
             <p className="flex items-center gap-1.5">
               <Users className="size-3.5 shrink-0 text-primary" aria-hidden />
               <span className="text-foreground/90">

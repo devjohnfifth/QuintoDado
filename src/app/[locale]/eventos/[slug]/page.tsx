@@ -8,6 +8,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { ComprarIngressoButton } from "./comprar-ingresso-button";
+import { GaleriaLightbox } from "./galeria-lightbox";
 import bannerOg from "@/assets/brand/banner-og.webp";
 
 const STATUS_INGRESSO_LABEL: Record<string, string> = {
@@ -183,63 +184,74 @@ export default async function EventoDetalhePage({
 
       <p className="mt-6 whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
 
-      {atracoes.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-heading text-xl font-bold">Programação</h2>
-          <ul className="mt-4 space-y-3 border-l-2 border-primary/30 pl-4">
-            {atracoes.map((a, i) => (
-              <li key={i}>
-                {a.horario && (
-                  <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                    <Clock className="size-3.5 shrink-0" aria-hidden />
-                    {a.horario}
-                  </p>
-                )}
-                <p className="font-medium">{a.titulo}</p>
-                {a.descricao && <p className="text-sm text-muted-foreground">{a.descricao}</p>}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {(atracoes.length > 0 || mestres.length > 0) && (
+        <div
+          className={`mt-10 gap-8 ${
+            atracoes.length > 0 && mestres.length > 0 ? "grid sm:grid-cols-3" : ""
+          }`}
+        >
+          {atracoes.length > 0 && (
+            <div className={mestres.length > 0 ? "sm:col-span-2" : ""}>
+              <h2 className="font-heading text-xl font-bold">Programação</h2>
+              <ul className="mt-4 space-y-3 border-l-2 border-primary/30 pl-4">
+                {atracoes.map((a, i) => (
+                  <li key={i}>
+                    {a.horario && (
+                      <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                        <Clock className="size-3.5 shrink-0" aria-hidden />
+                        {a.horario}
+                      </p>
+                    )}
+                    <p className="font-medium">{a.titulo}</p>
+                    {a.descricao && <p className="text-sm text-muted-foreground">{a.descricao}</p>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      {mestres.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-heading text-xl font-bold">Mestres confirmados</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {mestres.map((m) => (
-              <div key={m.username} className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-4">
-                {m.avatar_url ? (
-                  <Image
-                    src={m.avatar_url}
-                    alt={m.nome_exibicao}
-                    width={44}
-                    height={44}
-                    className="size-11 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
-                    {m.nome_exibicao.charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <p className="font-medium">{m.nome_exibicao}</p>
-                  {m.bio ? (
-                    <p className="truncate text-xs text-muted-foreground">{m.bio}</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">@{m.username}</p>
-                  )}
-                </div>
+          {mestres.length > 0 && (
+            <div className={atracoes.length > 0 ? "sm:col-span-1" : ""}>
+              <h2 className="font-heading text-xl font-bold">Mestres confirmados</h2>
+              <div className="mt-4 grid gap-3">
+                {mestres.map((m) => (
+                  <div
+                    key={m.username}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-4"
+                  >
+                    {m.avatar_url ? (
+                      <Image
+                        src={m.avatar_url}
+                        alt={m.nome_exibicao}
+                        width={44}
+                        height={44}
+                        className="size-11 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
+                        {m.nome_exibicao.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-medium">{m.nome_exibicao}</p>
+                      {m.bio ? (
+                        <p className="truncate text-xs text-muted-foreground">{m.bio}</p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">@{m.username}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       {mesas.length > 0 && (
         <div className="mt-10">
           <h2 className="font-heading text-xl font-bold">Mesas do evento</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4">
             {mesas.map((mesa) => (
               <MesaCard key={mesa.slug} mesa={mesa} />
             ))}
@@ -310,13 +322,7 @@ export default async function EventoDetalhePage({
       {imagens.length > 0 && (
         <div className="mt-10">
           <h2 className="font-heading text-xl font-bold">Galeria</h2>
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {imagens.map((url, i) => (
-              <div key={i} className="relative aspect-square overflow-hidden rounded-xl border border-border">
-                <Image src={url} alt="" fill className="object-cover" sizes="(min-width: 640px) 33vw, 50vw" />
-              </div>
-            ))}
-          </div>
+          <GaleriaLightbox imagens={imagens} />
         </div>
       )}
 
