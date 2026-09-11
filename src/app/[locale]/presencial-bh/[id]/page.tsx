@@ -66,7 +66,7 @@ export default async function MinhasCandidaturasPage({
     .order("criado_em", { ascending: true });
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-[10vw]">
+    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <p className="text-sm text-muted-foreground">
         <Link href="/conta" className="hover:underline">
           ← Voltar pra minha conta

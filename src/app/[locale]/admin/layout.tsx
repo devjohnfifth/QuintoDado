@@ -16,7 +16,7 @@ export default async function AdminLayout({
 
   if (!isSupabaseConfigured()) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-[10vw]">
+      <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
         <p className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
           Supabase ainda não está configurado neste ambiente (ver .env.example)
           — o admin não funciona até isso existir.

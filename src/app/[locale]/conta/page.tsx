@@ -122,7 +122,7 @@ export default async function ContaPage({
   ]);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-[10vw]">
+    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <PerfilSection
         nomeExibicao={perfil?.nome_exibicao ?? "?"}
         nomeCompleto={perfil?.nome_completo ?? null}

@@ -256,7 +256,7 @@ export default async function HomePage({
       )}
 
       {/* Blocos 4 e 5 — suplementos e mesas, lado a lado pra quebrar a pilha vertical */}
-      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
+      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
         <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
           <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
             <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">

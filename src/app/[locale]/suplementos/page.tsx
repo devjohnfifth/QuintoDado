@@ -34,7 +34,7 @@ export default async function SuplementosPage({
   const t = await getTranslations("Suplementos");
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-[10vw]">
+    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <Reveal>
         <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
           <BookOpen className="size-5" aria-hidden />

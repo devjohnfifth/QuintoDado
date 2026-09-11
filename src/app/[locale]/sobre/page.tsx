@@ -47,9 +47,9 @@ export default async function SobrePage({
   ];
 
   return (
-    <article className="mx-auto max-w-2xl px-4 pb-16 sm:px-6 lg:px-[10vw]">
+    <article className="mx-auto max-w-2xl px-4 pb-16 sm:px-6">
       <Reveal>
-        <div className="relative aspect-[16/10] w-[calc(100%+2rem)] -translate-x-4 overflow-hidden sm:aspect-[3/1] sm:w-[calc(100%+3rem)] sm:-translate-x-6 sm:rounded-b-2xl lg:w-[calc(100%+20vw)] lg:-translate-x-[10vw]">
+        <div className="relative aspect-[16/10] w-[calc(100%+2rem)] -translate-x-4 overflow-hidden sm:aspect-[3/1] sm:w-[calc(100%+3rem)] sm:-translate-x-6 sm:rounded-b-2xl">
           <Image
             src={grupoJogandoRpg}
             alt=""

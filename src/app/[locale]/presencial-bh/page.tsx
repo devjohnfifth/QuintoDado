@@ -84,7 +84,7 @@ export default async function PresencialBhPage({
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
         </div>
 
-        <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28 lg:px-[10vw]">
+        <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">
           <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl">
             {t("titulo")}
           </h1>
@@ -100,7 +100,7 @@ export default async function PresencialBhPage({
         </div>
       </section>
 
-      <section className="mx-auto max-w-3xl px-4 pb-10 sm:px-6 lg:px-[10vw]">
+      <section className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
         <div className="rounded-xl border border-border bg-card/40 p-5">
           <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted-foreground">
             {t("comoFunciona")}
