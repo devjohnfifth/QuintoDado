@@ -28,6 +28,35 @@ async function exigirAdmin() {
 }
 
 /**
+ * Mesa vinculada a evento não pode ter cidade nem data escolhidas livremente
+ * — o form já trava esses campos na UI, mas isso aqui é o que garante de
+ * verdade (nunca confia só no que o cliente mandou). Cidade sempre vira a do
+ * evento; data precisa cair dentro do intervalo do evento (ou ser a única
+ * data, se o evento for de um dia só).
+ */
+async function validarMesaDeEvento(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  eventoId: string | null | undefined,
+  dataInicio: string,
+): Promise<{ ok: true; cidadeUf: string | null; dataInicio: string } | { ok: false; error: string }> {
+  if (!eventoId) return { ok: true, cidadeUf: null, dataInicio };
+
+  const { data: evento } = await supabase
+    .from("eventos")
+    .select("cidade_uf, data_inicio, data_fim")
+    .eq("id", eventoId)
+    .single();
+  if (!evento) return { ok: false, error: "Evento não encontrado." };
+
+  const dataFinal = evento.data_fim ?? evento.data_inicio;
+  if (dataInicio < evento.data_inicio || dataInicio > dataFinal) {
+    return { ok: false, error: "A data da mesa precisa estar dentro do período do evento." };
+  }
+
+  return { ok: true, cidadeUf: evento.cidade_uf, dataInicio };
+}
+
+/**
  * Só avisa o mestre dono se ele não for o próprio admin agindo (o admin
  * sabe muito bem que acabou de aprovar/cancelar a própria mesa — a
  * notificação existe pra quando é a mesa presencial de OUTRO mestre).
@@ -160,6 +189,11 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
     return { ok: false, error: "Escreva o nome do sistema." };
   }
 
+  const eventoCheck = await validarMesaDeEvento(supabase, d.eventoId, d.dataInicio);
+  if (!eventoCheck.ok) {
+    return { ok: false, error: eventoCheck.error };
+  }
+
   const slug = `${slugify(d.titulo)}-${Math.random().toString(36).slice(2, 7)}`;
   const agora = new Date().toISOString();
 
@@ -174,7 +208,7 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
       sistema_outro: sistemaEscolhido?.slug === "outro" ? d.sistemaOutroNome : null,
       tipo: d.tipo,
       modalidade: d.modalidade,
-      cidade_uf: d.modalidade === "presencial" ? d.cidadeUf : null,
+      cidade_uf: d.modalidade === "presencial" ? (eventoCheck.cidadeUf ?? d.cidadeUf) : null,
       plataforma_vtt: d.plataformaVtt || null,
       plataforma_voz: d.plataformaVoz || null,
       classificacao: d.classificacao,
@@ -185,7 +219,7 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
       cobranca_gerenciada_pelo_site: d.cobrancaGerenciadaPeloSite,
       frequencia: d.frequencia,
       qtd_sessoes: d.qtdSessoes ?? null,
-      data_inicio: d.dataInicio,
+      data_inicio: eventoCheck.dataInicio,
       horario_inicio: d.horarioInicio,
       horario_fim: d.horarioFim,
       banner_url: d.bannerUrl || null,
@@ -236,11 +270,18 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
 
   const { data: mesaAtual } = await supabase
     .from("mesas")
-    .select("slug, vagas_preenchidas, data_inicio, horario_inicio, horario_fim")
+    .select("slug, vagas_preenchidas, data_inicio, horario_inicio, horario_fim, evento_id")
     .eq("id", mesaId)
     .single();
   if (!mesaAtual) {
     return { ok: false, error: "Mesa não encontrada." };
+  }
+
+  // O vínculo com evento é fixado na criação e nunca muda por aqui — ignora
+  // de propósito qualquer evento_id que o cliente tenha mandado.
+  const eventoCheck = await validarMesaDeEvento(supabase, mesaAtual.evento_id, d.dataInicio);
+  if (!eventoCheck.ok) {
+    return { ok: false, error: eventoCheck.error };
   }
   // Postgres devolve horário com segundos ("08:22:00"), o form manda só
   // HH:MM — sem normalizar os dois, toda edição pareceria uma mudança de
@@ -279,7 +320,7 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
       sistema_outro: sistemaEscolhido?.slug === "outro" ? d.sistemaOutroNome : null,
       tipo: d.tipo,
       modalidade: d.modalidade,
-      cidade_uf: d.modalidade === "presencial" ? d.cidadeUf : null,
+      cidade_uf: d.modalidade === "presencial" ? (eventoCheck.cidadeUf ?? d.cidadeUf) : null,
       plataforma_vtt: d.plataformaVtt || null,
       plataforma_voz: d.plataformaVoz || null,
       classificacao: d.classificacao,
@@ -290,11 +331,10 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
       cobranca_gerenciada_pelo_site: d.cobrancaGerenciadaPeloSite,
       frequencia: d.frequencia,
       qtd_sessoes: d.qtdSessoes ?? null,
-      data_inicio: d.dataInicio,
+      data_inicio: eventoCheck.dataInicio,
       horario_inicio: d.horarioInicio,
       horario_fim: d.horarioFim,
       banner_url: d.bannerUrl || null,
-      evento_id: d.eventoId || null,
     })
     .eq("id", mesaId);
 

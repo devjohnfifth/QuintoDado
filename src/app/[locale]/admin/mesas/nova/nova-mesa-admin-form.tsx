@@ -72,7 +72,13 @@ export type MesaExistente = {
   eventoId: string | null;
 };
 
-export type EventoOpcao = { id: string; titulo: string };
+export type EventoOpcao = {
+  id: string;
+  titulo: string;
+  cidadeUf: string;
+  dataInicio: string;
+  dataFim: string | null;
+};
 
 export function NovaMesaAdminForm({
   sistemas,
@@ -97,7 +103,7 @@ export function NovaMesaAdminForm({
   const [sistemaOutroNome, setSistemaOutroNome] = useState(mesaExistente?.sistemaOutroNome ?? "");
   const [tipo, setTipo] = useState(mesaExistente?.tipo ?? "one_shot");
   const [modalidade, setModalidade] = useState<"online" | "presencial">(
-    mesaExistente?.modalidade ?? "online",
+    mesaExistente?.modalidade ?? (eventoVinculado ? "presencial" : "online"),
   );
   const [frequencia, setFrequencia] = useState(mesaExistente?.frequencia ?? "unica");
   const [classificacao, setClassificacao] = useState(mesaExistente?.classificacao ?? "livre");
@@ -257,7 +263,19 @@ export function NovaMesaAdminForm({
         {modalidade === "presencial" ? (
           <div className="space-y-2">
             <Label htmlFor="cidadeUf">Cidade</Label>
-            <Input id="cidadeUf" name="cidadeUf" maxLength={80} defaultValue={mesaExistente?.cidadeUf ?? ""} />
+            {eventoVinculado ? (
+              <>
+                <Input id="cidadeUf" name="cidadeUf" readOnly value={eventoVinculado.cidadeUf} className="opacity-70" />
+                <p className="text-xs text-muted-foreground">Fixo na cidade do evento.</p>
+              </>
+            ) : (
+              <Input
+                id="cidadeUf"
+                name="cidadeUf"
+                maxLength={80}
+                defaultValue={mesaExistente?.cidadeUf ?? ""}
+              />
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -288,14 +306,30 @@ export function NovaMesaAdminForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="dataInicio">Data</Label>
-          <Input
-            id="dataInicio"
-            name="dataInicio"
-            type="date"
-            min={new Date().toISOString().slice(0, 10)}
-            required
-            defaultValue={mesaExistente?.dataInicio}
-          />
+          {eventoVinculado && !eventoVinculado.dataFim ? (
+            <>
+              <Input id="dataInicio" name="dataInicio" type="date" readOnly value={eventoVinculado.dataInicio} className="opacity-70" />
+              <p className="text-xs text-muted-foreground">Fixo na data do evento.</p>
+            </>
+          ) : (
+            <>
+              <Input
+                id="dataInicio"
+                name="dataInicio"
+                type="date"
+                min={eventoVinculado?.dataInicio ?? new Date().toISOString().slice(0, 10)}
+                max={eventoVinculado?.dataFim ?? undefined}
+                required
+                defaultValue={mesaExistente?.dataInicio ?? eventoVinculado?.dataInicio}
+              />
+              {eventoVinculado && (
+                <p className="text-xs text-muted-foreground">
+                  Precisa estar entre {new Date(`${eventoVinculado.dataInicio}T00:00:00`).toLocaleDateString("pt-BR")} e{" "}
+                  {new Date(`${eventoVinculado.dataFim}T00:00:00`).toLocaleDateString("pt-BR")}.
+                </p>
+              )}
+            </>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="horarioInicio">Início</Label>

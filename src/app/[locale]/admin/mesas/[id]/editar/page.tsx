@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { NovaMesaAdminForm, type MesaExistente } from "../../nova/nova-mesa-admin-form";
+import { NovaMesaAdminForm, type MesaExistente, type EventoOpcao } from "../../nova/nova-mesa-admin-form";
 
 export default async function EditarMesaAdminPage({
   params,
@@ -15,7 +15,7 @@ export default async function EditarMesaAdminPage({
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id, eventos(id, titulo)",
+        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id, eventos(id, titulo, cidade_uf, data_inicio, data_fim)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -24,7 +24,22 @@ export default async function EditarMesaAdminPage({
 
   if (!mesa) notFound();
 
-  const eventoVinculado = mesa.eventos as unknown as { id: string; titulo: string } | null;
+  const eventoBruto = mesa.eventos as unknown as {
+    id: string;
+    titulo: string;
+    cidade_uf: string;
+    data_inicio: string;
+    data_fim: string | null;
+  } | null;
+  const eventoVinculado: EventoOpcao | null = eventoBruto
+    ? {
+        id: eventoBruto.id,
+        titulo: eventoBruto.titulo,
+        cidadeUf: eventoBruto.cidade_uf,
+        dataInicio: eventoBruto.data_inicio,
+        dataFim: eventoBruto.data_fim,
+      }
+    : null;
 
   const mesaExistente: MesaExistente = {
     titulo: mesa.titulo,
