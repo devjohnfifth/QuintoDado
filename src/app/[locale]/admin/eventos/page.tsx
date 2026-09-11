@@ -99,12 +99,20 @@ export default async function AdminEventosPage() {
                       </Link>
                     </td>
                     <td className="py-3 pr-4 text-right">
-                      <Link
-                        href={`/admin/eventos/${evento.id}/editar`}
-                        className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-                      >
-                        Editar
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link
+                          href={`/admin/mesas/nova?eventoId=${evento.id}`}
+                          className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                        >
+                          + Mesa
+                        </Link>
+                        <Link
+                          href={`/admin/eventos/${evento.id}/editar`}
+                          className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+                        >
+                          Editar
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 );

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { EventoForm, type EventoExistente } from "../../evento-form";
@@ -53,11 +54,20 @@ export default async function EditarEventoPage({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <p className="text-sm text-muted-foreground">
-        <Link href={`/admin/eventos/${id}`} className="hover:underline">
-          ← Voltar pro evento
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-muted-foreground">
+          <Link href={`/admin/eventos/${id}`} className="hover:underline">
+            ← Voltar pro evento
+          </Link>
+        </p>
+        <Link
+          href={`/admin/mesas/nova?eventoId=${id}`}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+        >
+          <Plus className="size-3.5" aria-hidden />
+          Adicionar mesa
         </Link>
-      </p>
+      </div>
       <h1 className="mt-2 font-heading text-2xl font-bold">Editar evento</h1>
       <EventoForm eventoId={id} eventoExistente={eventoExistente} />
     </div>
