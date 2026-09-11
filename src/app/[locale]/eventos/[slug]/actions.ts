@@ -37,12 +37,19 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
 
   const [{ data: perfil }, { data: evento }, { data: tipo }] = await Promise.all([
     supabase.from("profiles").select("nome_completo, telefone").eq("id", user.id).single(),
-    supabase.from("eventos").select("titulo, status, capacidade_maxima, ingressos_vendidos").eq("id", eventoId).single(),
+    supabase
+      .from("eventos")
+      .select("titulo, status, capacidade_maxima, ingressos_vendidos, vendas_abertas")
+      .eq("id", eventoId)
+      .single(),
     supabase.from("evento_ingresso_tipos").select("nome, ativo").eq("id", tipoId).eq("evento_id", eventoId).single(),
   ]);
 
   if (!evento || evento.status !== "publicado") {
     return { ok: false, error: "Esse evento não está mais disponível." };
+  }
+  if (!evento.vendas_abertas) {
+    return { ok: false, error: "Vendas indisponíveis no momento." };
   }
   if (!tipo || !tipo.ativo) {
     return { ok: false, error: "Esse tipo de ingresso não está mais disponível." };

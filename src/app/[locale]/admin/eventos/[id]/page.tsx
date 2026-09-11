@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBRL } from "@/lib/format";
 import { IngressoActions } from "./ingresso-actions";
 import { EventoStatusActions } from "./evento-status-actions";
+import { VendasToggle } from "./vendas-toggle";
 
 const STATUS_LABEL: Record<string, string> = {
   pendente: "Pendente",
@@ -41,7 +42,7 @@ export default async function AdminEventoDetalhePage({
 
   const { data: evento } = await supabase
     .from("eventos")
-    .select("id, slug, titulo, status")
+    .select("id, slug, titulo, status, vendas_abertas")
     .eq("id", id)
     .maybeSingle();
 
@@ -97,6 +98,12 @@ export default async function AdminEventoDetalhePage({
       <div className="mt-4">
         <EventoStatusActions eventoId={id} status={evento.status} />
       </div>
+
+      {evento.status === "publicado" && (
+        <div className="mt-4">
+          <VendasToggle eventoId={id} vendasAbertas={evento.vendas_abertas} />
+        </div>
+      )}
 
       <div className="mt-10 flex items-center justify-between">
         <h2 className="font-heading text-lg font-bold">Mesas do evento ({mesas?.length ?? 0})</h2>

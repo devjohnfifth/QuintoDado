@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { VendasToggleCompacto } from "./vendas-toggle-compacto";
 
 const STATUS_LABEL: Record<string, string> = {
   rascunho: "Rascunho",
@@ -13,7 +14,7 @@ export default async function AdminEventosPage() {
   const [{ data: eventos, error }, { data: pendentes }] = await Promise.all([
     supabase
       .from("eventos")
-      .select("id, slug, titulo, status, cidade_uf, data_inicio")
+      .select("id, slug, titulo, status, cidade_uf, data_inicio, vendas_abertas")
       .order("criado_em", { ascending: false }),
     supabase.from("evento_ingressos").select("evento_id").eq("status", "pendente"),
   ]);
@@ -52,6 +53,7 @@ export default async function AdminEventosPage() {
                 <th className="py-2 pr-4">Cidade</th>
                 <th className="py-2 pr-4">Data</th>
                 <th className="py-2 pr-4">Status</th>
+                <th className="py-2 pr-4">Vendas</th>
                 <th className="py-2 pr-4" />
                 <th className="py-2 pr-4" />
               </tr>
@@ -85,6 +87,13 @@ export default async function AdminEventosPage() {
                       >
                         {STATUS_LABEL[evento.status] ?? evento.status}
                       </span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      {evento.status === "publicado" ? (
+                        <VendasToggleCompacto eventoId={evento.id} vendasAbertas={evento.vendas_abertas} />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="py-3 pr-4">
                       <Link

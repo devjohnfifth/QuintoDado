@@ -323,7 +323,14 @@ export async function buscarUsuariosAction(query: string): Promise<UsuarioBusca[
 export async function mudarStatusEventoAction(eventoId: string, status: "publicado" | "encerrado" | "cancelado") {
   const { supabase } = await exigirAdmin();
 
-  const { error } = await supabase.from("eventos").update({ status }).eq("id", eventoId);
+  // Publicar nunca libera as vendas de tabela — é um interruptor à parte
+  // (vendas_abertas) que o admin liga na mão. Toda vez que o evento entra em
+  // "publicado", as vendas voltam bloqueadas por segurança, mesmo se já
+  // tivessem sido abertas antes de uma republicação.
+  const dados: { status: string; vendas_abertas?: boolean } = { status };
+  if (status === "publicado") dados.vendas_abertas = false;
+
+  const { error } = await supabase.from("eventos").update(dados).eq("id", eventoId);
   if (error) {
     console.error("[mudarStatusEventoAction] erro:", error.message);
     throw new Error("Não deu pra atualizar o status do evento.");
@@ -333,4 +340,20 @@ export async function mudarStatusEventoAction(eventoId: string, status: "publica
   revalidatePath(`/admin/eventos/${eventoId}`);
   revalidatePath("/eventos");
   revalidatePath("/");
+}
+
+export async function alternarVendasEventoAction(eventoId: string, vendasAbertas: boolean) {
+  const { supabase } = await exigirAdmin();
+
+  const { error } = await supabase
+    .from("eventos")
+    .update({ vendas_abertas: vendasAbertas })
+    .eq("id", eventoId);
+  if (error) {
+    console.error("[alternarVendasEventoAction] erro:", error.message);
+    throw new Error("Não deu pra atualizar as vendas do evento.");
+  }
+
+  revalidatePath(`/admin/eventos/${eventoId}`);
+  revalidatePath("/eventos");
 }

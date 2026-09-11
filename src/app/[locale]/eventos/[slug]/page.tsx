@@ -25,7 +25,7 @@ async function buscarEvento(slug: string) {
   const { data: evento } = await supabase
     .from("eventos")
     .select(
-      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, ingressos_vendidos",
+      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, ingressos_vendidos, vendas_abertas",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -43,7 +43,7 @@ async function buscarEvento(slug: string) {
       supabase
         .from("mesas")
         .select(
-          "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
+          "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo)",
         )
         .eq("evento_id", evento.id)
         .in("status", ["publicada", "confirmada", "em_andamento"])
@@ -316,17 +316,23 @@ export default async function EventoDetalhePage({
                     : "Candidatura em qualquer mesa do evento"}
                 </p>
                 <div className="mt-4">
-                  <ComprarIngressoButton
-                    eventoId={evento.id}
-                    tipoId={tipo.id}
-                    tipoNome={tipo.nome}
-                    precoCentavos={tipo.preco_centavos}
-                    slug={slug}
-                    chavePix={evento.chave_pix}
-                    whatsappConfirmacao={evento.whatsapp_confirmacao}
-                    nomeCompletoAtual={nomeCompletoAtual}
-                    telefoneAtual={telefoneAtual}
-                  />
+                  {evento.vendas_abertas ? (
+                    <ComprarIngressoButton
+                      eventoId={evento.id}
+                      tipoId={tipo.id}
+                      tipoNome={tipo.nome}
+                      precoCentavos={tipo.preco_centavos}
+                      slug={slug}
+                      chavePix={evento.chave_pix}
+                      whatsappConfirmacao={evento.whatsapp_confirmacao}
+                      nomeCompletoAtual={nomeCompletoAtual}
+                      telefoneAtual={telefoneAtual}
+                    />
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
+                      Vendas indisponíveis no momento.
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
