@@ -11,15 +11,16 @@ export default async function EditarMesaAdminPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: mesa }, { data: sistemas }] = await Promise.all([
+  const [{ data: mesa }, { data: sistemas }, { data: eventos }] = await Promise.all([
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url",
+        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id",
       )
       .eq("id", id)
       .maybeSingle(),
     supabase.from("sistemas").select("id, nome, slug").eq("ativo", true).order("nome"),
+    supabase.from("eventos").select("id, titulo").in("status", ["rascunho", "publicado"]).order("data_inicio"),
   ]);
 
   if (!mesa) notFound();
@@ -47,6 +48,7 @@ export default async function EditarMesaAdminPage({
     valorReais: mesa.preco_centavos > 0 ? mesa.preco_centavos / 100 : null,
     cobrancaGerenciadaPeloSite: mesa.cobranca_gerenciada_pelo_site,
     bannerUrl: mesa.banner_url,
+    eventoId: mesa.evento_id,
   };
 
   return (
@@ -57,7 +59,12 @@ export default async function EditarMesaAdminPage({
         </Link>
       </p>
       <h1 className="mt-2 font-heading text-2xl font-bold">Editar mesa</h1>
-      <NovaMesaAdminForm sistemas={sistemas ?? []} mesaId={id} mesaExistente={mesaExistente} />
+      <NovaMesaAdminForm
+        sistemas={sistemas ?? []}
+        eventos={eventos ?? []}
+        mesaId={id}
+        mesaExistente={mesaExistente}
+      />
     </div>
   );
 }

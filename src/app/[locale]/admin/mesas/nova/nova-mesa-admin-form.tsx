@@ -68,14 +68,19 @@ export type MesaExistente = {
   valorReais: number | null;
   cobrancaGerenciadaPeloSite: boolean;
   bannerUrl: string | null;
+  eventoId: string | null;
 };
+
+export type EventoOpcao = { id: string; titulo: string };
 
 export function NovaMesaAdminForm({
   sistemas,
+  eventos = [],
   mesaId,
   mesaExistente,
 }: {
   sistemas: Sistema[];
+  eventos?: EventoOpcao[];
   mesaId?: string;
   mesaExistente?: MesaExistente;
 }) {
@@ -98,6 +103,7 @@ export function NovaMesaAdminForm({
   );
   const [publicarAgora, setPublicarAgora] = useState(true);
   const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
+  const [eventoId, setEventoId] = useState(mesaExistente?.eventoId ?? "");
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
@@ -130,6 +136,7 @@ export function NovaMesaAdminForm({
       cobrancaGerenciadaPeloSite,
       publicarAgora,
       bannerUrl,
+      eventoId: eventoId || null,
     };
 
     startTransition(async () => {
@@ -219,6 +226,35 @@ export function NovaMesaAdminForm({
         <Label>Imagem de capa</Label>
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
+
+      {eventos.length > 0 && (
+        <div className="space-y-2">
+          <Label htmlFor="eventoId">Vincular a um evento (opcional)</Label>
+          <Select
+            value={eventoId || "nenhum"}
+            onValueChange={(v) => v && setEventoId(v === "nenhum" ? "" : v)}
+          >
+            <SelectTrigger id="eventoId" className="w-full">
+              <SelectValue>
+                {(v: string) =>
+                  v === "nenhum" ? "Nenhum" : (eventos.find((e) => e.id === v)?.titulo ?? "Nenhum")
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="nenhum">Nenhum</SelectItem>
+              {eventos.map((e) => (
+                <SelectItem key={e.id} value={e.id}>
+                  {e.titulo}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Candidatar-se a essa mesa passa a exigir ingresso aprovado pro evento escolhido.
+          </p>
+        </div>
+      )}
 
       <div className="space-y-3 rounded-xl border border-border p-4">
         <div className="flex items-center gap-2">

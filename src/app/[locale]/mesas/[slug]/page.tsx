@@ -44,6 +44,8 @@ type MesaDetalhe = {
   vagas_preenchidas: number;
   banner_url: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
+  evento_id: string | null;
+  eventos: { slug: string; titulo: string } | null;
 };
 
 async function buscarMesa(slug: string) {
@@ -53,7 +55,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados, evento_id, eventos(slug, titulo)",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -70,10 +72,13 @@ async function buscarMesa(slug: string) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const mesaTyped = mesa as unknown as MesaDetalhe;
+
   let inscricao: { id: string; status: string } | null = null;
   let idadeInsuficiente = false;
+  let ingressoEventoAprovado = false;
   if (user) {
-    const [{ data: inscricaoData }, { data: perfil }] = await Promise.all([
+    const [{ data: inscricaoData }, { data: perfil }, { data: ingressoData }] = await Promise.all([
       supabase
         .from("inscricoes")
         .select("id, status")
@@ -81,8 +86,17 @@ async function buscarMesa(slug: string) {
         .eq("usuario_id", user.id)
         .maybeSingle(),
       supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+      mesaTyped.evento_id
+        ? supabase
+            .from("evento_ingressos")
+            .select("status")
+            .eq("evento_id", mesaTyped.evento_id)
+            .eq("usuario_id", user.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
     ]);
     inscricao = inscricaoData;
+    ingressoEventoAprovado = ingressoData?.status === "aprovado";
 
     const limite = limiteIdadeClassificacao(mesa.classificacao);
     const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
@@ -90,12 +104,13 @@ async function buscarMesa(slug: string) {
   }
 
   return {
-    mesa: mesa as unknown as MesaDetalhe,
+    mesa: mesaTyped,
     perguntas: perguntas ?? [],
     logado: Boolean(user),
     inscricao,
     idadeInsuficiente,
-    ehMestre: Boolean(user && user.id === (mesa as unknown as MesaDetalhe).mestre_id),
+    ehMestre: Boolean(user && user.id === mesaTyped.mestre_id),
+    ingressoEventoAprovado,
   };
 }
 
@@ -136,7 +151,7 @@ export default async function MesaDetalhePage({
 
   const resultado = await buscarMesa(slug);
   if (!resultado) notFound();
-  const { mesa, perguntas, logado, inscricao, idadeInsuficiente, ehMestre } = resultado;
+  const { mesa, perguntas, logado, inscricao, idadeInsuficiente, ehMestre, ingressoEventoAprovado } = resultado;
 
   const dataFormatada = new Date(`${mesa.data_inicio}T${mesa.horario_inicio}`).toLocaleDateString(
     "pt-BR",
@@ -227,6 +242,14 @@ export default async function MesaDetalhePage({
         </p>
         <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
       </div>
+      {mesa.eventos && (
+        <Link
+          href={`/eventos/${mesa.eventos.slug}`}
+          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:underline"
+        >
+          Mesa do evento {mesa.eventos.titulo}
+        </Link>
+      )}
       <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
       {mesa.profiles?.nome_exibicao && (
         <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -346,6 +369,14 @@ export default async function MesaDetalhePage({
           ) : idadeInsuficiente ? (
             <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
               {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
+            </p>
+          ) : mesa.eventos && !ingressoEventoAprovado ? (
+            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              Essa mesa é do evento {mesa.eventos.titulo} — você precisa ter um ingresso aprovado pra se
+              candidatar.{" "}
+              <Link href={`/eventos/${mesa.eventos.slug}`} className="text-primary hover:underline">
+                Ver ingressos
+              </Link>
             </p>
           ) : mesa.vagas_preenchidas >= mesa.vagas_total ? (
             <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">

@@ -34,7 +34,7 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
   const [{ data: mesa }, { data: perfil }, { data: perguntas }] = await Promise.all([
     supabase
       .from("mesas")
-      .select("classificacao, vagas_total, vagas_preenchidas, mestre_id")
+      .select("classificacao, vagas_total, vagas_preenchidas, mestre_id, evento_id")
       .eq("id", mesaId)
       .single(),
     supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
@@ -54,6 +54,21 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
 
   if (mesa.vagas_preenchidas >= mesa.vagas_total) {
     return { ok: false, error: "Essa mesa já está com todas as vagas preenchidas." };
+  }
+
+  if (mesa.evento_id) {
+    const { data: ingresso } = await supabase
+      .from("evento_ingressos")
+      .select("status")
+      .eq("evento_id", mesa.evento_id)
+      .eq("usuario_id", user.id)
+      .maybeSingle();
+    if (ingresso?.status !== "aprovado") {
+      return {
+        ok: false,
+        error: "Essa mesa é de um evento — você precisa ter um ingresso aprovado pra se candidatar.",
+      };
+    }
   }
 
   const limite = limiteIdadeClassificacao(mesa.classificacao);
