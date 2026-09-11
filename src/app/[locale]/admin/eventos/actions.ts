@@ -24,6 +24,7 @@ const tipoSchema = z.object({
   nome: z.string().trim().min(2, "Nome do ingresso muito curto.").max(60),
   descricao: z.string().trim().max(300).optional(),
   precoReais: z.coerce.number().min(0.01, "O preço precisa ser maior que zero.").max(99999),
+  limiteMesas: z.coerce.number().int().min(1).max(99).nullable().optional(),
 });
 
 const schema = z
@@ -103,6 +104,7 @@ export async function criarEventoAction(input: unknown): Promise<EventoActionRes
       nome: t.nome,
       descricao: t.descricao || null,
       preco_centavos: Math.round(t.precoReais * 100),
+      limite_mesas: t.limiteMesas ?? null,
       ordem: i,
     })),
   );
@@ -179,6 +181,7 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
       nome: t.nome,
       descricao: t.descricao || null,
       preco_centavos: Math.round(t.precoReais * 100),
+      limite_mesas: t.limiteMesas ?? null,
       ordem: i,
       ativo: true,
     };

@@ -34,7 +34,7 @@ async function buscarEvento(slug: string) {
   const [{ data: tipos }, { data: mesas }] = await Promise.all([
     supabase
       .from("evento_ingresso_tipos")
-      .select("id, nome, descricao, preco_centavos")
+      .select("id, nome, descricao, preco_centavos, limite_mesas")
       .eq("evento_id", evento.id)
       .eq("ativo", true)
       .order("ordem"),
@@ -204,6 +204,11 @@ export default async function EventoDetalhePage({
                 {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
                 <p className="mt-3 font-heading text-2xl font-bold text-primary">
                   {formatBRL(tipo.preco_centavos)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {tipo.limite_mesas
+                    ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
+                    : "Candidatura em qualquer mesa do evento"}
                 </p>
                 <div className="mt-4">
                   <ComprarIngressoButton

@@ -59,7 +59,7 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
   if (mesa.evento_id) {
     const { data: ingresso } = await supabase
       .from("evento_ingressos")
-      .select("status")
+      .select("status, evento_ingresso_tipos(limite_mesas)")
       .eq("evento_id", mesa.evento_id)
       .eq("usuario_id", user.id)
       .maybeSingle();
@@ -68,6 +68,25 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
         ok: false,
         error: "Essa mesa é de um evento — você precisa ter um ingresso aprovado pra se candidatar.",
       };
+    }
+
+    const limiteMesas = (ingresso.evento_ingresso_tipos as unknown as { limite_mesas: number | null } | null)
+      ?.limite_mesas;
+    if (limiteMesas) {
+      const { data: mesasDoEvento } = await supabase.from("mesas").select("id").eq("evento_id", mesa.evento_id);
+      const idsMesasEvento = (mesasDoEvento ?? []).map((m) => m.id);
+      const { count: candidaturasAtivas } = await supabase
+        .from("inscricoes")
+        .select("id", { count: "exact", head: true })
+        .eq("usuario_id", user.id)
+        .in("mesa_id", idsMesasEvento)
+        .in("status", ["candidatura_enviada", "aguardando_pagamento", "pago_em_analise", "aprovado"]);
+      if ((candidaturasAtivas ?? 0) >= limiteMesas) {
+        return {
+          ok: false,
+          error: `Seu ingresso permite se candidatar a no máximo ${limiteMesas} ${limiteMesas === 1 ? "mesa" : "mesas"} desse evento.`,
+        };
+      }
     }
   }
 

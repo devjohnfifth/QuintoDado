@@ -16,6 +16,7 @@ export type TipoIngressoExistente = {
   nome: string;
   descricao: string;
   precoReais: number;
+  limiteMesas: number | null;
 };
 
 export type EventoExistente = {
@@ -35,7 +36,7 @@ export type EventoExistente = {
   tipos: TipoIngressoExistente[];
 };
 
-const TIPO_VAZIO: TipoIngressoExistente = { nome: "", descricao: "", precoReais: 0 };
+const TIPO_VAZIO: TipoIngressoExistente = { nome: "", descricao: "", precoReais: 0, limiteMesas: null };
 
 export function EventoForm({
   eventoId,
@@ -54,7 +55,7 @@ export function EventoForm({
     eventoExistente?.tipos && eventoExistente.tipos.length > 0 ? eventoExistente.tipos : [{ ...TIPO_VAZIO }],
   );
 
-  function alterarTipo(i: number, campo: keyof TipoIngressoExistente, valor: string | number) {
+  function alterarTipo(i: number, campo: keyof TipoIngressoExistente, valor: string | number | null) {
     setTipos((atual) => atual.map((t, idx) => (idx === i ? { ...t, [campo]: valor } : t)));
   }
 
@@ -266,19 +267,34 @@ export function EventoForm({
               value={t.descricao}
               onChange={(e) => alterarTipo(i, "descricao", e.target.value)}
             />
-            <div className="max-w-[160px] space-y-1">
-              <Label htmlFor={`tipo-preco-${i}`} className="text-xs text-muted-foreground">
-                Preço (R$)
-              </Label>
-              <Input
-                id={`tipo-preco-${i}`}
-                type="number"
-                min={0.01}
-                step="0.01"
-                required
-                value={t.precoReais || ""}
-                onChange={(e) => alterarTipo(i, "precoReais", Number(e.target.value))}
-              />
+            <div className="flex gap-3">
+              <div className="max-w-[160px] space-y-1">
+                <Label htmlFor={`tipo-preco-${i}`} className="text-xs text-muted-foreground">
+                  Preço (R$)
+                </Label>
+                <Input
+                  id={`tipo-preco-${i}`}
+                  type="number"
+                  min={0.01}
+                  step="0.01"
+                  required
+                  value={t.precoReais || ""}
+                  onChange={(e) => alterarTipo(i, "precoReais", Number(e.target.value))}
+                />
+              </div>
+              <div className="max-w-[200px] space-y-1">
+                <Label htmlFor={`tipo-limite-${i}`} className="text-xs text-muted-foreground">
+                  Mesas inclusas (opcional)
+                </Label>
+                <Input
+                  id={`tipo-limite-${i}`}
+                  type="number"
+                  min={1}
+                  placeholder="Sem limite"
+                  value={t.limiteMesas ?? ""}
+                  onChange={(e) => alterarTipo(i, "limiteMesas", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
             </div>
           </div>
         ))}
