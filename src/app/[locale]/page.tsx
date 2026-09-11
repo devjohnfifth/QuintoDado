@@ -98,7 +98,7 @@ export default async function HomePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Bloco 1 — herói */}
-      <section className="relative overflow-hidden px-4 py-24 sm:px-6 sm:py-32">
+      <section className="relative overflow-hidden px-4 py-14 sm:px-6 sm:py-20">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-20 opacity-[0.06]"
@@ -118,21 +118,21 @@ export default async function HomePage({
           className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[24rem] w-[24rem] translate-x-[40%] rounded-full bg-[#A855F7]/8 blur-[130px]"
         />
 
-        <div className="mx-auto max-w-sm text-center">
+        <div className="mx-auto max-w-lg text-center">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
             <Dices className="size-3.5 text-primary" aria-hidden />
             {t("hero.eyebrow")}
           </span>
 
-          <h1 className="mt-5 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="mt-4 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
             <span className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] bg-clip-text text-transparent">
               {t("hero.titulo")}
             </span>
           </h1>
-          <p className="mt-6 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-muted-foreground">
             {t("hero.subtitulo")}
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={SITE_LINKS.whatsappComunidade}
               target="_blank"
