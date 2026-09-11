@@ -151,7 +151,7 @@ export default async function EventoDetalhePage({
   );
 
   return (
-    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl">
+    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-8">
       {evento.banner_url && (
         <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
           <Image
