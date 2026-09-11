@@ -11,19 +11,20 @@ export default async function EditarMesaAdminPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: mesa }, { data: sistemas }, { data: eventos }] = await Promise.all([
+  const [{ data: mesa }, { data: sistemas }] = await Promise.all([
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id",
+        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id, eventos(id, titulo)",
       )
       .eq("id", id)
       .maybeSingle(),
     supabase.from("sistemas").select("id, nome, slug").eq("ativo", true).order("nome"),
-    supabase.from("eventos").select("id, titulo").in("status", ["rascunho", "publicado"]).order("data_inicio"),
   ]);
 
   if (!mesa) notFound();
+
+  const eventoVinculado = mesa.eventos as unknown as { id: string; titulo: string } | null;
 
   const mesaExistente: MesaExistente = {
     titulo: mesa.titulo,
@@ -61,7 +62,7 @@ export default async function EditarMesaAdminPage({
       <h1 className="mt-2 font-heading text-2xl font-bold">Editar mesa</h1>
       <NovaMesaAdminForm
         sistemas={sistemas ?? []}
-        eventos={eventos ?? []}
+        eventoVinculado={eventoVinculado}
         mesaId={id}
         mesaExistente={mesaExistente}
       />

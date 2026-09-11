@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Pencil, ExternalLink } from "lucide-react";
+import { Pencil, ExternalLink, Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL } from "@/lib/format";
@@ -21,6 +21,16 @@ const STATUS_EVENTO_LABEL: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
+const STATUS_MESA_LABEL: Record<string, string> = {
+  rascunho: "Rascunho",
+  aguardando_aprovacao: "Aguardando aprovação",
+  publicada: "Publicada",
+  confirmada: "Confirmada",
+  em_andamento: "Em andamento",
+  concluida: "Concluída",
+  cancelada: "Cancelada",
+};
+
 export default async function AdminEventoDetalhePage({
   params,
 }: {
@@ -37,13 +47,20 @@ export default async function AdminEventoDetalhePage({
 
   if (!evento) notFound();
 
-  const { data: ingressos } = await supabase
-    .from("evento_ingressos")
-    .select(
-      "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url), evento_ingresso_tipos(nome, preco_centavos)",
-    )
-    .eq("evento_id", id)
-    .order("criado_em", { ascending: true });
+  const [{ data: ingressos }, { data: mesas }] = await Promise.all([
+    supabase
+      .from("evento_ingressos")
+      .select(
+        "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url), evento_ingresso_tipos(nome, preco_centavos)",
+      )
+      .eq("evento_id", id)
+      .order("criado_em", { ascending: true }),
+    supabase
+      .from("mesas")
+      .select("id, titulo, status")
+      .eq("evento_id", id)
+      .order("criado_em", { ascending: true }),
+  ]);
 
   return (
     <div>
@@ -81,7 +98,40 @@ export default async function AdminEventoDetalhePage({
         <EventoStatusActions eventoId={id} status={evento.status} />
       </div>
 
-      <h2 className="mt-8 font-heading text-lg font-bold">Pedidos de ingresso ({ingressos?.length ?? 0})</h2>
+      <div className="mt-10 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-bold">Mesas do evento ({mesas?.length ?? 0})</h2>
+        <Link
+          href={`/admin/mesas/nova?eventoId=${id}`}
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+        >
+          <Plus className="size-4" aria-hidden />
+          Adicionar mesa
+        </Link>
+      </div>
+
+      {!mesas || mesas.length === 0 ? (
+        <p className="mt-4 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          Nenhuma mesa vinculada a esse evento ainda.
+        </p>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {mesas.map((mesa) => (
+            <li
+              key={mesa.id}
+              className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+            >
+              <Link href={`/admin/mesas/${mesa.id}`} className="font-medium hover:underline">
+                {mesa.titulo}
+              </Link>
+              <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                {STATUS_MESA_LABEL[mesa.status] ?? mesa.status}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h2 className="mt-10 font-heading text-lg font-bold">Pedidos de ingresso ({ingressos?.length ?? 0})</h2>
 
       {!ingressos || ingressos.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">

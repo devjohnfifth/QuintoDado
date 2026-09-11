@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CalendarDays } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -75,12 +76,16 @@ export type EventoOpcao = { id: string; titulo: string };
 
 export function NovaMesaAdminForm({
   sistemas,
-  eventos = [],
+  eventoVinculado = null,
   mesaId,
   mesaExistente,
 }: {
   sistemas: Sistema[];
-  eventos?: EventoOpcao[];
+  // Só existe quando a mesa nasce do botão "+ Adicionar mesa" de dentro de
+  // um evento (ou já foi criada assim) — não é um select de livre escolha,
+  // de propósito: vincular mesa a evento é decisão de quem tá organizando o
+  // evento, não algo que se marca à toa na criação normal de mesa.
+  eventoVinculado?: EventoOpcao | null;
   mesaId?: string;
   mesaExistente?: MesaExistente;
 }) {
@@ -103,7 +108,7 @@ export function NovaMesaAdminForm({
   );
   const [publicarAgora, setPublicarAgora] = useState(true);
   const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
-  const [eventoId, setEventoId] = useState(mesaExistente?.eventoId ?? "");
+  const eventoId = eventoVinculado?.id ?? mesaExistente?.eventoId ?? null;
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
@@ -136,7 +141,7 @@ export function NovaMesaAdminForm({
       cobrancaGerenciadaPeloSite,
       publicarAgora,
       bannerUrl,
-      eventoId: eventoId || null,
+      eventoId,
     };
 
     startTransition(async () => {
@@ -227,32 +232,13 @@ export function NovaMesaAdminForm({
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
 
-      {eventos.length > 0 && (
-        <div className="space-y-2">
-          <Label htmlFor="eventoId">Vincular a um evento (opcional)</Label>
-          <Select
-            value={eventoId || "nenhum"}
-            onValueChange={(v) => v && setEventoId(v === "nenhum" ? "" : v)}
-          >
-            <SelectTrigger id="eventoId" className="w-full">
-              <SelectValue>
-                {(v: string) =>
-                  v === "nenhum" ? "Nenhum" : (eventos.find((e) => e.id === v)?.titulo ?? "Nenhum")
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nenhum">Nenhum</SelectItem>
-              {eventos.map((e) => (
-                <SelectItem key={e.id} value={e.id}>
-                  {e.titulo}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-muted-foreground">
-            Candidatar-se a essa mesa passa a exigir ingresso aprovado pro evento escolhido.
-          </p>
+      {eventoVinculado && (
+        <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/[0.04] p-4 text-sm">
+          <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden />
+          <span>
+            Mesa do evento <strong className="font-semibold">{eventoVinculado.titulo}</strong> — candidatar-se vai
+            exigir ingresso aprovado pra esse evento.
+          </span>
         </div>
       )}
 
