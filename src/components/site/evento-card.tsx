@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, Tag } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 
@@ -44,6 +44,10 @@ export function EventoCard({ evento }: { evento: EventoCardData }) {
             day: "2-digit",
             month: "short",
           })}
+        </span>
+        <span className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold text-white">
+          <Tag className="size-2.5 shrink-0" aria-hidden />
+          Evento
         </span>
       </div>
 
