@@ -10,6 +10,12 @@ const schema = z.object({
   tipoId: z.string().uuid(),
   slug: z.string().min(1),
   nomeCompleto: z.string().trim().min(3, "Digite seu nome completo.").max(160).optional(),
+  telefone: z
+    .string()
+    .trim()
+    .max(20)
+    .refine((v) => v.replace(/\D/g, "").length >= 10, "Digite um número de telefone válido, com DDD.")
+    .optional(),
 });
 
 export type ComprarIngressoResult = { ok: true } | { ok: false; error: string };
@@ -19,7 +25,7 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
-  const { eventoId, tipoId, slug, nomeCompleto } = parsed.data;
+  const { eventoId, tipoId, slug, nomeCompleto, telefone } = parsed.data;
 
   const supabase = await createClient();
   const {
@@ -30,7 +36,7 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
   }
 
   const [{ data: perfil }, { data: evento }, { data: tipo }] = await Promise.all([
-    supabase.from("profiles").select("nome_completo").eq("id", user.id).single(),
+    supabase.from("profiles").select("nome_completo, telefone").eq("id", user.id).single(),
     supabase.from("eventos").select("titulo, status, capacidade_maxima, ingressos_vendidos").eq("id", eventoId).single(),
     supabase.from("evento_ingresso_tipos").select("nome, ativo").eq("id", tipoId).eq("evento_id", eventoId).single(),
   ]);
@@ -49,8 +55,22 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
   if (!nomeFinal) {
     return { ok: false, error: "Informe seu nome completo pra continuar." };
   }
-  if (!perfil?.nome_completo && nomeCompleto) {
-    await supabase.from("profiles").update({ nome_completo: nomeCompleto }).eq("id", user.id);
+  const telefoneFinal = perfil?.telefone || telefone;
+  if (!telefoneFinal) {
+    return { ok: false, error: "Informe seu telefone pra continuar." };
+  }
+
+  const dadosPerfilNovos: Record<string, string> = {};
+  if (!perfil?.nome_completo && nomeCompleto) dadosPerfilNovos.nome_completo = nomeCompleto;
+  if (!perfil?.telefone && telefone) dadosPerfilNovos.telefone = telefone;
+  if (Object.keys(dadosPerfilNovos).length > 0) {
+    const { error: perfilError } = await supabase
+      .from("profiles")
+      .update(dadosPerfilNovos)
+      .eq("id", user.id);
+    if (perfilError) {
+      console.error("[comprarIngressoAction] erro ao salvar nome/telefone no perfil:", perfilError.message);
+    }
   }
 
   const { error: ingressoError } = await supabase

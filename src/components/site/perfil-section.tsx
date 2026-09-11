@@ -19,6 +19,7 @@ function iniciais(nome: string) {
 export function PerfilSection({
   nomeExibicao,
   nomeCompleto,
+  telefone,
   username,
   bio,
   avatarUrl,
@@ -27,6 +28,7 @@ export function PerfilSection({
 }: {
   nomeExibicao: string;
   nomeCompleto: string | null;
+  telefone: string | null;
   username: string;
   bio: string | null;
   avatarUrl: string | null;
@@ -82,6 +84,7 @@ export function PerfilSection({
         <EditarPerfilForm
           nomeExibicao={nomeExibicao}
           nomeCompleto={nomeCompleto}
+          telefone={telefone}
           bio={bio}
           avatarUrl={avatarUrl}
           sistemasFavoritos={sistemasFavoritos}

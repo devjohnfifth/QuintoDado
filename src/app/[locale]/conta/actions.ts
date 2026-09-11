@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 const schema = z.object({
   nomeExibicao: z.string().trim().min(2, "Nome muito curto.").max(80),
   nomeCompleto: z.string().trim().max(160).optional(),
+  telefone: z.string().trim().max(20).optional(),
   bio: z.string().trim().max(280).optional(),
   sistemasFavoritos: z.array(z.string().uuid()).max(10),
   avatarUrl: z.string().url().nullable().optional(),
@@ -34,6 +35,7 @@ export async function atualizarPerfilAction(input: unknown): Promise<AtualizarPe
     .update({
       nome_exibicao: d.nomeExibicao,
       nome_completo: d.nomeCompleto || null,
+      telefone: d.telefone || null,
       bio: d.bio || null,
       sistemas_favoritos: d.sistemasFavoritos,
       avatar_url: d.avatarUrl || null,

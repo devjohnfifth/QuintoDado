@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, MessageCircle } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,7 @@ export function ComprarIngressoButton({
   chavePix,
   whatsappConfirmacao,
   nomeCompletoAtual,
+  telefoneAtual,
 }: {
   eventoId: string;
   tipoId: string;
@@ -35,12 +36,14 @@ export function ComprarIngressoButton({
   chavePix: string | null;
   whatsappConfirmacao: string | null;
   nomeCompletoAtual: string | null;
+  telefoneAtual: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
   const [nomeCompleto, setNomeCompleto] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [copiado, setCopiado] = useState(false);
 
   function copiarChave() {
@@ -57,12 +60,17 @@ export function ComprarIngressoButton({
       setErro("Digite seu nome completo.");
       return;
     }
+    if (!telefoneAtual && telefone.replace(/\D/g, "").length < 10) {
+      setErro("Digite um telefone válido, com DDD.");
+      return;
+    }
     startTransition(async () => {
       const resultado = await comprarIngressoAction({
         eventoId,
         tipoId,
         slug,
         nomeCompleto: nomeCompletoAtual ? undefined : nomeCompleto.trim(),
+        telefone: telefoneAtual ? undefined : telefone.trim(),
       });
       if (!resultado.ok) {
         setErro(resultado.error);
@@ -105,6 +113,22 @@ export function ComprarIngressoButton({
               </div>
             )}
 
+            {!telefoneAtual && (
+              <div className="space-y-2">
+                <Label htmlFor="telefone">Seu telefone (com DDD)</Label>
+                <Input
+                  id="telefone"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  placeholder="31999999999"
+                  maxLength={20}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Pra gente conseguir te achar se o comprovante não chegar pelo WhatsApp.
+                </p>
+              </div>
+            )}
+
             {chavePix && (
               <div className="space-y-1.5">
                 <Label>Chave Pix</Label>
@@ -124,18 +148,26 @@ export function ComprarIngressoButton({
             )}
 
             {whatsappConfirmacao && (
-              <p className="text-sm text-muted-foreground">
-                Depois de pagar, manda o comprovante no WhatsApp{" "}
+              <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
                 <a
-                  href={`https://wa.me/55${whatsappConfirmacao.replace(/\D/g, "")}`}
+                  href={`https://wa.me/55${whatsappConfirmacao.replace(/\D/g, "")}?text=${encodeURIComponent(
+                    `Oi! Comprei o ingresso "${tipoNome}" e vou mandar o comprovante do Pix.`,
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-primary hover:underline"
+                  className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
                 >
-                  {whatsappConfirmacao}
+                  <MessageCircle className="size-4 shrink-0" aria-hidden />
+                  Abrir WhatsApp e mandar o comprovante
                 </a>
-                .
-              </p>
+                <p className="text-xs text-muted-foreground">
+                  Se não abrir sozinho, copia o número <strong className="text-foreground">{whatsappConfirmacao}</strong>{" "}
+                  e manda o comprovante por lá na mão.{" "}
+                  <strong className="text-foreground">
+                    Sem o comprovante, seu ingresso não é aprovado.
+                  </strong>
+                </p>
+              </div>
             )}
 
             {erro && <p className="text-sm text-destructive">{erro}</p>}

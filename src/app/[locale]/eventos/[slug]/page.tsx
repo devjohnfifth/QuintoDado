@@ -76,6 +76,7 @@ async function buscarEvento(slug: string) {
 
   let ingressoExistente: { status: string; motivo_recusa: string | null } | null = null;
   let nomeCompletoAtual: string | null = null;
+  let telefoneAtual: string | null = null;
   if (user) {
     const [{ data: ingressoData }, { data: perfil }] = await Promise.all([
       supabase
@@ -84,10 +85,11 @@ async function buscarEvento(slug: string) {
         .eq("evento_id", evento.id)
         .eq("usuario_id", user.id)
         .maybeSingle(),
-      supabase.from("profiles").select("nome_completo").eq("id", user.id).single(),
+      supabase.from("profiles").select("nome_completo, telefone").eq("id", user.id).single(),
     ]);
     ingressoExistente = ingressoData;
     nomeCompletoAtual = perfil?.nome_completo ?? null;
+    telefoneAtual = perfil?.telefone ?? null;
   }
 
   return {
@@ -101,6 +103,7 @@ async function buscarEvento(slug: string) {
     logado: Boolean(user),
     ingressoExistente,
     nomeCompletoAtual,
+    telefoneAtual,
   };
 }
 
@@ -138,8 +141,19 @@ export default async function EventoDetalhePage({
   const resultado = await buscarEvento(slug);
   if (!resultado) notFound();
 
-  const { evento, tipos, mesas, imagens, apoiadores, atracoes, mestres, logado, ingressoExistente, nomeCompletoAtual } =
-    resultado;
+  const {
+    evento,
+    tipos,
+    mesas,
+    imagens,
+    apoiadores,
+    atracoes,
+    mestres,
+    logado,
+    ingressoExistente,
+    nomeCompletoAtual,
+    telefoneAtual,
+  } = resultado;
 
   const dataFormatada = new Date(`${evento.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -311,6 +325,7 @@ export default async function EventoDetalhePage({
                     chavePix={evento.chave_pix}
                     whatsappConfirmacao={evento.whatsapp_confirmacao}
                     nomeCompletoAtual={nomeCompletoAtual}
+                    telefoneAtual={telefoneAtual}
                   />
                 </div>
               </div>

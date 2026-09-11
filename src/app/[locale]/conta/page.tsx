@@ -93,7 +93,7 @@ export default async function ContaPage({
   const [{ data: perfil }, { data: sistemas }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, nome_exibicao, nome_completo, avatar_url, papel, bio, sistemas_favoritos")
+      .select("username, nome_exibicao, nome_completo, telefone, avatar_url, papel, bio, sistemas_favoritos")
       .eq("id", user.id)
       .single(),
     // "Outro" não faz sentido como sistema favorito fixo — só existe pra
@@ -126,6 +126,7 @@ export default async function ContaPage({
       <PerfilSection
         nomeExibicao={perfil?.nome_exibicao ?? "?"}
         nomeCompleto={perfil?.nome_completo ?? null}
+        telefone={perfil?.telefone ?? null}
         username={perfil?.username ?? ""}
         bio={perfil?.bio ?? null}
         avatarUrl={perfil?.avatar_url ?? null}

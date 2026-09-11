@@ -17,6 +17,7 @@ type Sistema = { id: string; nome: string };
 export function EditarPerfilForm({
   nomeExibicao,
   nomeCompleto,
+  telefone,
   bio,
   avatarUrl,
   sistemasFavoritos,
@@ -25,6 +26,7 @@ export function EditarPerfilForm({
 }: {
   nomeExibicao: string;
   nomeCompleto: string | null;
+  telefone: string | null;
   bio: string | null;
   avatarUrl: string | null;
   sistemasFavoritos: string[];
@@ -55,6 +57,7 @@ export function EditarPerfilForm({
       const resultado = await atualizarPerfilAction({
         nomeExibicao: nome,
         nomeCompleto: formData.get("nomeCompleto"),
+        telefone: formData.get("telefone"),
         bio: formData.get("bio"),
         sistemasFavoritos: favoritos,
         avatarUrl: novoAvatar,
@@ -120,6 +123,14 @@ export function EditarPerfilForm({
           <Input id="nomeCompleto" name="nomeCompleto" defaultValue={nomeCompleto ?? ""} maxLength={160} />
           <p className="text-xs text-muted-foreground">
             Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="telefone">Telefone (opcional)</Label>
+          <Input id="telefone" name="telefone" defaultValue={telefone ?? ""} maxLength={20} placeholder="31999999999" />
+          <p className="text-xs text-muted-foreground">
+            Também só pedido quando precisar, como comprar ingresso de evento.
           </p>
         </div>
 
