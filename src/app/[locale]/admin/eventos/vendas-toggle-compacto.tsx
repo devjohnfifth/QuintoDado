@@ -28,16 +28,31 @@ export function VendasToggleCompacto({
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={vendasAbertas}
       disabled={pending}
       onClick={alternar}
-      title={vendasAbertas ? "Clique pra bloquear as vendas" : "Clique pra liberar as vendas"}
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors disabled:opacity-60 ${
-        vendasAbertas
-          ? "border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10"
-          : "border-border text-muted-foreground hover:bg-accent"
-      }`}
+      title={vendasAbertas ? "Clique pra desligar as vendas" : "Clique pra ligar as vendas"}
+      className="group flex items-center gap-2 disabled:opacity-60"
     >
-      {pending ? "Aguarde..." : vendasAbertas ? "Vendas abertas" : "Vendas bloqueadas"}
+      <span
+        className={`relative block h-6 w-10 shrink-0 rounded-full p-0.5 shadow-inner transition-colors duration-300 ease-out ${
+          vendasAbertas ? "bg-emerald-500" : "bg-[#3a3a46]"
+        }`}
+      >
+        <span
+          className={`block size-5 rounded-full bg-white shadow-md transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-active:scale-90 ${
+            vendasAbertas ? "translate-x-4" : "translate-x-0"
+          }`}
+        />
+      </span>
+      <span
+        className={`text-xs font-medium transition-colors duration-300 ${
+          vendasAbertas ? "text-emerald-400" : "text-muted-foreground"
+        }`}
+      >
+        {pending ? "..." : vendasAbertas ? "Venda ON" : "Venda OFF"}
+      </span>
     </button>
   );
 }
