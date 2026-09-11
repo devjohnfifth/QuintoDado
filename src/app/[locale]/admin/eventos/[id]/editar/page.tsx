@@ -12,21 +12,30 @@ export default async function EditarEventoPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: evento }, { data: tipos }] = await Promise.all([
-    supabase
-      .from("eventos")
-      .select(
-        "titulo, subtitulo, descricao, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, banner_url",
-      )
-      .eq("id", id)
-      .maybeSingle(),
-    supabase
-      .from("evento_ingresso_tipos")
-      .select("id, nome, descricao, preco_centavos, limite_mesas")
-      .eq("evento_id", id)
-      .eq("ativo", true)
-      .order("ordem"),
-  ]);
+  const [{ data: evento }, { data: tipos }, { data: imagens }, { data: apoiadores }, { data: atracoes }, { data: mestres }] =
+    await Promise.all([
+      supabase
+        .from("eventos")
+        .select(
+          "titulo, subtitulo, descricao, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, banner_url",
+        )
+        .eq("id", id)
+        .maybeSingle(),
+      supabase
+        .from("evento_ingresso_tipos")
+        .select("id, nome, descricao, preco_centavos, limite_mesas")
+        .eq("evento_id", id)
+        .eq("ativo", true)
+        .order("ordem"),
+      supabase.from("evento_imagens").select("url").eq("evento_id", id).order("ordem"),
+      supabase.from("evento_apoiadores").select("nome, logo_url, link").eq("evento_id", id).order("ordem"),
+      supabase.from("evento_atracoes").select("horario, titulo, descricao").eq("evento_id", id).order("ordem"),
+      supabase
+        .from("evento_mestres")
+        .select("profiles(id, nome_exibicao, username, avatar_url)")
+        .eq("evento_id", id)
+        .order("ordem"),
+    ]);
 
   if (!evento) notFound();
 
@@ -51,6 +60,16 @@ export default async function EditarEventoPage({
       precoReais: t.preco_centavos / 100,
       limiteMesas: t.limite_mesas,
     })),
+    imagens: (imagens ?? []).map((i) => i.url),
+    apoiadores: (apoiadores ?? []).map((a) => ({ nome: a.nome, logoUrl: a.logo_url, link: a.link ?? "" })),
+    atracoes: (atracoes ?? []).map((a) => ({
+      horario: a.horario ?? "",
+      titulo: a.titulo,
+      descricao: a.descricao ?? "",
+    })),
+    mestres: (mestres ?? [])
+      .map((m) => m.profiles as unknown as { id: string; nome_exibicao: string; username: string; avatar_url: string | null } | null)
+      .filter((p): p is NonNullable<typeof p> => p !== null),
   };
 
   return (

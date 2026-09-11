@@ -13,10 +13,14 @@ export function BannerUpload({
   value,
   onChange,
   bucket = "mesa-banners",
+  hideHint = false,
+  previewClassName = "aspect-[3/4] w-full max-w-[220px]",
 }: {
   value: string | null;
   onChange: (url: string | null) => void;
   bucket?: string;
+  hideHint?: boolean;
+  previewClassName?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
@@ -71,7 +75,7 @@ export function BannerUpload({
   return (
     <div className="space-y-2">
       {value ? (
-        <div className="relative aspect-[3/4] w-full max-w-[220px] overflow-hidden rounded-xl border border-border">
+        <div className={`relative overflow-hidden rounded-xl border border-border ${previewClassName}`}>
           <Image src={value} alt="" fill className="object-cover" sizes="320px" />
           <button
             type="button"
@@ -101,10 +105,12 @@ export function BannerUpload({
         onChange={aoEscolherArquivo}
         className="hidden"
       />
-      <p className="text-xs text-muted-foreground">
-        JPEG, PNG ou WebP, até 5MB. A imagem é cortada pra preencher o card — prefira algo
-        centralizado, sem texto importante nas bordas.
-      </p>
+      {!hideHint && (
+        <p className="text-xs text-muted-foreground">
+          JPEG, PNG ou WebP, até 5MB. A imagem é cortada pra preencher o card — prefira algo
+          centralizado, sem texto importante nas bordas.
+        </p>
+      )}
       {erro && <p className="text-xs text-destructive">{erro}</p>}
     </div>
   );

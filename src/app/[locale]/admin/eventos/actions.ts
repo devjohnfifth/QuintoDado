@@ -27,6 +27,24 @@ const tipoSchema = z.object({
   limiteMesas: z.coerce.number().int().min(1).max(99).nullable().optional(),
 });
 
+const imagemSchema = z.object({ url: z.string().url() });
+
+const apoiadorSchema = z.object({
+  nome: z.string().trim().min(1, "Nome do apoiador é obrigatório.").max(80),
+  logoUrl: z.string().url("Envie a logo do apoiador."),
+  link: z.string().trim().max(300).optional(),
+});
+
+const atracaoSchema = z.object({
+  horario: z.string().trim().max(40).optional(),
+  titulo: z.string().trim().min(1, "Título da atração é obrigatório.").max(120),
+  descricao: z.string().trim().max(300).optional(),
+});
+
+const mestreSchema = z.object({
+  usuarioId: z.string().uuid(),
+});
+
 const schema = z
   .object({
     titulo: z.string().trim().min(3, "Título muito curto.").max(120),
@@ -47,6 +65,10 @@ const schema = z
     bannerUrl: z.string().url().nullable().optional(),
     publicarAgora: z.coerce.boolean(),
     tipos: z.array(tipoSchema).min(1, "Adicione pelo menos um tipo de ingresso."),
+    imagens: z.array(imagemSchema).max(20).default([]),
+    apoiadores: z.array(apoiadorSchema).max(40).default([]),
+    atracoes: z.array(atracaoSchema).max(40).default([]),
+    mestres: z.array(mestreSchema).max(40).default([]),
   })
   .refine((d) => !d.dataFim || d.dataFim >= d.dataInicio, {
     message: "A data final não pode ser antes da data de início.",
@@ -113,10 +135,66 @@ export async function criarEventoAction(input: unknown): Promise<EventoActionRes
     return { ok: false, error: "Evento criado, mas os tipos de ingresso não salvaram. Edite o evento pra corrigir." };
   }
 
+  await salvarExtras(supabase, evento.id, d);
+
   revalidatePath("/admin/eventos");
   revalidatePath("/eventos");
   revalidatePath("/");
   return { ok: true, slug };
+}
+
+/**
+ * Galeria, apoiadores, atrações e mestres não têm nada de fora referenciando
+ * as linhas deles (diferente de evento_ingresso_tipos, que tem
+ * evento_ingressos.tipo_id apontando pra ele) — então dá pra apagar tudo e
+ * reinserir do zero a cada salvamento, bem mais simples que o diff de tipos.
+ */
+async function salvarExtras(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  eventoId: string,
+  d: z.infer<typeof schema>,
+) {
+  await Promise.all([
+    supabase.from("evento_imagens").delete().eq("evento_id", eventoId),
+    supabase.from("evento_apoiadores").delete().eq("evento_id", eventoId),
+    supabase.from("evento_atracoes").delete().eq("evento_id", eventoId),
+    supabase.from("evento_mestres").delete().eq("evento_id", eventoId),
+  ]);
+
+  await Promise.all([
+    d.imagens.length > 0
+      ? supabase.from("evento_imagens").insert(
+          d.imagens.map((img, i) => ({ evento_id: eventoId, url: img.url, ordem: i })),
+        )
+      : Promise.resolve(),
+    d.apoiadores.length > 0
+      ? supabase.from("evento_apoiadores").insert(
+          d.apoiadores.map((a, i) => ({
+            evento_id: eventoId,
+            nome: a.nome,
+            logo_url: a.logoUrl,
+            link: a.link || null,
+            ordem: i,
+          })),
+        )
+      : Promise.resolve(),
+    d.atracoes.length > 0
+      ? supabase.from("evento_atracoes").insert(
+          d.atracoes.map((a, i) => ({
+            evento_id: eventoId,
+            horario: a.horario || null,
+            titulo: a.titulo,
+            descricao: a.descricao || null,
+            ordem: i,
+          })),
+        )
+      : Promise.resolve(),
+    d.mestres.length > 0
+      ? supabase.from("evento_mestres").insert(
+          d.mestres.map((m, i) => ({ evento_id: eventoId, usuario_id: m.usuarioId, ordem: i })),
+        )
+      : Promise.resolve(),
+  ]);
 }
 
 /**
@@ -192,12 +270,40 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
     }
   }
 
+  await salvarExtras(supabase, eventoId, d);
+
   revalidatePath("/admin/eventos");
   revalidatePath(`/admin/eventos/${eventoId}`);
   revalidatePath(`/eventos/${eventoAtual.slug}`);
   revalidatePath("/eventos");
   revalidatePath("/");
   return { ok: true, slug: eventoAtual.slug };
+}
+
+export type UsuarioBusca = { id: string; nome_exibicao: string; username: string; avatar_url: string | null };
+
+export async function buscarUsuariosAction(query: string): Promise<UsuarioBusca[]> {
+  const { supabase } = await exigirAdmin();
+
+  const termo = query.trim().slice(0, 60);
+  if (termo.length < 2) return [];
+
+  // Escapa % e , — o primeiro quebraria o padrão do ilike, o segundo é o
+  // separador do .or() do PostgREST.
+  const seguro = termo.replace(/[%,]/g, "");
+  if (!seguro) return [];
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, nome_exibicao, username, avatar_url")
+    .or(`nome_exibicao.ilike.%${seguro}%,username.ilike.%${seguro}%`)
+    .limit(8);
+
+  if (error) {
+    console.error("[buscarUsuariosAction] erro:", error.message);
+    return [];
+  }
+  return data ?? [];
 }
 
 export async function mudarStatusEventoAction(eventoId: string, status: "publicado" | "encerrado" | "cancelado") {

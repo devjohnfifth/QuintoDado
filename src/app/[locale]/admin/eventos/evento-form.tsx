@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BannerUpload } from "@/components/site/banner-upload";
 import { criarEventoAction, atualizarEventoAction } from "./actions";
+import { MestrePicker, type MestreSelecionado } from "./mestre-picker";
 
 export type TipoIngressoExistente = {
   id?: string;
@@ -18,6 +19,9 @@ export type TipoIngressoExistente = {
   precoReais: number;
   limiteMesas: number | null;
 };
+
+export type ApoiadorExistente = { nome: string; logoUrl: string; link: string };
+export type AtracaoExistente = { horario: string; titulo: string; descricao: string };
 
 export type EventoExistente = {
   titulo: string;
@@ -34,9 +38,15 @@ export type EventoExistente = {
   capacidadeMaxima: number | null;
   bannerUrl: string | null;
   tipos: TipoIngressoExistente[];
+  imagens: string[];
+  apoiadores: ApoiadorExistente[];
+  atracoes: AtracaoExistente[];
+  mestres: MestreSelecionado[];
 };
 
 const TIPO_VAZIO: TipoIngressoExistente = { nome: "", descricao: "", precoReais: 0, limiteMesas: null };
+const APOIADOR_VAZIO: ApoiadorExistente = { nome: "", logoUrl: "", link: "" };
+const ATRACAO_VAZIA: AtracaoExistente = { horario: "", titulo: "", descricao: "" };
 
 export function EventoForm({
   eventoId,
@@ -54,6 +64,10 @@ export function EventoForm({
   const [tipos, setTipos] = useState<TipoIngressoExistente[]>(
     eventoExistente?.tipos && eventoExistente.tipos.length > 0 ? eventoExistente.tipos : [{ ...TIPO_VAZIO }],
   );
+  const [imagens, setImagens] = useState<string[]>(eventoExistente?.imagens ?? []);
+  const [apoiadores, setApoiadores] = useState<ApoiadorExistente[]>(eventoExistente?.apoiadores ?? []);
+  const [atracoes, setAtracoes] = useState<AtracaoExistente[]>(eventoExistente?.atracoes ?? []);
+  const [mestres, setMestres] = useState<MestreSelecionado[]>(eventoExistente?.mestres ?? []);
 
   function alterarTipo(i: number, campo: keyof TipoIngressoExistente, valor: string | number | null) {
     setTipos((atual) => atual.map((t, idx) => (idx === i ? { ...t, [campo]: valor } : t)));
@@ -61,6 +75,14 @@ export function EventoForm({
 
   function removerTipo(i: number) {
     setTipos((atual) => atual.filter((_, idx) => idx !== i));
+  }
+
+  function alterarApoiador(i: number, campo: keyof ApoiadorExistente, valor: string) {
+    setApoiadores((atual) => atual.map((a, idx) => (idx === i ? { ...a, [campo]: valor } : a)));
+  }
+
+  function alterarAtracao(i: number, campo: keyof AtracaoExistente, valor: string) {
+    setAtracoes((atual) => atual.map((a, idx) => (idx === i ? { ...a, [campo]: valor } : a)));
   }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -84,6 +106,14 @@ export function EventoForm({
       bannerUrl,
       publicarAgora,
       tipos,
+      imagens: imagens.map((url) => ({ url })),
+      apoiadores: apoiadores
+        .filter((a) => a.nome.trim() && a.logoUrl)
+        .map((a) => ({ nome: a.nome, logoUrl: a.logoUrl, link: a.link || undefined })),
+      atracoes: atracoes
+        .filter((a) => a.titulo.trim())
+        .map((a) => ({ horario: a.horario || undefined, titulo: a.titulo, descricao: a.descricao || undefined })),
+      mestres: mestres.map((m) => ({ usuarioId: m.id })),
     };
 
     startTransition(async () => {
@@ -298,6 +328,139 @@ export function EventoForm({
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-border p-4">
+        <p className="text-sm font-medium">Galeria de fotos</p>
+        <p className="text-xs text-muted-foreground">Fotos extras pra mostrar o clima do evento.</p>
+        <div className="flex flex-wrap gap-3">
+          {imagens.map((url, i) => (
+            <BannerUpload
+              key={i}
+              value={url}
+              hideHint
+              previewClassName="aspect-square w-28"
+              onChange={(nova) =>
+                setImagens((atual) => (nova ? atual.map((u, idx) => (idx === i ? nova : u)) : atual.filter((_, idx) => idx !== i)))
+              }
+              bucket="event-banners"
+            />
+          ))}
+          <BannerUpload
+            value={null}
+            hideHint
+            previewClassName="aspect-square w-28"
+            onChange={(nova) => nova && setImagens((atual) => [...atual, nova])}
+            bucket="event-banners"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-border p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium">Apoiadores</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setApoiadores((atual) => [...atual, { ...APOIADOR_VAZIO }])}
+          >
+            <Plus className="size-3.5" aria-hidden />
+            Adicionar
+          </Button>
+        </div>
+
+        {apoiadores.map((a, i) => (
+          <div key={i} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+            <BannerUpload
+              value={a.logoUrl || null}
+              hideHint
+              previewClassName="aspect-square w-16"
+              onChange={(nova) => alterarApoiador(i, "logoUrl", nova ?? "")}
+              bucket="event-banners"
+            />
+            <div className="flex-1 space-y-2">
+              <Input
+                placeholder="Nome do apoiador"
+                maxLength={80}
+                value={a.nome}
+                onChange={(e) => alterarApoiador(i, "nome", e.target.value)}
+              />
+              <Input
+                placeholder="Link (opcional)"
+                maxLength={300}
+                value={a.link}
+                onChange={(e) => alterarApoiador(i, "link", e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setApoiadores((atual) => atual.filter((_, idx) => idx !== i))}
+              className="text-muted-foreground transition-colors hover:text-destructive"
+              aria-label="Remover apoiador"
+            >
+              <Trash2 className="size-4" aria-hidden />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-border p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium">Programação / atrações</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setAtracoes((atual) => [...atual, { ...ATRACAO_VAZIA }])}
+          >
+            <Plus className="size-3.5" aria-hidden />
+            Adicionar
+          </Button>
+        </div>
+
+        {atracoes.map((a, i) => (
+          <div key={i} className="space-y-2 rounded-lg border border-border/60 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-1 gap-2">
+                <Input
+                  placeholder="Horário (ex.: 14h)"
+                  maxLength={40}
+                  className="max-w-[140px]"
+                  value={a.horario}
+                  onChange={(e) => alterarAtracao(i, "horario", e.target.value)}
+                />
+                <Input
+                  placeholder="Título da atração"
+                  maxLength={120}
+                  value={a.titulo}
+                  onChange={(e) => alterarAtracao(i, "titulo", e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setAtracoes((atual) => atual.filter((_, idx) => idx !== i))}
+                className="text-muted-foreground transition-colors hover:text-destructive"
+                aria-label="Remover atração"
+              >
+                <Trash2 className="size-4" aria-hidden />
+              </button>
+            </div>
+            <Textarea
+              placeholder="Descrição (opcional)"
+              maxLength={300}
+              rows={2}
+              value={a.descricao}
+              onChange={(e) => alterarAtracao(i, "descricao", e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-border p-4">
+        <p className="text-sm font-medium">Mestres confirmados</p>
+        <p className="text-xs text-muted-foreground">Busca por nome ou usuário entre quem já tem conta no site.</p>
+        <MestrePicker selecionados={mestres} onChange={setMestres} />
       </div>
 
       {!editando && (

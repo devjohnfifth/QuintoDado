@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Ticket } from "lucide-react";
+import { Calendar, MapPin, Ticket, Clock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
@@ -31,22 +31,43 @@ async function buscarEvento(slug: string) {
 
   if (!evento) return null;
 
-  const [{ data: tipos }, { data: mesas }] = await Promise.all([
-    supabase
-      .from("evento_ingresso_tipos")
-      .select("id, nome, descricao, preco_centavos, limite_mesas")
-      .eq("evento_id", evento.id)
-      .eq("ativo", true)
-      .order("ordem"),
-    supabase
-      .from("mesas")
-      .select(
-        "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
-      )
-      .eq("evento_id", evento.id)
-      .in("status", ["publicada", "confirmada", "em_andamento"])
-      .order("data_inicio"),
-  ]);
+  const [{ data: tipos }, { data: mesas }, { data: imagens }, { data: apoiadores }, { data: atracoes }, { data: mestresData }] =
+    await Promise.all([
+      supabase
+        .from("evento_ingresso_tipos")
+        .select("id, nome, descricao, preco_centavos, limite_mesas")
+        .eq("evento_id", evento.id)
+        .eq("ativo", true)
+        .order("ordem"),
+      supabase
+        .from("mesas")
+        .select(
+          "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
+        )
+        .eq("evento_id", evento.id)
+        .in("status", ["publicada", "confirmada", "em_andamento"])
+        .order("data_inicio"),
+      supabase.from("evento_imagens").select("url").eq("evento_id", evento.id).order("ordem"),
+      supabase.from("evento_apoiadores").select("nome, logo_url, link").eq("evento_id", evento.id).order("ordem"),
+      supabase.from("evento_atracoes").select("horario, titulo, descricao").eq("evento_id", evento.id).order("ordem"),
+      supabase
+        .from("evento_mestres")
+        .select("profiles(nome_exibicao, username, avatar_url, bio)")
+        .eq("evento_id", evento.id)
+        .order("ordem"),
+    ]);
+
+  const mestres = (mestresData ?? [])
+    .map(
+      (m) =>
+        m.profiles as unknown as {
+          nome_exibicao: string;
+          username: string;
+          avatar_url: string | null;
+          bio: string | null;
+        } | null,
+    )
+    .filter((p): p is NonNullable<typeof p> => p !== null);
 
   const {
     data: { user },
@@ -72,6 +93,10 @@ async function buscarEvento(slug: string) {
     evento,
     tipos: tipos ?? [],
     mesas: (mesas ?? []) as unknown as MesaCardData[],
+    imagens: (imagens ?? []).map((i) => i.url),
+    apoiadores: apoiadores ?? [],
+    atracoes: atracoes ?? [],
+    mestres,
     logado: Boolean(user),
     ingressoExistente,
     nomeCompletoAtual,
@@ -112,7 +137,8 @@ export default async function EventoDetalhePage({
   const resultado = await buscarEvento(slug);
   if (!resultado) notFound();
 
-  const { evento, tipos, mesas, logado, ingressoExistente, nomeCompletoAtual } = resultado;
+  const { evento, tipos, mesas, imagens, apoiadores, atracoes, mestres, logado, ingressoExistente, nomeCompletoAtual } =
+    resultado;
 
   const dataFormatada = new Date(`${evento.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -156,6 +182,59 @@ export default async function EventoDetalhePage({
       </div>
 
       <p className="mt-6 whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
+
+      {atracoes.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-heading text-xl font-bold">Programação</h2>
+          <ul className="mt-4 space-y-3 border-l-2 border-primary/30 pl-4">
+            {atracoes.map((a, i) => (
+              <li key={i}>
+                {a.horario && (
+                  <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
+                    <Clock className="size-3.5 shrink-0" aria-hidden />
+                    {a.horario}
+                  </p>
+                )}
+                <p className="font-medium">{a.titulo}</p>
+                {a.descricao && <p className="text-sm text-muted-foreground">{a.descricao}</p>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {mestres.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-heading text-xl font-bold">Mestres confirmados</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {mestres.map((m) => (
+              <div key={m.username} className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-4">
+                {m.avatar_url ? (
+                  <Image
+                    src={m.avatar_url}
+                    alt={m.nome_exibicao}
+                    width={44}
+                    height={44}
+                    className="size-11 shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
+                    {m.nome_exibicao.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="font-medium">{m.nome_exibicao}</p>
+                  {m.bio ? (
+                    <p className="truncate text-xs text-muted-foreground">{m.bio}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">@{m.username}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {mesas.length > 0 && (
         <div className="mt-10">
@@ -227,6 +306,54 @@ export default async function EventoDetalhePage({
           </div>
         )}
       </div>
+
+      {imagens.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-heading text-xl font-bold">Galeria</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {imagens.map((url, i) => (
+              <div key={i} className="relative aspect-square overflow-hidden rounded-xl border border-border">
+                <Image src={url} alt="" fill className="object-cover" sizes="(min-width: 640px) 33vw, 50vw" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {apoiadores.length > 0 && (
+        <div className="mt-10">
+          <h2 className="font-heading text-xl font-bold">Apoiadores</h2>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            {apoiadores.map((a, i) => {
+              const logo = (
+                <Image
+                  src={a.logo_url}
+                  alt={a.nome}
+                  width={72}
+                  height={72}
+                  className="size-16 rounded-lg border border-border object-cover"
+                />
+              );
+              return a.link ? (
+                <a
+                  key={i}
+                  href={a.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={a.nome}
+                  className="transition-opacity hover:opacity-80"
+                >
+                  {logo}
+                </a>
+              ) : (
+                <span key={i} title={a.nome}>
+                  {logo}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </article>
   );
 }
