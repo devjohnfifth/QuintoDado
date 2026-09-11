@@ -98,7 +98,7 @@ export default async function HomePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       {/* Bloco 1 — herói */}
-      <section className="relative overflow-hidden px-4 py-14 sm:px-6 sm:py-20">
+      <section className="relative overflow-hidden px-4 py-8 sm:px-6 sm:py-12">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-20 opacity-[0.06]"
@@ -124,15 +124,15 @@ export default async function HomePage({
             {t("hero.eyebrow")}
           </span>
 
-          <h1 className="mt-4 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
+          <h1 className="mt-3 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
             <span className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] bg-clip-text text-transparent">
               {t("hero.titulo")}
             </span>
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-3 text-lg text-muted-foreground">
             {t("hero.subtitulo")}
           </p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={SITE_LINKS.whatsappComunidade}
               target="_blank"
