@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Dices, Info, Link2, Menu, MapPin, CalendarDays } from "lucide-react";
+import { Dices, Info, Menu, MapPin, CalendarDays } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,13 +19,15 @@ export function MobileNav({ logado }: { logado: boolean }) {
   const pathname = usePathname();
   const [aberto, setAberto] = useState(false);
 
+  // Suplementos: fora do menu por enquanto (catálogo ainda "em construção"),
+  // volta quando o conteúdo estiver pronto pra valer — ver MEMORY.md.
+  // Links: fica de fora de propósito — a página só deve ser acessada como
+  // link-in-bio externo (Instagram/TikTok), nunca navegada a partir do site.
   const links = [
-    { href: "/suplementos", label: t("suplementos"), Icon: BookOpen },
     { href: "/mesas", label: t("mesas"), Icon: Dices },
     { href: "/eventos", label: t("eventos"), Icon: CalendarDays },
     { href: "/presencial-bh", label: t("presencialBh"), Icon: MapPin },
     { href: "/sobre", label: t("sobre"), Icon: Info },
-    { href: "/links", label: t("links"), Icon: Link2 },
   ] as const;
 
   return (

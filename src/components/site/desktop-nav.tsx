@@ -7,13 +7,15 @@ export function DesktopNav() {
   const t = useTranslations("Nav");
   const pathname = usePathname();
 
+  // Suplementos: fora do menu por enquanto (catálogo ainda "em construção"),
+  // volta quando o conteúdo estiver pronto pra valer — ver MEMORY.md.
+  // Links: fica de fora de propósito — a página só deve ser acessada como
+  // link-in-bio externo (Instagram/TikTok), nunca navegada a partir do site.
   const links = [
-    { href: "/suplementos", label: t("suplementos") },
     { href: "/mesas", label: t("mesas") },
     { href: "/eventos", label: t("eventos") },
     { href: "/presencial-bh", label: t("presencialBh") },
     { href: "/sobre", label: t("sobre") },
-    { href: "/links", label: t("links") },
   ] as const;
 
   return (
