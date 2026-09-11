@@ -1,5 +1,18 @@
 import Image from "next/image";
-import { Users, Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star, Wallet } from "lucide-react";
+import {
+  Users,
+  Globe,
+  MapPin,
+  Repeat,
+  Calendar,
+  Clock,
+  Flame,
+  UserPlus,
+  Lock,
+  Star,
+  Wallet,
+  CalendarDays,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
@@ -26,6 +39,7 @@ export type MesaCardData = {
   sistemas: { nome: string; slug: string } | null;
   sistema_outro: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
+  eventos?: { titulo: string } | null;
 };
 
 export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favorito?: boolean }) {
@@ -146,7 +160,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
       {/* Canhoto destacável — peça própria e completa, forma nunca muda, só a posição no hover.
           Mesma lógica do talão: quem recorta (overflow-hidden) não tem borda própria, então
           o furo cobre a borda de verdade, na mordida inteira — parada ou junto no hover. */}
-      <div className="relative w-[27%] shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:z-10 group-hover:translate-x-3 group-hover:rotate-2 sm:w-[30%]">
+      <div className="relative w-[32%] shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:z-10 group-hover:translate-x-3 group-hover:rotate-2 sm:w-[34%]">
         <div className="relative size-full overflow-hidden rounded-r-2xl">
         <span className="absolute -left-3 -top-3 z-10 size-6 rounded-full bg-background" />
         <span className="absolute -bottom-3 -left-3 z-10 size-6 rounded-full bg-background" />
@@ -157,7 +171,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
             alt=""
             fill
             className="object-cover"
-            sizes="(min-width: 640px) 15vw, 27vw"
+            sizes="(min-width: 640px) 18vw, 32vw"
           />
         ) : (
           <div
@@ -172,6 +186,12 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
 
         <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-2 sm:top-2">
+          {mesa.eventos && (
+            <span className="flex items-center gap-1 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
+              <CalendarDays className="size-2.5 shrink-0" aria-hidden />
+              Evento
+            </span>
+          )}
           {lotada ? (
             <span className="flex items-center gap-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
               <Lock className="size-2.5 shrink-0" aria-hidden />
@@ -202,7 +222,7 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
           )}
         </div>
 
-        <p className="absolute inset-x-1.5 top-1/2 -translate-y-1/2 text-center font-heading text-xs font-bold uppercase leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:inset-x-2">
+        <p className="absolute inset-x-1.5 top-1/2 line-clamp-4 -translate-y-1/2 text-center font-heading text-[11px] font-bold uppercase leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:inset-x-2 sm:text-xs">
           {mesa.titulo}
         </p>
 

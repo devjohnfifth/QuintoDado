@@ -44,7 +44,7 @@ async function buscarMesasPresenciaisBh(): Promise<MesaCardData[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados",
+      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo)",
     )
     .eq("modalidade", "presencial")
     .in("status", ["publicada", "confirmada", "em_andamento"])
