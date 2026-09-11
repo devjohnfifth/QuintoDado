@@ -76,8 +76,31 @@ presencial de `/presencial-bh` (ver `docs/Especificacao-Completa_QuintoDado_v1.m
 informativo (`cobranca_gerenciada_pelo_site = false`, nunca entra no fluxo de
 Pix). Mesa online comissionada continua só do admin.
 
+## Disciplina de qualidade (não repetir)
+
+- **Nunca engula erro de escrita no banco.** Toda Server Action que faz
+  insert/update/delete confere o `error` de cada chamada antes de retornar
+  sucesso ou redirecionar — inclusive dentro de `Promise.all` com várias
+  escritas. Uma escrita que falha e não é checada vira exatamente isto: o
+  usuário salva, não vê erro nenhum, e a mudança simplesmente não aparece
+  depois. (Aconteceu de verdade com `salvarExtras` em
+  `admin/eventos/actions.ts` — a tabela nem existia ainda, por uma migração
+  pendente, e a action retornou sucesso mesmo assim.)
+- **Depois de escrever uma migration nova, nunca assuma que ela já rodou.**
+  Antes de dizer "pronto, testa" pro usuário, confirma com um script
+  service_role (`select` na tabela/coluna nova) que ela existe de verdade no
+  banco dele. Se não existir, isso é a causa mais provável de qualquer "salvei
+  e não aparece" — descarta essa hipótese primeiro, antes de procurar bug em
+  outro lugar.
+- Código que degrada bem na ausência de uma migração (não derruba a página)
+  não é desculpa pra pular a checagem acima — degradar sem quebrar é rede de
+  segurança, não substituto de confirmar que a escrita principal funcionou.
+
 ## Antes de encerrar uma tarefa
 
 Funciona no mobile · RLS testado com usuário de outro papel · estados de
 carregamento, erro e vazio · metadata e OG nas páginas públicas · textos em
-pt-BR sem jargão · `pnpm build` e `pnpm test` passando.
+pt-BR sem jargão · `pnpm build` e `pnpm test` passando · toda escrita nova
+(insert/update/delete) tem o `error` checado, nenhuma ação "engolida" em
+`Promise.all` · se a tarefa envolveu migration nova, confirmado via
+service_role que ela já rodou antes de pedir pro usuário testar.

@@ -258,7 +258,13 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
   const idsPraDesativar = (tiposExistentes ?? []).map((t) => t.id).filter((id) => !idsNoForm.has(id));
 
   if (idsPraDesativar.length > 0) {
-    await supabase.from("evento_ingresso_tipos").update({ ativo: false }).in("id", idsPraDesativar);
+    const { error: desativaError } = await supabase
+      .from("evento_ingresso_tipos")
+      .update({ ativo: false })
+      .in("id", idsPraDesativar);
+    if (desativaError) {
+      console.error("[atualizarEventoAction] erro ao desativar tipos removidos:", desativaError.message);
+    }
   }
 
   for (const [i, t] of d.tipos.entries()) {
@@ -270,10 +276,11 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
       ordem: i,
       ativo: true,
     };
-    if (t.id) {
-      await supabase.from("evento_ingresso_tipos").update(dados).eq("id", t.id).eq("evento_id", eventoId);
-    } else {
-      await supabase.from("evento_ingresso_tipos").insert({ ...dados, evento_id: eventoId });
+    const { error: tipoError } = t.id
+      ? await supabase.from("evento_ingresso_tipos").update(dados).eq("id", t.id).eq("evento_id", eventoId)
+      : await supabase.from("evento_ingresso_tipos").insert({ ...dados, evento_id: eventoId });
+    if (tipoError) {
+      console.error(`[atualizarEventoAction] erro ao salvar tipo de ingresso "${t.nome}":`, tipoError.message);
     }
   }
 
