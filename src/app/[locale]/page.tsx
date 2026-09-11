@@ -5,6 +5,8 @@ import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { EventoCarousel } from "@/components/site/evento-carousel";
+import type { EventoCardData } from "@/components/site/evento-card";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
@@ -56,6 +58,25 @@ async function buscarMesasAbertas(): Promise<MesaCardData[]> {
   return (data ?? []) as unknown as MesaCardData[];
 }
 
+async function buscarEventosAbertos(): Promise<EventoCardData[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("slug, titulo, subtitulo, cidade_uf, data_inicio, banner_url, evento_ingresso_tipos(preco_centavos)")
+    .eq("status", "publicado")
+    .order("data_inicio", { ascending: true })
+    .limit(6);
+
+  if (error) {
+    console.error("[home] erro ao buscar eventos:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as unknown as EventoCardData[];
+}
+
 export default async function HomePage({
   params,
 }: {
@@ -63,7 +84,11 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, mesasAbertas] = await Promise.all([getTranslations("Home"), buscarMesasAbertas()]);
+  const [t, mesasAbertas, eventosAbertos] = await Promise.all([
+    getTranslations("Home"),
+    buscarMesasAbertas(),
+    buscarEventosAbertos(),
+  ]);
   const perguntasFaq = t.raw("faq.perguntas") as { pergunta: string; resposta: string }[];
 
   return (
@@ -165,6 +190,37 @@ export default async function HomePage({
           </div>
         </div>
       </Reveal>
+
+      {/* Bloco 3' — eventos publicados, some se não houver nenhum */}
+      {eventosAbertos.length > 0 && (
+        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
+          <div className="mx-auto max-w-4xl">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="font-heading text-2xl font-bold">{t("eventos.titulo")}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{t("eventos.subtitulo")}</p>
+              </div>
+              <Link
+                href="/eventos"
+                className="hidden shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline sm:inline-flex"
+              >
+                {t("eventos.verTodos")}
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </div>
+            <div className="mt-6">
+              <EventoCarousel eventos={eventosAbertos} />
+            </div>
+            <Link
+              href="/eventos"
+              className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden"
+            >
+              {t("eventos.verTodos")}
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </Reveal>
+      )}
 
       {/* Bloco 4 — mesas abertas de verdade, some se não houver nenhuma */}
       {mesasAbertas.length > 0 && (

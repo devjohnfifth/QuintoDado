@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Dices, Info, Link2, Menu, MapPin } from "lucide-react";
+import { BookOpen, Dices, Info, Link2, Menu, MapPin, CalendarDays } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
   const links = [
     { href: "/suplementos", label: t("suplementos"), Icon: BookOpen },
     { href: "/mesas", label: t("mesas"), Icon: Dices },
+    { href: "/eventos", label: t("eventos"), Icon: CalendarDays },
     { href: "/presencial-bh", label: t("presencialBh"), Icon: MapPin },
     { href: "/sobre", label: t("sobre"), Icon: Info },
     { href: "/links", label: t("links"), Icon: Link2 },

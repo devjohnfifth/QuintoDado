@@ -10,6 +10,7 @@ export function DesktopNav() {
   const links = [
     { href: "/suplementos", label: t("suplementos") },
     { href: "/mesas", label: t("mesas") },
+    { href: "/eventos", label: t("eventos") },
     { href: "/presencial-bh", label: t("presencialBh") },
     { href: "/sobre", label: t("sobre") },
     { href: "/links", label: t("links") },

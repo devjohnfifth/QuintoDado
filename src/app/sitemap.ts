@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 const ROTAS_ESTATICAS = [
   "",
   "/mesas",
+  "/eventos",
   "/presencial-bh",
   "/sobre",
   "/links",
@@ -32,9 +33,26 @@ async function buscarSlugsDeMesas() {
   return data ?? [];
 }
 
+async function buscarSlugsDeEventos() {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("slug, atualizado_em")
+    .eq("status", "publicado");
+
+  if (error) {
+    console.error("[sitemap] erro ao buscar eventos:", error.message);
+  }
+
+  return data ?? [];
+}
+
 const PRIORIDADE: Record<string, number> = {
   "": 1,
   "/mesas": 0.9,
+  "/eventos": 0.8,
   "/presencial-bh": 0.8,
   "/sobre": 0.7,
   "/links": 0.6,
@@ -48,7 +66,7 @@ const PRIORIDADE: Record<string, number> = {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const mesas = await buscarSlugsDeMesas();
+  const [mesas, eventos] = await Promise.all([buscarSlugsDeMesas(), buscarSlugsDeEventos()]);
 
   return [
     ...ROTAS_ESTATICAS.map((rota) => ({
@@ -62,6 +80,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(mesa.atualizado_em as string),
       changeFrequency: "daily" as const,
       priority: 0.8,
+    })),
+    ...eventos.map((evento) => ({
+      url: `${site}/eventos/${evento.slug}`,
+      lastModified: new Date(evento.atualizado_em as string),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     })),
   ];
 }
