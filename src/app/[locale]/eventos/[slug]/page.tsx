@@ -151,7 +151,7 @@ export default async function EventoDetalhePage({
   );
 
   return (
-    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl">
       {evento.banner_url && (
         <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
           <Image
@@ -159,7 +159,7 @@ export default async function EventoDetalhePage({
             alt={evento.titulo}
             fill
             className="object-cover"
-            sizes="(min-width: 672px) 672px, 100vw"
+            sizes="(min-width: 1024px) 1024px, (min-width: 672px) 672px, 100vw"
             priority
           />
         </div>
@@ -182,7 +182,7 @@ export default async function EventoDetalhePage({
         </span>
       </div>
 
-      <p className="mt-6 whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
+      <p className="mt-6 max-w-2xl whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
 
       {(atracoes.length > 0 || mestres.length > 0) && (
         <div
@@ -251,7 +251,7 @@ export default async function EventoDetalhePage({
       {mesas.length > 0 && (
         <div className="mt-10">
           <h2 className="font-heading text-xl font-bold">Mesas do evento</h2>
-          <div className="mt-4 grid gap-4">
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {mesas.map((mesa) => (
               <MesaCard key={mesa.slug} mesa={mesa} />
             ))}
@@ -288,7 +288,7 @@ export default async function EventoDetalhePage({
             Ainda não tem ingresso disponível pra esse evento.
           </p>
         ) : (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tipos.map((tipo) => (
               <div key={tipo.id} className="flex flex-col rounded-xl border border-border bg-card/60 p-5">
                 <p className="font-heading font-bold">{tipo.nome}</p>

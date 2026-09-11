@@ -17,7 +17,7 @@ export function GaleriaLightbox({ imagens }: { imagens: string[] }) {
 
   return (
     <>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {imagens.map((url, i) => (
           <button
             key={i}
@@ -30,7 +30,7 @@ export function GaleriaLightbox({ imagens }: { imagens: string[] }) {
               alt=""
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(min-width: 640px) 33vw, 50vw"
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
             />
           </button>
         ))}
