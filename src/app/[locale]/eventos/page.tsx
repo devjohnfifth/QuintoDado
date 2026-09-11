@@ -32,7 +32,7 @@ export default async function EventosPage() {
   const eventos = await buscarEventos();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-[10vw]">
+    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
       <h1 className="font-heading text-3xl font-bold sm:text-4xl">Eventos</h1>
       <p className="mt-2 text-muted-foreground">
         Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.
