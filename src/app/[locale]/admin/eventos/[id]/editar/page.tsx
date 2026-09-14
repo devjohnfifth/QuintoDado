@@ -23,7 +23,7 @@ export default async function EditarEventoPage({
         .maybeSingle(),
       supabase
         .from("evento_ingresso_tipos")
-        .select("id, nome, descricao, preco_centavos, limite_mesas")
+        .select("id, nome, descricao, preco_centavos, limite_mesas, quantidade_maxima")
         .eq("evento_id", id)
         .eq("ativo", true)
         .order("ordem"),
@@ -59,6 +59,7 @@ export default async function EditarEventoPage({
       descricao: t.descricao ?? "",
       precoReais: t.preco_centavos / 100,
       limiteMesas: t.limite_mesas,
+      quantidadeMaxima: t.quantidade_maxima,
     })),
     imagens: (imagens ?? []).map((i) => i.url),
     apoiadores: (apoiadores ?? []).map((a) => ({ nome: a.nome, logoUrl: a.logo_url, link: a.link ?? "" })),

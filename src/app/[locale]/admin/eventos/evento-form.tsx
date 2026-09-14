@@ -18,6 +18,7 @@ export type TipoIngressoExistente = {
   descricao: string;
   precoReais: number;
   limiteMesas: number | null;
+  quantidadeMaxima: number | null;
 };
 
 export type ApoiadorExistente = { nome: string; logoUrl: string; link: string };
@@ -44,7 +45,13 @@ export type EventoExistente = {
   mestres: MestreSelecionado[];
 };
 
-const TIPO_VAZIO: TipoIngressoExistente = { nome: "", descricao: "", precoReais: 0, limiteMesas: null };
+const TIPO_VAZIO: TipoIngressoExistente = {
+  nome: "",
+  descricao: "",
+  precoReais: 0,
+  limiteMesas: null,
+  quantidadeMaxima: null,
+};
 const APOIADOR_VAZIO: ApoiadorExistente = { nome: "", logoUrl: "", link: "" };
 const ATRACAO_VAZIA: AtracaoExistente = { horario: "", titulo: "", descricao: "" };
 
@@ -323,6 +330,21 @@ export function EventoForm({
                   placeholder="Sem limite"
                   value={t.limiteMesas ?? ""}
                   onChange={(e) => alterarTipo(i, "limiteMesas", e.target.value ? Number(e.target.value) : null)}
+                />
+              </div>
+              <div className="max-w-[200px] space-y-1">
+                <Label htmlFor={`tipo-quantidade-${i}`} className="text-xs text-muted-foreground">
+                  Quantidade disponível (opcional)
+                </Label>
+                <Input
+                  id={`tipo-quantidade-${i}`}
+                  type="number"
+                  min={1}
+                  placeholder="Sem limite"
+                  value={t.quantidadeMaxima ?? ""}
+                  onChange={(e) =>
+                    alterarTipo(i, "quantidadeMaxima", e.target.value ? Number(e.target.value) : null)
+                  }
                 />
               </div>
             </div>

@@ -36,7 +36,7 @@ async function buscarEvento(slug: string) {
     await Promise.all([
       supabase
         .from("evento_ingresso_tipos")
-        .select("id, nome, descricao, preco_centavos, limite_mesas")
+        .select("id, nome, descricao, preco_centavos, limite_mesas, quantidade_maxima, ingressos_vendidos_tipo")
         .eq("evento_id", evento.id)
         .eq("ativo", true)
         .order("ordem"),
@@ -303,39 +303,48 @@ export default async function EventoDetalhePage({
           </p>
         ) : (
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tipos.map((tipo) => (
-              <div key={tipo.id} className="flex flex-col rounded-xl border border-border bg-card/60 p-5">
-                <p className="font-heading font-bold">{tipo.nome}</p>
-                {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
-                <p className="mt-3 font-heading text-2xl font-bold text-primary">
-                  {formatBRL(tipo.preco_centavos)}
-                </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {tipo.limite_mesas
-                    ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
-                    : "Candidatura em qualquer mesa do evento"}
-                </p>
-                <div className="mt-4">
-                  {evento.vendas_abertas ? (
-                    <ComprarIngressoButton
-                      eventoId={evento.id}
-                      tipoId={tipo.id}
-                      tipoNome={tipo.nome}
-                      precoCentavos={tipo.preco_centavos}
-                      slug={slug}
-                      chavePix={evento.chave_pix}
-                      whatsappConfirmacao={evento.whatsapp_confirmacao}
-                      nomeCompletoAtual={nomeCompletoAtual}
-                      telefoneAtual={telefoneAtual}
-                    />
-                  ) : (
-                    <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
-                      Vendas indisponíveis no momento.
-                    </p>
-                  )}
+            {tipos.map((tipo) => {
+              const tipoEsgotado = Boolean(
+                tipo.quantidade_maxima && tipo.ingressos_vendidos_tipo >= tipo.quantidade_maxima,
+              );
+              return (
+                <div key={tipo.id} className="flex flex-col rounded-xl border border-border bg-card/60 p-5">
+                  <p className="font-heading font-bold">{tipo.nome}</p>
+                  {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
+                  <p className="mt-3 font-heading text-2xl font-bold text-primary">
+                    {formatBRL(tipo.preco_centavos)}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {tipo.limite_mesas
+                      ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
+                      : "Candidatura em qualquer mesa do evento"}
+                  </p>
+                  <div className="mt-4">
+                    {!evento.vendas_abertas ? (
+                      <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
+                        Vendas indisponíveis no momento.
+                      </p>
+                    ) : tipoEsgotado ? (
+                      <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
+                        Esgotado.
+                      </p>
+                    ) : (
+                      <ComprarIngressoButton
+                        eventoId={evento.id}
+                        tipoId={tipo.id}
+                        tipoNome={tipo.nome}
+                        precoCentavos={tipo.preco_centavos}
+                        slug={slug}
+                        chavePix={evento.chave_pix}
+                        whatsappConfirmacao={evento.whatsapp_confirmacao}
+                        nomeCompletoAtual={nomeCompletoAtual}
+                        telefoneAtual={telefoneAtual}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

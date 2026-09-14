@@ -42,7 +42,12 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
       .select("titulo, status, capacidade_maxima, ingressos_vendidos, vendas_abertas")
       .eq("id", eventoId)
       .single(),
-    supabase.from("evento_ingresso_tipos").select("nome, ativo").eq("id", tipoId).eq("evento_id", eventoId).single(),
+    supabase
+      .from("evento_ingresso_tipos")
+      .select("nome, ativo, quantidade_maxima, ingressos_vendidos_tipo")
+      .eq("id", tipoId)
+      .eq("evento_id", eventoId)
+      .single(),
   ]);
 
   if (!evento || evento.status !== "publicado") {
@@ -56,6 +61,9 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
   }
   if (evento.capacidade_maxima && evento.ingressos_vendidos >= evento.capacidade_maxima) {
     return { ok: false, error: "As vagas desse evento esgotaram." };
+  }
+  if (tipo.quantidade_maxima && tipo.ingressos_vendidos_tipo >= tipo.quantidade_maxima) {
+    return { ok: false, error: "Esse tipo de ingresso esgotou." };
   }
 
   const nomeFinal = perfil?.nome_completo || nomeCompleto;
