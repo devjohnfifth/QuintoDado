@@ -8,6 +8,7 @@ import { EventoCarousel } from "@/components/site/evento-carousel";
 import type { EventoCardData } from "@/components/site/evento-card";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { jsonLdSeguro } from "@/lib/json-ld";
 import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
 
 const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -94,7 +95,7 @@ export default async function HomePage({
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       {/* Bloco 1 — herói */}
       <section className="relative overflow-hidden px-4 py-8 sm:px-6 sm:py-12">
@@ -278,7 +279,7 @@ export default async function HomePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: jsonLdSeguro({
             "@context": "https://schema.org",
             "@type": "FAQPage",
             mainEntity: perguntasFaq.map((item) => ({

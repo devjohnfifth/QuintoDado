@@ -40,7 +40,7 @@ const schema = z
     titulo: z.string().trim().min(3, "Título muito curto.").max(120),
     sistemaId: z.string().uuid("Escolha um sistema."),
     sistemaOutroNome: z.string().trim().max(60).optional(),
-    sinopse: z.string().trim().min(10, "Conte um pouco mais sobre a mesa.").max(2000),
+    sinopse: z.string().trim().min(10, "Conte um pouco mais sobre a mesa.").max(20000),
     cidadeUf: z.string().trim().min(3, "Informe a cidade.").max(80),
     dataInicio: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Data inválida."),
     horarioInicio: z.string().regex(/^\d{2}:\d{2}$/, "Horário inválido."),

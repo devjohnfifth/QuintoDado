@@ -3,11 +3,8 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ImageUp, X, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { enviarImagem } from "@/lib/storage/enviar-imagem";
 import { Button } from "@/components/ui/button";
-
-const TIPOS_ACEITOS = ["image/jpeg", "image/png", "image/webp"];
-const TAMANHO_MAXIMO = 5 * 1024 * 1024;
 
 export function BannerUpload({
   value,
@@ -32,43 +29,16 @@ export function BannerUpload({
     if (!arquivo) return;
 
     setErro(null);
-
-    if (!TIPOS_ACEITOS.includes(arquivo.type)) {
-      setErro("Use uma imagem JPEG, PNG ou WebP.");
-      return;
-    }
-    if (arquivo.size > TAMANHO_MAXIMO) {
-      setErro("A imagem precisa ter até 5MB.");
-      return;
-    }
-
     setEnviando(true);
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      setErro("Sua sessão expirou. Recarregue a página.");
+
+    const resultado = await enviarImagem(arquivo, bucket);
+    if (!resultado.ok) {
+      setErro(resultado.erro);
       setEnviando(false);
       return;
     }
 
-    const extensao = arquivo.name.split(".").pop() ?? "jpg";
-    const caminho = `${user.id}/${Date.now()}.${extensao}`;
-
-    const { error } = await supabase.storage.from(bucket).upload(caminho, arquivo, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-    if (error) {
-      setErro("Não deu pra enviar a imagem. Tente de novo.");
-      setEnviando(false);
-      return;
-    }
-
-    const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(caminho);
-    onChange(publicUrlData.publicUrl);
+    onChange(resultado.url);
     setEnviando(false);
   }
 

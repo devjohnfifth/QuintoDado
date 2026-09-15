@@ -6,7 +6,6 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
+import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
 import { criarMesaPresencial, atualizarMesaPresencialAction } from "./actions";
 
@@ -134,14 +134,7 @@ export function NovaMesaForm({
 
       <div className="space-y-2">
         <Label htmlFor="sinopse">{t("campoSinopse")}</Label>
-        <Textarea
-          id="sinopse"
-          name="sinopse"
-          required
-          maxLength={2000}
-          rows={4}
-          defaultValue={mesaExistente?.sinopse}
-        />
+        <EditorMarkdown name="sinopse" defaultValue={mesaExistente?.sinopse ?? ""} />
       </div>
 
       <div className="space-y-2">

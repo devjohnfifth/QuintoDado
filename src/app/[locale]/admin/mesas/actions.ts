@@ -127,7 +127,7 @@ const schema = z
     titulo: z.string().trim().min(3).max(120),
     sistemaId: z.string().uuid("Escolha um sistema."),
     sistemaOutroNome: z.string().trim().max(60).optional(),
-    sinopse: z.string().trim().min(10).max(2000),
+    sinopse: z.string().trim().min(10).max(20000),
     tipo: z.enum(["one_shot", "aventura", "campanha"]),
     modalidade: z.enum(["online", "presencial"]),
     cidadeUf: z.string().trim().max(80).optional(),
@@ -160,6 +160,35 @@ const schema = z
   .refine((d) => d.dataInicio >= hojeNoBrasil(), {
     message: "A data de início não pode ser no passado.",
     path: ["dataInicio"],
+  })
+  // Tipo, frequência e nº de sessões descrevem a mesma coisa por ângulos
+  // diferentes — sem amarrar os três dá pra salvar "Campanha de sessão única"
+  // ou "Aventura fechada" sem saber quantas sessões são (e aí não dá pra
+  // calcular quando ela termina).
+  .superRefine((d, ctx) => {
+    if (d.tipo === "one_shot" && d.frequencia !== "unica") {
+      ctx.addIssue({
+        code: "custom",
+        message: "One-shot é sessão única. Pra mais de uma sessão, use aventura fechada ou campanha.",
+        path: ["frequencia"],
+      });
+    }
+
+    if (d.tipo !== "one_shot" && d.frequencia === "unica") {
+      ctx.addIssue({
+        code: "custom",
+        message: "Aventura fechada e campanha acontecem em mais de uma sessão — escolha a frequência.",
+        path: ["frequencia"],
+      });
+    }
+
+    if (d.tipo === "aventura" && (d.qtdSessoes === undefined || d.qtdSessoes < 2)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Aventura fechada precisa do nº de sessões previstas (2 ou mais).",
+        path: ["qtdSessoes"],
+      });
+    }
   });
 
 export type CriarMesaAdminResult = { ok: true; slug: string } | { ok: false; error: string };

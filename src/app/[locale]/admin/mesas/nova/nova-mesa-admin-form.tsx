@@ -5,7 +5,6 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarDays } from "lucide-react";
 import {
@@ -16,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BannerUpload } from "@/components/site/banner-upload";
+import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
 import { criarMesaAdmin, atualizarMesaAction } from "../actions";
 
@@ -206,7 +206,11 @@ export function NovaMesaAdminForm({
             onValueChange={(v) => {
               if (!v) return;
               setTipo(v);
+              // Mantém a frequência coerente com o tipo: se não fizer isso, o
+              // valor antigo continua no state (escondido) e o servidor recusa
+              // apontando pra um campo que a pessoa nem está vendo.
               if (v === "one_shot") setFrequencia("unica");
+              else if (frequencia === "unica") setFrequencia("semanal");
             }}
           >
             <SelectTrigger id="tipo" className="w-full">
@@ -222,15 +226,8 @@ export function NovaMesaAdminForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="sinopse">Sinopse</Label>
-        <Textarea
-          id="sinopse"
-          name="sinopse"
-          required
-          maxLength={2000}
-          rows={4}
-          defaultValue={mesaExistente?.sinopse}
-        />
+        <Label htmlFor="sinopse">Descrição</Label>
+        <EditorMarkdown name="sinopse" defaultValue={mesaExistente?.sinopse ?? ""} />
       </div>
 
       <div className="space-y-2">
@@ -353,6 +350,10 @@ export function NovaMesaAdminForm({
         </div>
       </div>
 
+      {/* One-shot é sempre sessão única (a frequência nem aparece). Aventura
+          fechada e campanha são recorrentes, então "Sessão única" sai das
+          opções; só a aventura fechada tem nº de sessões, porque campanha é
+          aberta por definição. */}
       {tipo !== "one_shot" && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -362,25 +363,28 @@ export function NovaMesaAdminForm({
                 <SelectValue>{(v: string) => FREQUENCIA_LABEL[v] ?? v}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="unica">Sessão única (one-shot)</SelectItem>
                 <SelectItem value="semanal">Semanal</SelectItem>
                 <SelectItem value="quinzenal">Quinzenal</SelectItem>
                 <SelectItem value="mensal">Mensal</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          {frequencia !== "unica" && (
+          {tipo === "aventura" && (
             <div className="space-y-2">
               <Label htmlFor="qtdSessoes">Nº de sessões previstas</Label>
               <Input
                 id="qtdSessoes"
                 name="qtdSessoes"
                 type="number"
-                min={1}
+                min={2}
                 max={999}
-                placeholder="Deixe em branco se for campanha aberta"
+                required
+                placeholder="Ex.: 4"
                 defaultValue={mesaExistente?.qtdSessoes ?? undefined}
               />
+              <p className="text-xs text-muted-foreground">
+                É o que define quando a aventura termina.
+              </p>
             </div>
           )}
         </div>

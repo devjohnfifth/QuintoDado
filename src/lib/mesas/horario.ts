@@ -33,6 +33,38 @@ export function diasParaComeco(dataInicio: string) {
   return Math.round((inicio.getTime() - hoje.getTime()) / 86_400_000);
 }
 
+const DIAS_ENTRE_SESSOES: Record<string, number> = {
+  semanal: 7,
+  quinzenal: 14,
+  mensal: 30,
+};
+
+/**
+ * Data prevista da última sessão, em YYYY-MM-DD.
+ *
+ * One-shot acaba no próprio dia. Aventura fechada tem nº de sessões definido,
+ * então dá pra estimar o fim. Campanha é aberta por definição — devolve
+ * `null`, e quem chama decide como mostrar isso.
+ *
+ * É estimativa: sessão remarcada ou pulada muda o fim real.
+ */
+export function dataFimPrevista(mesa: {
+  tipo: string;
+  frequencia: string;
+  qtd_sessoes: number | null;
+  data_inicio: string;
+}): string | null {
+  if (mesa.tipo === "one_shot" || mesa.frequencia === "unica") return mesa.data_inicio;
+  if (mesa.tipo !== "aventura" || !mesa.qtd_sessoes || mesa.qtd_sessoes < 2) return null;
+
+  const intervalo = DIAS_ENTRE_SESSOES[mesa.frequencia];
+  if (!intervalo) return null;
+
+  const fim = new Date(`${mesa.data_inicio}T00:00:00`);
+  fim.setDate(fim.getDate() + (mesa.qtd_sessoes - 1) * intervalo);
+  return new Intl.DateTimeFormat("en-CA").format(fim);
+}
+
 /** "Semanal · domingo às 18:30" — mesmo padrão do Tavernaria/MesaQuest. */
 export function formatarFrequenciaEHorario(
   dataInicio: string,

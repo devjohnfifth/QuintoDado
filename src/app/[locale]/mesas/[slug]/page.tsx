@@ -15,6 +15,8 @@ import {
   FREQUENCIA_LABEL,
   limiteIdadeClassificacao,
 } from "@/lib/mesas/labels";
+import { dataFimPrevista } from "@/lib/mesas/horario";
+import { jsonLdSeguro } from "@/lib/json-ld";
 import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
 import { ShareButton } from "./share-button";
@@ -158,6 +160,8 @@ export default async function MesaDetalhePage({
     { day: "2-digit", month: "long", year: "numeric" },
   );
 
+  const fimPrevisto = dataFimPrevista(mesa);
+
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const jsonLd = {
     "@context": "https://schema.org",
@@ -207,11 +211,11 @@ export default async function MesaDetalhePage({
     <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }}
       />
       <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
         <Link href="/" className="hover:text-foreground hover:underline">
@@ -294,6 +298,16 @@ export default async function MesaDetalhePage({
           <dd className="font-medium">
             {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
             {mesa.qtd_sessoes ? ` (${mesa.qtd_sessoes} sessões)` : ""}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-muted-foreground">Encerramento</dt>
+          <dd className="font-medium">
+            {mesa.tipo === "campanha"
+              ? "Campanha aberta"
+              : fimPrevisto
+                ? `Por volta de ${new Date(`${fimPrevisto}T00:00:00`).toLocaleDateString("pt-BR")}`
+                : "—"}
           </dd>
         </div>
         <div>
