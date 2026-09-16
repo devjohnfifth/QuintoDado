@@ -22,7 +22,7 @@ export function DesktopNav() {
   return (
     <nav className="hidden items-center gap-1 text-sm sm:flex">
       {links.map((link) => {
-        const ativo = pathname === link.href;
+        const ativo = pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (
           <Link
             key={link.href}
@@ -35,7 +35,7 @@ export function DesktopNav() {
             {link.label}
             <span
               aria-hidden
-              className={`absolute inset-x-3 -bottom-px h-px origin-left scale-x-0 bg-gradient-to-r from-[#4F7DF3] to-[#A855F7] transition-transform duration-200 ease-out group-hover:scale-x-100 ${
+              className={`absolute inset-x-3 -bottom-px h-px origin-left scale-x-0 bg-marca transition-transform duration-200 ease-out group-hover:scale-x-100 ${
                 ativo ? "scale-x-100" : ""
               }`}
             />

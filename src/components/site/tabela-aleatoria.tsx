@@ -112,7 +112,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
             <button
               type="button"
               onClick={() => aplicar(rolarTudo(tabelas), "tudo")}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-1.5 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02] sm:ml-auto"
+              className="inline-flex items-center gap-2 rounded-full bg-marca px-4 py-1.5 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02] sm:ml-auto"
             >
               <Dices className={`size-4 ${animando === "tudo" ? "animate-spin" : ""}`} aria-hidden />
               {t("rolarTudo")}
@@ -139,7 +139,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
               <button
                 type="button"
                 onClick={() => rolar(tabela.chave)}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+                className="inline-flex items-center gap-2 rounded-full bg-marca px-4 py-2 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
               >
                 <Dices className={`size-4 ${animando === tabela.chave ? "animate-spin" : ""}`} aria-hidden />
                 {t("rolar", { dado: tabela.dado })}

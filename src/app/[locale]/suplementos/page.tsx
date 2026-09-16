@@ -6,6 +6,11 @@ import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
 import { SuplementoCard } from "@/components/site/suplemento-card";
+import { Container } from "@/components/site/container";
+import { PageHeader } from "@/components/site/page-header";
+import { EstadoVazio } from "@/components/site/estado-vazio";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { buttonVariants } from "@/components/ui/button";
 import { listarSuplementos } from "@/lib/suplementos/publico";
 import { TIPO_SUPLEMENTO, TIPOS_SUPLEMENTO, type TipoSuplemento } from "@/lib/suplementos/labels";
 import emConstrucao from "@/assets/brand/em-construcao.svg";
@@ -54,14 +59,8 @@ export default async function SuplementosPage({
   const temFiltroAtivo = Boolean(filtros.sistema || filtros.tipo);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-      <Reveal>
-        <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-          <BookOpen className="size-5" aria-hidden />
-        </div>
-        <h1 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">{t("titulo")}</h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">{t("subtitulo")}</p>
-      </Reveal>
+    <Container className="py-16">
+      <PageHeader icone={BookOpen} titulo={t("titulo")} subtitulo={t("subtitulo")} />
 
       {todos.length > 0 && (
         <Reveal className="mt-8">
@@ -71,7 +70,7 @@ export default async function SuplementosPage({
                 name="sistema"
                 defaultValue={filtros.sistema ?? ""}
                 aria-label={t("todosSistemas")}
-                className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+                className="h-10 rounded-full border border-border bg-card/60 px-4 text-sm"
               >
                 <option value="">{t("todosSistemas")}</option>
                 {sistemas.map((s) => (
@@ -85,7 +84,7 @@ export default async function SuplementosPage({
               name="tipo"
               defaultValue={filtros.tipo ?? ""}
               aria-label={t("todosTipos")}
-              className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+              className="h-10 rounded-full border border-border bg-card/60 px-4 text-sm"
             >
               <option value="">{t("todosTipos")}</option>
               {tipos.map((tp) => (
@@ -94,17 +93,11 @@ export default async function SuplementosPage({
                 </option>
               ))}
             </select>
-            <button
-              type="submit"
-              className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-2 text-sm font-medium text-white"
-            >
+            <button type="submit" className={buttonVariants({ variant: "marca" })}>
               {t("filtrar")}
             </button>
             {temFiltroAtivo && (
-              <Link
-                href="/suplementos"
-                className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              >
+              <Link href="/suplementos" className={buttonVariants({ variant: "ghost", className: "rounded-full" })}>
                 {t("limpar")}
               </Link>
             )}
@@ -114,35 +107,31 @@ export default async function SuplementosPage({
 
       <Reveal className="mt-6">
         {suplementos.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <Image src={emConstrucao} alt="" className="mx-auto h-28 w-28" />
-            <p className="mt-4 font-heading text-lg font-bold">
-              {temFiltroAtivo ? t("semResultadoTitulo") : t("vazioTitulo")}
-            </p>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-              {temFiltroAtivo ? t("semResultadoCorpo") : t("vazioCorpo")}
-            </p>
-            {!temFiltroAtivo && (
-              <a
-                href={SITE_LINKS.whatsappComunidade}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-block rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-2.5 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02]"
-              >
-                {t("cta")}
-              </a>
-            )}
-          </div>
+          <EstadoVazio
+            imagem={<Image src={emConstrucao} alt="" className="mx-auto h-28 w-28" />}
+            titulo={temFiltroAtivo ? t("semResultadoTitulo") : t("vazioTitulo")}
+            corpo={temFiltroAtivo ? t("semResultadoCorpo") : t("vazioCorpo")}
+            acao={
+              !temFiltroAtivo && (
+                <a
+                  href={SITE_LINKS.whatsappComunidade}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({ variant: "marca" })}
+                >
+                  {t("cta")}
+                </a>
+              )
+            }
+          />
         ) : (
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {suplementos.map((s) => (
-              <li key={s.slug}>
-                <SuplementoCard suplemento={s} />
-              </li>
-            ))}
-          </ul>
+          <GradeAdaptavel
+            itens={suplementos}
+            chave={(s) => s.slug}
+            render={(s, destaque) => <SuplementoCard suplemento={s} destaque={destaque} />}
+          />
         )}
       </Reveal>
-    </div>
+    </Container>
   );
 }

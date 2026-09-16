@@ -83,7 +83,7 @@ export function ComprarIngressoButton({
 
   return (
     <>
-      <Button className="w-full" onClick={() => setOpen(true)}>
+      <Button variant="marca" className="w-full" onClick={() => setOpen(true)}>
         Comprar
       </Button>
 
@@ -139,7 +139,7 @@ export function ComprarIngressoButton({
                 >
                   <span className="truncate">{chavePix}</span>
                   {copiado ? (
-                    <Check className="size-4 shrink-0 text-emerald-400" aria-hidden />
+                    <Check className="size-4 shrink-0 text-sucesso" aria-hidden />
                   ) : (
                     <Copy className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                   )}
@@ -148,14 +148,14 @@ export function ComprarIngressoButton({
             )}
 
             {whatsappConfirmacao && (
-              <div className="space-y-2 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+              <div className="space-y-2 rounded-lg border border-alerta/30 bg-alerta/5 p-3">
                 <a
                   href={`https://wa.me/55${whatsappConfirmacao.replace(/\D/g, "")}?text=${encodeURIComponent(
                     `Oi! Comprei o ingresso "${tipoNome}" e vou mandar o comprovante do Pix.`,
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-500"
+                  className="flex items-center justify-center gap-2 rounded-full bg-sucesso/90 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-sucesso"
                 >
                   <MessageCircle className="size-4 shrink-0" aria-hidden />
                   Abrir WhatsApp e mandar o comprovante
@@ -174,7 +174,7 @@ export function ComprarIngressoButton({
           </div>
 
           <DialogFooter>
-            <Button disabled={pending} onClick={confirmar} className="w-full">
+            <Button variant="marca" disabled={pending} onClick={confirmar} className="w-full">
               {pending ? "Enviando..." : "Já paguei, enviar solicitação"}
             </Button>
           </DialogFooter>

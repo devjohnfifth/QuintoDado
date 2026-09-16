@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Calendar, CalendarDays, CheckCircle2, Clock, Globe, LogIn, MapPin, Repeat, Ticket, UserPlus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { Container } from "@/components/site/container";
+import { Selo } from "@/components/site/selo";
+import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
+import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
@@ -201,208 +206,268 @@ export default async function MesaDetalhePage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Início", item: site },
-      { "@type": "ListItem", position: 2, name: "Mesas", item: `${site}/mesas` },
+      { "@type": "ListItem", position: 1, name: t("breadcrumbInicio"), item: site },
+      { "@type": "ListItem", position: 2, name: t("breadcrumbMesas"), item: `${site}/mesas` },
       { "@type": "ListItem", position: 3, name: mesa.titulo, item: `${site}/mesas/${slug}` },
     ],
   };
 
+  const vagasLivres = Math.max(0, mesa.vagas_total - mesa.vagas_preenchidas);
+  const lotada = vagasLivres === 0;
+  const ocupacao = mesa.vagas_total > 0 ? Math.min(100, Math.round((mesa.vagas_preenchidas / mesa.vagas_total) * 100)) : 0;
+  const diaSemana = new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", { weekday: "long" });
+  const preco = mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos);
+  const jogadores = mesa.jogadores_aprovados ?? [];
+
+  // A ação principal da página, decidida uma vez e usada no cartão de resumo
+  // e na barra fixa do celular. `null` = não há o que fazer (só mostra o status).
+  const podeCandidatar =
+    logado && !ehMestre && !inscricao && !idadeInsuficiente && !(mesa.eventos && !ingressoEventoAprovado) && !lotada;
+  const acaoPrincipal = ehMestre ? null : !logado ? (
+    <Link
+      href={{ pathname: "/entrar", query: { next: `/mesas/${slug}` } }}
+      className={buttonVariants({ variant: "marca", size: "lg", className: "w-full" })}
+    >
+      <LogIn className="size-4" aria-hidden />
+      {t("entrarPraCandidatar")}
+    </Link>
+  ) : podeCandidatar ? (
+    <a href="#candidatura" className={buttonVariants({ variant: "marca", size: "lg", className: "w-full" })}>
+      <UserPlus className="size-4" aria-hidden />
+      {t("candidatar")}
+    </a>
+  ) : null;
+  const statusResumo = ehMestre
+    ? t("voceMestra")
+    : inscricao?.status === "aprovado"
+      ? t("confirmadoNaMesa")
+      : inscricao
+        ? t("candidaturaEnviada")
+        : null;
+
   return (
-    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }}
-      />
-      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Link href="/" className="hover:text-foreground hover:underline">
-          Início
-        </Link>
-        <span aria-hidden>/</span>
-        <Link href="/mesas" className="hover:text-foreground hover:underline">
-          Mesas
-        </Link>
-        <span aria-hidden>/</span>
-        <span className="truncate text-foreground/80">{mesa.titulo}</span>
-      </nav>
-      {mesa.banner_url && (
-        <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
-          <Image
-            src={mesa.banner_url}
-            alt={mesa.titulo}
-            fill
-            className="object-cover"
-            sizes="(min-width: 1024px) 1024px, (min-width: 672px) 672px, 100vw"
-            priority
-          />
-        </div>
-      )}
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {mesa.sistema_outro || mesa.sistemas?.nome || "—"} · {TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}
-        </p>
-        <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
-      </div>
-      {mesa.eventos && (
-        <Link
-          href={`/eventos/${mesa.eventos.slug}`}
-          className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-medium text-primary hover:underline"
-        >
-          Mesa do evento {mesa.eventos.titulo}
-        </Link>
-      )}
-      <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">{mesa.titulo}</h1>
-      {mesa.profiles?.nome_exibicao && (
-        <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-          {mesa.profiles.avatar_url ? (
+    <article className={acaoPrincipal ? "pb-24 sm:pb-0" : undefined}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
+
+      <Container className="py-10 sm:py-16">
+        <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
+          <Link href="/" className="hover:text-foreground hover:underline">
+            {t("breadcrumbInicio")}
+          </Link>
+          <span aria-hidden>/</span>
+          <Link href="/mesas" className="hover:text-foreground hover:underline">
+            {t("breadcrumbMesas")}
+          </Link>
+          <span aria-hidden>/</span>
+          <span className="truncate text-foreground/80">{mesa.titulo}</span>
+        </nav>
+
+        {mesa.banner_url && (
+          <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
             <Image
-              src={mesa.profiles.avatar_url}
-              alt=""
-              width={20}
-              height={20}
-              className="size-5 rounded-full object-cover"
+              src={mesa.banner_url}
+              alt={mesa.titulo}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 768px, 100vw"
+              priority
             />
-          ) : (
-            <span className="flex size-5 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[10px] font-bold text-white">
-              {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
-            </span>
-          )}
-          Mestrado por {mesa.profiles.nome_exibicao}
-        </p>
-      )}
-      <SinopseExpansivel texto={mesa.sinopse} />
+          </div>
+        )}
 
-      <dl className="mt-8 grid grid-cols-2 gap-4 rounded-xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3 lg:grid-cols-4">
-        <div>
-          <dt className="text-muted-foreground">{t("modalidade")}</dt>
-          <dd className="font-medium">
-            {MODALIDADE_LABEL[mesa.modalidade]}
-            {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` — ${mesa.cidade_uf}` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("data")}</dt>
-          <dd className="font-medium">{dataFormatada}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Horário</dt>
-          <dd className="font-medium">
-            {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Frequência</dt>
-          <dd className="font-medium">
-            {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
-            {mesa.qtd_sessoes ? ` (${mesa.qtd_sessoes} sessões)` : ""}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Encerramento</dt>
-          <dd className="font-medium">
-            {mesa.tipo === "campanha"
-              ? "Campanha aberta"
-              : fimPrevisto
-                ? `Por volta de ${new Date(`${fimPrevisto}T00:00:00`).toLocaleDateString("pt-BR")}`
-                : "—"}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("vagasLabel")}</dt>
-          <dd className="font-medium">
-            {mesa.vagas_preenchidas}/{mesa.vagas_total} preenchidas
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("classificacao")}</dt>
-          <dd className="font-medium">{CLASSIFICACAO_LABEL[mesa.classificacao]}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("nivel")}</dt>
-          <dd className="font-medium">{NIVEL_LABEL[mesa.nivel_experiencia]}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("preco")}</dt>
-          <dd className="font-medium">
-            {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
-          </dd>
-        </div>
-      </dl>
-
-      {mesa.jogadores_aprovados && mesa.jogadores_aprovados.length > 0 && (
-        <div className="mt-6">
-          <p className="text-sm font-medium text-muted-foreground">Quem já confirmou presença</p>
-          <div className="mt-2 flex items-center -space-x-2">
-            {mesa.jogadores_aprovados.map((jogador, i) =>
-              jogador.avatar_url ? (
-                <Image
-                  key={i}
-                  src={jogador.avatar_url}
-                  alt={jogador.nome}
-                  width={40}
-                  height={40}
-                  className="size-10 rounded-full border-2 border-background object-cover"
-                />
-              ) : (
-                <span
-                  key={i}
-                  className="flex size-10 items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white"
-                  title={jogador.nome}
-                >
-                  {jogador.nome.charAt(0).toUpperCase()}
-                </span>
-              ),
+        <div className="mt-6 flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Selo>{mesa.sistema_outro || mesa.sistemas?.nome || "—"}</Selo>
+            <Selo tom="neutro">{TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}</Selo>
+            {mesa.eventos && (
+              <Link href={`/eventos/${mesa.eventos.slug}`} className="hover:underline">
+                <Selo tom="solido" icone={CalendarDays}>
+                  {t("mesaDoEvento", { evento: mesa.eventos.titulo })}
+                </Selo>
+              </Link>
             )}
           </div>
+          <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
         </div>
-      )}
 
-      {!ehMestre && (
-        <>
-          <h2 className="mt-10 font-heading text-xl font-bold">{t("candidatar")}</h2>
+        <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{mesa.titulo}</h1>
+        {mesa.profiles?.nome_exibicao && (
+          <p className="mt-2 flex items-center gap-2 text-muted-foreground">
+            {mesa.profiles.avatar_url ? (
+              <Image
+                src={mesa.profiles.avatar_url}
+                alt=""
+                width={28}
+                height={28}
+                className="size-7 rounded-full object-cover"
+              />
+            ) : (
+              <span className="flex size-7 items-center justify-center rounded-full bg-marca text-xs font-bold text-white">
+                {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+              </span>
+            )}
+            {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
+          </p>
+        )}
 
-          {!logado ? (
-            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              {t("precisaEntrar")}{" "}
-              <Link href="/entrar" className="text-primary hover:underline">
-                {t("candidatar")}
-              </Link>
-            </p>
-          ) : inscricao?.status === "aprovado" ? (
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card/60 p-5 text-sm">
-              <p>Você está confirmado nessa mesa!</p>
-              <SairDaMesaButton inscricaoId={inscricao.id} slug={slug} />
+        {/* Resumo: o que decide a candidatura, com a ação principal ao lado. */}
+        <section className="mt-6 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="font-heading text-3xl font-bold text-primary">{preco}</p>
+              <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                <li className="flex items-center gap-2">
+                  <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
+                  <span className="first-letter:uppercase">
+                    {diaSemana}, {dataFormatada}
+                  </span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Clock className="size-4 shrink-0 text-primary" aria-hidden />
+                  {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
+                </li>
+                <li className="flex items-center gap-2">
+                  {mesa.modalidade === "online" ? (
+                    <Globe className="size-4 shrink-0 text-primary" aria-hidden />
+                  ) : (
+                    <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+                  )}
+                  {MODALIDADE_LABEL[mesa.modalidade]}
+                  {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
+                </li>
+                <li className="flex items-center gap-2">
+                  <Repeat className="size-4 shrink-0 text-primary" aria-hidden />
+                  {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
+                  {mesa.qtd_sessoes ? ` · ${t("sessoes", { n: mesa.qtd_sessoes })}` : ""}
+                </li>
+              </ul>
+
+              <div className="mt-4">
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="text-muted-foreground">
+                    {t("vagasPreenchidas", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}
+                  </span>
+                  <span className={lotada ? "text-muted-foreground" : "font-medium text-foreground"}>
+                    {t("vagasRestantes", { n: vagasLivres })}
+                  </span>
+                </div>
+                <div aria-hidden className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={`h-full rounded-full ${lotada ? "bg-muted-foreground" : "bg-marca"}`}
+                    style={{ width: `${ocupacao}%` }}
+                  />
+                </div>
+              </div>
+
+              {jogadores.length > 0 && (
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex items-center -space-x-2">
+                    {jogadores.map((jogador, i) =>
+                      jogador.avatar_url ? (
+                        <Image
+                          key={i}
+                          src={jogador.avatar_url}
+                          alt={jogador.nome}
+                          width={36}
+                          height={36}
+                          className="size-9 rounded-full border-2 border-background object-cover"
+                        />
+                      ) : (
+                        <span
+                          key={i}
+                          className="flex size-9 items-center justify-center rounded-full border-2 border-background bg-marca text-sm font-bold text-white"
+                          title={jogador.nome}
+                        >
+                          {jogador.nome.charAt(0).toUpperCase()}
+                        </span>
+                      ),
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t("confirmados")}</p>
+                </div>
+              )}
             </div>
-          ) : inscricao ? (
-            <p className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
-              {t("jaCandidatado")}
-            </p>
-          ) : idadeInsuficiente ? (
-            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
-            </p>
-          ) : mesa.eventos && !ingressoEventoAprovado ? (
-            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              Essa mesa é do evento {mesa.eventos.titulo} — você precisa ter um ingresso aprovado pra se
-              candidatar.{" "}
-              <Link href={`/eventos/${mesa.eventos.slug}`} className="text-primary hover:underline">
-                Ver ingressos
-              </Link>
-            </p>
-          ) : mesa.vagas_preenchidas >= mesa.vagas_total ? (
-            <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-              {t("mesaLotada")}
-            </p>
-          ) : (
-            <div className="mt-4">
-              <CandidaturaForm mesaId={mesa.id} slug={slug} perguntas={perguntas} />
+
+            {(acaoPrincipal || statusResumo) && (
+              <div className="sm:w-64 sm:shrink-0">
+                {acaoPrincipal}
+                {statusResumo && (
+                  <p className="flex items-center justify-center gap-2 rounded-full bg-primary/10 px-4 py-2.5 text-center text-sm font-medium text-primary">
+                    <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+                    {statusResumo}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <div className="mt-4">
+          <SinopseExpansivel texto={mesa.sinopse} />
+        </div>
+
+        <section className="mt-8">
+          <h2 className="font-heading text-xl font-bold">{t("detalhes")}</h2>
+          <dl className="mt-3 grid grid-cols-2 gap-4 rounded-2xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-muted-foreground">{t("encerramento")}</dt>
+              <dd className="font-medium">
+                {mesa.tipo === "campanha"
+                  ? t("campanhaAberta")
+                  : fimPrevisto
+                    ? t("porVoltaDe", { data: new Date(`${fimPrevisto}T00:00:00`).toLocaleDateString("pt-BR") })
+                    : "—"}
+              </dd>
             </div>
-          )}
-        </>
-      )}
+            <div>
+              <dt className="text-muted-foreground">{t("classificacao")}</dt>
+              <dd className="font-medium">{CLASSIFICACAO_LABEL[mesa.classificacao]}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("nivel")}</dt>
+              <dd className="font-medium">{NIVEL_LABEL[mesa.nivel_experiencia]}</dd>
+            </div>
+          </dl>
+        </section>
+
+        {!ehMestre && logado && (
+          <section id="candidatura" className="mt-10 scroll-mt-24">
+            <h2 className="font-heading text-2xl font-bold">{t("candidatar")}</h2>
+
+            {inscricao?.status === "aprovado" ? (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-5 text-sm">
+                <p>{t("confirmadoNaMesa")}</p>
+                <SairDaMesaButton inscricaoId={inscricao.id} slug={slug} />
+              </div>
+            ) : inscricao ? (
+              <p className="mt-4 rounded-2xl border border-border bg-card/60 p-5 text-sm">{t("jaCandidatado")}</p>
+            ) : idadeInsuficiente ? (
+              <p className="mt-4 rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+                {t("idadeInsuficiente", { classificacao: CLASSIFICACAO_LABEL[mesa.classificacao] })}
+              </p>
+            ) : mesa.eventos && !ingressoEventoAprovado ? (
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+                <p className="max-w-lg">{t("precisaIngresso", { evento: mesa.eventos.titulo })}</p>
+                <Link href={`/eventos/${mesa.eventos.slug}#ingressos`} className={buttonVariants({ variant: "marca" })}>
+                  <Ticket className="size-4" aria-hidden />
+                  {t("verIngressos")}
+                </Link>
+              </div>
+            ) : lotada ? (
+              <p className="mt-4 rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+                {t("mesaLotada")}
+              </p>
+            ) : (
+              <div className="mt-4">
+                <CandidaturaForm mesaId={mesa.id} slug={slug} perguntas={perguntas} />
+              </div>
+            )}
+          </section>
+        )}
+      </Container>
+
+      {acaoPrincipal && <BarraAcaoMovel rotulo={preco} acao={acaoPrincipal} />}
     </article>
   );
 }

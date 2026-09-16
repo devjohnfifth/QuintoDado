@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { SITE_LINKS } from "@/lib/site-links";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { NovaMesaForm } from "./nova-mesa-form";
@@ -66,9 +67,14 @@ export default async function NovaMesaPresencialPage({
       return (
         <Aviso>
           {t("precisaSerMestre")}{" "}
-          <Link href="/links" className="text-primary hover:underline">
-            Falar com a comunidade
-          </Link>
+          <a
+            href={SITE_LINKS.whatsappComunidade}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            {t("falarComunidade")}
+          </a>
           <SolicitarMestreButton jaSolicitado={Boolean(perfil?.mestre_solicitado_em)} />
         </Aviso>
       );

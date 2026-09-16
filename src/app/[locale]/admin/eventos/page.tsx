@@ -34,7 +34,7 @@ export default async function AdminEventosPage() {
         <h1 className="font-heading text-2xl font-bold">Eventos</h1>
         <Link
           href="/admin/eventos/nova"
-          className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white"
+          className="rounded-full bg-marca px-4 py-2 text-sm font-medium text-white"
         >
           + Novo evento
         </Link>
@@ -81,7 +81,7 @@ export default async function AdminEventosPage() {
                       <span
                         className={`rounded-full border px-2 py-0.5 text-xs ${
                           evento.status === "publicado"
-                            ? "border-emerald-500/40 text-emerald-400"
+                            ? "border-sucesso/40 text-sucesso"
                             : "border-border text-muted-foreground"
                         }`}
                       >

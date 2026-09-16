@@ -32,7 +32,7 @@ export function VendasToggle({
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-card/60 p-4">
       <div
         className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors duration-300 ${
-          vendasAbertas ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground"
+          vendasAbertas ? "bg-sucesso/15 text-sucesso" : "bg-muted text-muted-foreground"
         }`}
       >
         {vendasAbertas ? <ShoppingCart className="size-4" aria-hidden /> : <Lock className="size-4" aria-hidden />}
@@ -53,7 +53,7 @@ export function VendasToggle({
         disabled={pending}
         onClick={alternar}
         className={`group relative h-8 w-[3.25rem] shrink-0 rounded-full p-1 shadow-inner transition-colors duration-300 ease-out disabled:opacity-60 ${
-          vendasAbertas ? "bg-emerald-500" : "bg-[#3a3a46]"
+          vendasAbertas ? "bg-sucesso" : "bg-[#3a3a46]"
         }`}
       >
         <span

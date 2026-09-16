@@ -47,7 +47,7 @@ export function AccountMenu({ perfil }: { perfil: Perfil }) {
       >
         <Avatar className="size-7">
           <AvatarImage src={perfil.avatarUrl ?? undefined} alt="" />
-          <AvatarFallback className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-xs font-semibold text-white">
+          <AvatarFallback className="bg-marca text-xs font-semibold text-white">
             {iniciais(perfil.nomeExibicao)}
           </AvatarFallback>
         </Avatar>

@@ -6,7 +6,11 @@ import { Bot, Download, FileText, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DescricaoMarkdown } from "@/components/site/descricao-markdown";
 import { TabelasAleatorias } from "@/components/site/tabela-aleatoria";
-import { buscarSuplemento } from "@/lib/suplementos/publico";
+import { buscarSuplemento, listarSuplementos } from "@/lib/suplementos/publico";
+import { Container } from "@/components/site/container";
+import { Selo } from "@/components/site/selo";
+import { SuplementoCard } from "@/components/site/suplemento-card";
+import { buttonVariants } from "@/components/ui/button";
 import {
   FORMATO_LABEL,
   TIPO_SUPLEMENTO,
@@ -61,6 +65,14 @@ export default async function SuplementoPage({
   if (!resultado) notFound();
   const { suplemento: s, arquivos, tabelas, logado } = resultado;
 
+  // "Mais suplementos": publicados, primeiro os do mesmo sistema ou tipo.
+  const relacionados = (await listarSuplementos())
+    .filter((r) => r.publicado && r.slug !== s.slug)
+    .map((r) => ({ r, peso: (r.sistemas?.slug === s.sistemas?.slug ? 2 : 0) + (r.tipo === s.tipo ? 1 : 0) }))
+    .sort((a, b) => b.peso - a.peso)
+    .slice(0, 3)
+    .map(({ r }) => r);
+
   const tipo = TIPO_SUPLEMENTO[s.tipo as TipoSuplemento]?.rotulo ?? s.tipo;
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const breadcrumbLd = {
@@ -74,18 +86,18 @@ export default async function SuplementoPage({
   };
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
+    <Container as="article" className="py-10 sm:py-16">
       {s.publicado && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
       )}
 
       {!s.publicado && (
-        <p className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm text-amber-300">
+        <p className="mb-6 rounded-lg border border-alerta/40 bg-alerta/10 px-4 py-2 text-sm text-alerta">
           {t("rascunhoAviso")}
         </p>
       )}
 
-      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground hover:underline">
           {t("breadcrumbInicio")}
         </Link>
@@ -111,21 +123,13 @@ export default async function SuplementoPage({
       )}
 
       <div className="flex flex-wrap gap-1.5">
-        <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">{tipo}</span>
-        <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
-          {s.sistemas?.nome ?? t("generico")}
-        </span>
-        <span className="rounded-full bg-emerald-500/15 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">
-          {t("gratuito")}
-        </span>
-        {s.classificacao !== "livre" && (
-          <span className="rounded-full border border-border px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
-            {CLASSIFICACAO_LABEL[s.classificacao] ?? s.classificacao}
-          </span>
-        )}
+        <Selo tom="solido">{tipo}</Selo>
+        <Selo>{s.sistemas?.nome ?? t("generico")}</Selo>
+        <Selo tom="sucesso">{t("gratuito")}</Selo>
+        {s.classificacao !== "livre" && <Selo tom="neutro">{CLASSIFICACAO_LABEL[s.classificacao] ?? s.classificacao}</Selo>}
       </div>
 
-      <h1 className="mt-3 font-heading text-3xl font-bold sm:text-4xl">{s.titulo}</h1>
+      <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{s.titulo}</h1>
       <p className="mt-2 text-lg text-muted-foreground">{s.resumo}</p>
 
       {s.descricao_md && (
@@ -166,7 +170,7 @@ export default async function SuplementoPage({
                 {logado ? (
                   <a
                     href={`/api/suplementos/baixar/${a.id}`}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-3 py-1.5 text-xs font-medium text-white"
+                    className={buttonVariants({ variant: "marca" })}
                   >
                     <Download className="size-3.5" aria-hidden />
                     {t("baixar")}
@@ -174,7 +178,7 @@ export default async function SuplementoPage({
                 ) : (
                   <Link
                     href={{ pathname: "/entrar", query: { next: `/suplementos/${slug}` } }}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:border-primary/40 hover:text-primary"
+                    className={buttonVariants({ variant: "outline", className: "rounded-full" })}
                   >
                     <LogIn className="size-3.5" aria-hidden />
                     {t("entrarPraBaixar")}
@@ -201,6 +205,19 @@ export default async function SuplementoPage({
           </Link>
         </p>
       </footer>
-    </article>
+
+      {relacionados.length > 0 && (
+        <section className="mt-14 border-t border-border/60 pt-10">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">{t("maisSuplementos")}</h2>
+          <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {relacionados.map((r) => (
+              <li key={r.slug}>
+                <SuplementoCard suplemento={r} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </Container>
   );
 }

@@ -37,7 +37,7 @@ export function VendasToggleCompacto({
     >
       <span
         className={`relative block h-6 w-10 shrink-0 rounded-full p-0.5 shadow-inner transition-colors duration-300 ease-out ${
-          vendasAbertas ? "bg-emerald-500" : "bg-[#3a3a46]"
+          vendasAbertas ? "bg-sucesso" : "bg-[#3a3a46]"
         }`}
       >
         <span
@@ -48,7 +48,7 @@ export function VendasToggleCompacto({
       </span>
       <span
         className={`text-xs font-medium transition-colors duration-300 ${
-          vendasAbertas ? "text-emerald-400" : "text-muted-foreground"
+          vendasAbertas ? "text-sucesso" : "text-muted-foreground"
         }`}
       >
         {pending ? "..." : vendasAbertas ? "Venda ON" : "Venda OFF"}

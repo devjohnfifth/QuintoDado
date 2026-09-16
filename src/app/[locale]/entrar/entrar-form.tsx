@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { CampoSenha } from "@/components/site/campo-senha";
 import { Link } from "@/i18n/navigation";
 import { sanitizarUsername } from "@/lib/username";
 import { entrarComEmailAction, criarContaAction, esqueciSenhaAction } from "./actions";
@@ -15,19 +16,20 @@ export function EntrarForm({ mensagemInicial, destino = "/" }: { mensagemInicial
   const [modo, setModo] = useState<"entrar" | "cadastrar">("entrar");
 
   return (
-    <div className="mx-auto max-w-sm">
+    <div>
       {mensagemInicial && (
         <p className="mb-6 rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground">
           {mensagemInicial}
         </p>
       )}
 
-      <div className="mb-6 flex rounded-lg border border-border p-1 text-sm">
+      <div className="mb-6 flex rounded-full border border-border bg-background/60 p-1 text-sm">
         <button
           type="button"
           onClick={() => setModo("entrar")}
-          className={`flex-1 rounded-md py-1.5 font-medium transition-colors ${
-            modo === "entrar" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+          aria-pressed={modo === "entrar"}
+          className={`flex-1 rounded-full py-2 font-medium transition-colors ${
+            modo === "entrar" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {t("entrar")}
@@ -35,8 +37,9 @@ export function EntrarForm({ mensagemInicial, destino = "/" }: { mensagemInicial
         <button
           type="button"
           onClick={() => setModo("cadastrar")}
-          className={`flex-1 rounded-md py-1.5 font-medium transition-colors ${
-            modo === "cadastrar" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+          aria-pressed={modo === "cadastrar"}
+          className={`flex-1 rounded-full py-2 font-medium transition-colors ${
+            modo === "cadastrar" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {t("cadastrar")}
@@ -62,22 +65,22 @@ function FormLogin({ destino }: { destino: string }) {
       <input type="hidden" name="next" value={destino} />
       <div className="space-y-2">
         <Label htmlFor="email">{t("campoEmail")}</Label>
-        <Input id="email" name="email" type="email" required />
+        <Input id="email" name="email" type="email" required autoComplete="email" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="senha">{t("campoSenha")}</Label>
-        <Input id="senha" name="senha" type="password" required />
+        <CampoSenha id="senha" name="senha" required autoComplete="current-password" />
       </div>
       {estado?.erro && <p className="text-sm text-destructive">{estado.erro}</p>}
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" variant="marca" size="lg" disabled={pending} className="w-full">
         {pending ? t("entrando") : t("entrar")}
       </Button>
       <button
         type="button"
         onClick={() => setModo("esqueci")}
-        className="w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
+        className="w-full py-1 text-center text-sm text-muted-foreground hover:text-foreground hover:underline"
       >
-        Esqueci minha senha
+        {t("esqueciSenha")}
       </button>
     </form>
   );
@@ -96,7 +99,7 @@ function FormEsqueciSenha({ onVoltar }: { onVoltar: () => void }) {
         <Input id="email-recuperacao" name="email" type="email" required autoFocus />
       </div>
       {estado?.erro && <p className="text-sm text-destructive">{estado.erro}</p>}
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" variant="marca" size="lg" disabled={pending} className="w-full">
         {pending ? "Enviando..." : "Enviar link de recuperação"}
       </Button>
       <button
@@ -165,7 +168,7 @@ function FormCadastro() {
           onChange={campo("username", sanitizarUsername)}
         />
         <p className="text-xs text-muted-foreground">
-          Só letras minúsculas, números, - ou _. A gente ajusta pra esse formato enquanto você digita.
+          {t("usernameAjuda")}
         </p>
       </div>
       <div className="space-y-2">
@@ -192,7 +195,7 @@ function FormCadastro() {
       </div>
       <div className="space-y-2">
         <Label htmlFor="senha">{t("campoSenha")}</Label>
-        <Input id="senha" name="senha" type="password" required minLength={8} />
+        <CampoSenha id="senha" name="senha" required minLength={8} autoComplete="new-password" />
       </div>
       <div className="flex items-start gap-2">
         <Checkbox id="aceiteTermos" name="aceiteTermos" required className="mt-0.5" />
@@ -204,7 +207,7 @@ function FormCadastro() {
         </Label>
       </div>
       {estado?.erro && <p className="text-sm text-destructive">{estado.erro}</p>}
-      <Button type="submit" disabled={pending} className="w-full">
+      <Button type="submit" variant="marca" size="lg" disabled={pending} className="w-full">
         {pending ? t("cadastrando") : t("cadastrar")}
       </Button>
     </form>

@@ -84,7 +84,7 @@ export function TrocarSenhaForm() {
           </div>
 
           {erro && <p className="text-sm text-destructive">{erro}</p>}
-          {sucesso && <p className="text-sm text-emerald-400">Senha alterada com sucesso.</p>}
+          {sucesso && <p className="text-sm text-sucesso">Senha alterada com sucesso.</p>}
 
           <div className="flex gap-2">
             <Button type="submit" disabled={pending}>

@@ -6,6 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { Reveal } from "@/components/site/reveal";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { Container } from "@/components/site/container";
+import { PageHeader } from "@/components/site/page-header";
+import { EstadoVazio } from "@/components/site/estado-vazio";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { buttonVariants } from "@/components/ui/button";
 
 export async function generateMetadata({
   params,
@@ -145,33 +150,26 @@ export default async function MesasPage({
   const temFiltroAtivo = Boolean(filtros.sistema || filtros.modalidade || filtros.preco);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-      <Reveal>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-              <Dices className="size-5" aria-hidden />
-            </div>
-            <h1 className="mt-4 font-heading text-3xl font-bold sm:text-4xl">{t("titulo")}</h1>
-            <p className="mt-2 max-w-xl text-muted-foreground">{t("subtitulo")}</p>
-          </div>
-          {admin && (
-            <Link
-              href="/admin/mesas/nova"
-              className="shrink-0 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white"
-            >
-              + Nova mesa
+    <Container className="py-16">
+      <PageHeader
+        icone={Dices}
+        titulo={t("titulo")}
+        subtitulo={t("subtitulo")}
+        acoes={
+          admin && (
+            <Link href="/admin/mesas/nova" className={buttonVariants({ variant: "marca" })}>
+              {t("novaMesa")}
             </Link>
-          )}
-        </div>
-      </Reveal>
+          )
+        }
+      />
 
       <Reveal className="mt-8">
         <form className="flex flex-wrap gap-3" aria-label={t("filtros.label")}>
           <select
             name="sistema"
             defaultValue={filtros.sistema ?? ""}
-            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+            className="h-10 rounded-full border border-border bg-card/60 px-4 text-sm"
           >
             <option value="">{t("filtros.todosSistemas")}</option>
             {sistemas.map((s) => (
@@ -183,7 +181,7 @@ export default async function MesasPage({
           <select
             name="modalidade"
             defaultValue={filtros.modalidade ?? ""}
-            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+            className="h-10 rounded-full border border-border bg-card/60 px-4 text-sm"
           >
             <option value="">{t("filtros.todasModalidades")}</option>
             <option value="online">{t("filtros.online")}</option>
@@ -192,23 +190,17 @@ export default async function MesasPage({
           <select
             name="preco"
             defaultValue={filtros.preco ?? ""}
-            className="rounded-full border border-border bg-card/60 px-4 py-2 text-sm"
+            className="h-10 rounded-full border border-border bg-card/60 px-4 text-sm"
           >
             <option value="">{t("filtros.qualquerPreco")}</option>
             <option value="gratis">{t("filtros.gratuitas")}</option>
             <option value="pago">{t("filtros.pagas")}</option>
           </select>
-          <button
-            type="submit"
-            className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-2 text-sm font-medium text-white"
-          >
+          <button type="submit" className={buttonVariants({ variant: "marca" })}>
             {t("filtros.filtrar")}
           </button>
           {temFiltroAtivo && (
-            <Link
-              href="/mesas"
-              className="inline-flex items-center rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-            >
+            <Link href="/mesas" className={buttonVariants({ variant: "ghost", className: "rounded-full" })}>
               {t("filtros.limpar")}
             </Link>
           )}
@@ -217,30 +209,25 @@ export default async function MesasPage({
 
       <Reveal className="mt-6">
         {mesas.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-              <Dices className="size-6" aria-hidden />
-            </div>
-            <p className="mt-4 font-heading text-lg font-bold">
-              {temFiltroAtivo ? t("filtros.semResultadoTitulo") : t("vazioTitulo")}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {temFiltroAtivo ? t("filtros.semResultadoCorpo") : t("vazioCorpo")}
-            </p>
-          </div>
+          <EstadoVazio
+            icone={Dices}
+            titulo={temFiltroAtivo ? t("filtros.semResultadoTitulo") : t("vazioTitulo")}
+            corpo={temFiltroAtivo ? t("filtros.semResultadoCorpo") : t("vazioCorpo")}
+          />
         ) : (
-          <ul className="grid gap-4 lg:grid-cols-2">
-            {mesas.map((mesa) => (
-              <li key={mesa.slug}>
-                <MesaCard
-                  mesa={mesa}
-                  favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
-                />
-              </li>
-            ))}
-          </ul>
+          <GradeAdaptavel
+            itens={mesas}
+            chave={(m) => m.slug}
+            render={(mesa, destaque) => (
+              <MesaCard
+                mesa={mesa}
+                destaque={destaque}
+                favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
+              />
+            )}
+          />
         )}
       </Reveal>
-    </div>
+    </Container>
   );
 }

@@ -368,7 +368,7 @@ export function TabelasEditor({ suplementoId, iniciais }: { suplementoId: string
         </ul>
       )}
       {erro && <p className="text-sm text-destructive">{erro}</p>}
-      {salvo && <p className="text-sm text-emerald-400">Tabelas salvas.</p>}
+      {salvo && <p className="text-sm text-sucesso">Tabelas salvas.</p>}
 
       <div>
         <Button type="button" onClick={salvar} disabled={pending || erros.length > 0}>

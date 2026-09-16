@@ -8,6 +8,8 @@ import { AccountMenu } from "./account-menu";
 import { NotificationBell } from "./notification-bell";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { Container } from "./container";
+import { buttonVariants } from "@/components/ui/button";
 
 async function buscarSessao() {
   if (!isSupabaseConfigured()) return null;
@@ -58,7 +60,7 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-[57.6rem] items-center justify-between px-4 sm:px-6 lg:px-8">
+      <Container className="flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
           className="group flex items-center gap-2 font-heading text-lg font-bold tracking-tight"
@@ -69,7 +71,7 @@ export async function SiteHeader() {
             priority
             className="h-8 w-8 rounded-md transition-transform duration-200 ease-out group-hover:scale-110 group-hover:rotate-3"
           />
-          <span className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] bg-clip-text text-transparent">
+          <span className="text-marca">
             Quinto Dado
           </span>
         </Link>
@@ -85,14 +87,14 @@ export async function SiteHeader() {
           ) : (
             <Link
               href="/entrar"
-              className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white shadow-[0_0_0_0_rgba(79,125,243,0)] transition-all duration-200 hover:shadow-[0_0_20px_-2px_rgba(139,92,246,0.6)]"
+              className={buttonVariants({ variant: "marca", className: "h-9 px-4" })}
             >
               {t("entrar")}
             </Link>
           )}
           <MobileNav logado={Boolean(sessao)} />
         </div>
-      </div>
+      </Container>
     </header>
   );
 }

@@ -23,7 +23,7 @@ export function AprovarMesaAdminButton({ mesaId }: { mesaId: string }) {
             }
           })
         }
-        className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 hover:underline disabled:opacity-50"
+        className="inline-flex items-center gap-1 text-xs font-medium text-sucesso hover:underline disabled:opacity-50"
       >
         <Check className="size-3.5" aria-hidden />
         {pending ? "Aprovando..." : "Aprovar"}

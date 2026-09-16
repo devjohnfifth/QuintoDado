@@ -111,7 +111,7 @@ export default async function AdminMesaDetalhePage({
                         className="size-9 rounded-full object-cover"
                       />
                     ) : (
-                      <span className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-marca text-sm font-bold text-white">
                         {(perfil?.nome_exibicao ?? "?").charAt(0).toUpperCase()}
                       </span>
                     )}

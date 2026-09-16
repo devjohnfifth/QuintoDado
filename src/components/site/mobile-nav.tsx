@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BookOpen, Dices, Info, Menu, MapPin, CalendarDays } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -48,7 +48,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
         </SheetHeader>
         <nav className="mt-2 flex flex-1 flex-col gap-1 px-4">
           {links.map(({ href, label, Icon }, i) => {
-            const ativo = pathname === href;
+            const ativo = pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
@@ -58,8 +58,8 @@ export function MobileNav({ logado }: { logado: boolean }) {
                 style={{ animationDelay: `${i * 50}ms` }}
                 className={`motion-safe:animate-[menu-item-in_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards] flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   ativo
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <Icon className="size-4" aria-hidden />
@@ -74,7 +74,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
               href="/entrar"
               onClick={() => setAberto(false)}
               style={{ animationDelay: `${links.length * 50}ms` }}
-              className="motion-safe:animate-[reveal-up_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards] w-full rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2.5 text-center text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02]"
+              className={buttonVariants({ variant: "marca", className: "w-full motion-safe:animate-[reveal-up_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards]" })}
             >
               {t("entrar")}
             </Link>

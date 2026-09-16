@@ -6,6 +6,10 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import pracaSete from "@/assets/presencial-bh/praca-sete.webp";
+import { Container } from "@/components/site/container";
+import { EstadoVazio } from "@/components/site/estado-vazio";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { buttonVariants } from "@/components/ui/button";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 
 export async function generateMetadata({
@@ -91,45 +95,32 @@ export default async function PresencialBhPage({
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             {t("subtitulo")}
           </p>
-          <Link
-            href="/presencial-bh/nova"
-            className="mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          >
+          <Link href="/presencial-bh/nova" className={buttonVariants({ variant: "marca", size: "lg", className: "mt-8" })}>
             {t("criarMesa")}
           </Link>
         </div>
       </section>
 
-      <section className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
-        <div className="rounded-xl border border-border bg-card/40 p-5">
+      <Container className="pb-20">
+        <div className="rounded-2xl border border-border bg-card/40 p-5">
           <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted-foreground">
             {t("comoFunciona")}
           </h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("comoFuncionaCorpo")}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("comoFuncionaCorpo")}</p>
         </div>
-      </section>
 
-      <section className="mx-auto max-w-3xl px-4 pb-20 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-        {mesas.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border py-16 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-              <MapPin className="size-6" aria-hidden />
-            </div>
-            <p className="mt-4 font-heading text-lg font-bold">{t("vazioTitulo")}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{t("vazioCorpo")}</p>
-          </div>
-        ) : (
-          <ul className="grid gap-4 lg:grid-cols-2">
-            {mesas.map((mesa) => (
-              <li key={mesa.slug}>
-                <MesaCard mesa={mesa} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+        <div className="mt-8">
+          {mesas.length === 0 ? (
+            <EstadoVazio icone={MapPin} titulo={t("vazioTitulo")} corpo={t("vazioCorpo")} />
+          ) : (
+            <GradeAdaptavel
+              itens={mesas}
+              chave={(m) => m.slug}
+              render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+            />
+          )}
+        </div>
+      </Container>
     </>
   );
 }

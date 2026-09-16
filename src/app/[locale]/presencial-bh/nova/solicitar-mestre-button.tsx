@@ -12,7 +12,7 @@ export function SolicitarMestreButton({ jaSolicitado }: { jaSolicitado: boolean 
 
   if (enviado) {
     return (
-      <p className="mt-3 flex items-center gap-1.5 text-sm text-emerald-400">
+      <p className="mt-3 flex items-center gap-1.5 text-sm text-sucesso">
         <Check className="size-4 shrink-0" aria-hidden />
         Pedido enviado! A gente avisa quando for aprovado.
       </p>

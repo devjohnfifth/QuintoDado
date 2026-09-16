@@ -73,7 +73,7 @@ export function MestrePicker({
                   {u.avatar_url ? (
                     <Image src={u.avatar_url} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
                   ) : (
-                    <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[10px] font-bold text-white">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-marca text-[10px] font-bold text-white">
                       {u.nome_exibicao.charAt(0).toUpperCase()}
                     </span>
                   )}
@@ -96,7 +96,7 @@ export function MestrePicker({
               {m.avatar_url ? (
                 <Image src={m.avatar_url} alt="" width={24} height={24} className="size-6 rounded-full object-cover" />
               ) : (
-                <span className="flex size-6 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-[10px] font-bold text-white">
+                <span className="flex size-6 items-center justify-center rounded-full bg-marca text-[10px] font-bold text-white">
                   {m.nome_exibicao.charAt(0).toUpperCase()}
                 </span>
               )}

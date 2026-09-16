@@ -85,7 +85,7 @@ export default async function LinksPage({
               target={primeiro.href.startsWith("http") ? "_blank" : undefined}
               rel={primeiro.href.startsWith("http") ? "noopener noreferrer" : undefined}
               style={{ animationDelay: "120ms" }}
-              className="group flex transform-gpu items-center gap-3 rounded-xl bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-4 text-sm font-semibold text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
+              className="group flex transform-gpu items-center gap-3 rounded-xl bg-marca px-5 py-4 text-sm font-semibold text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
             >
               <primeiro.Icon className="size-5 shrink-0" aria-hidden />
               <span className="flex-1">{t(primeiro.chave)}</span>
@@ -107,7 +107,7 @@ export default async function LinksPage({
                 style={{ animationDelay: `${160 + i * 50}ms` }}
                 className="group flex transform-gpu items-center gap-3 rounded-xl border border-border bg-card/60 px-5 py-4 text-sm font-medium transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40 motion-safe:animate-[reveal-up_0.5s_ease-out_backwards]"
               >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">
                   <Icon className="size-4" aria-hidden />
                 </span>
                 <span className="flex-1">{t(chave)}</span>

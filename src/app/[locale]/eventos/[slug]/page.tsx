@@ -1,22 +1,20 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, MapPin, Ticket, Clock } from "lucide-react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Calendar, MapPin, Ticket, Clock, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { Container } from "@/components/site/container";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
+import { buttonVariants } from "@/components/ui/button";
 import { ComprarIngressoButton } from "./comprar-ingresso-button";
 import { GaleriaLightbox } from "./galeria-lightbox";
 import bannerOg from "@/assets/brand/banner-og.webp";
-
-const STATUS_INGRESSO_LABEL: Record<string, string> = {
-  pendente: "Pendente — aguardando você mandar o comprovante ser conferido.",
-  aprovado: "Aprovado! Te esperamos lá.",
-  recusado: "Não aprovado.",
-  cancelado: "Cancelado.",
-};
 
 async function buscarEvento(slug: string) {
   if (!isSupabaseConfigured()) return null;
@@ -137,7 +135,9 @@ export default async function EventoDetalhePage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("Eventos");
   const resultado = await buscarEvento(slug);
   if (!resultado) notFound();
 
@@ -156,239 +156,270 @@ export default async function EventoDetalhePage({
   } = resultado;
 
   const dataFormatada = new Date(`${evento.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
+    weekday: "long",
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
-  const esgotado = Boolean(
-    evento.capacidade_maxima && evento.ingressos_vendidos >= evento.capacidade_maxima,
-  );
+  const horario = evento.horario_inicio
+    ? `${evento.horario_inicio.slice(0, 5)}${evento.horario_fim ? `–${evento.horario_fim.slice(0, 5)}` : ""}`
+    : null;
+  const esgotado = Boolean(evento.capacidade_maxima && evento.ingressos_vendidos >= evento.capacidade_maxima);
+  const menorPreco = tipos.length > 0 ? Math.min(...tipos.map((tp) => tp.preco_centavos)) : null;
+  // Botão do topo e barra fixa do celular só quando dá pra comprar de fato.
+  const vendaAtiva = evento.vendas_abertas && !esgotado && tipos.length > 0 && !ingressoExistente;
+  const statusIngresso: Record<string, string> = {
+    pendente: t("statusPendente"),
+    aprovado: t("statusAprovado"),
+    recusado: t("statusRecusado"),
+    cancelado: t("statusCancelado"),
+  };
 
   return (
-    <article className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-      {evento.banner_url && (
-        <div className="relative mb-6 aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
-          <Image
-            src={evento.banner_url}
-            alt={evento.titulo}
-            fill
-            className="object-cover"
-            sizes="(min-width: 1024px) 1024px, (min-width: 672px) 672px, 100vw"
-            priority
-          />
-        </div>
-      )}
+    <article className={vendaAtiva ? "pb-24 sm:pb-0" : undefined}>
+      <Container className="py-10 sm:py-16">
+        {evento.banner_url && (
+          <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
+            <Image
+              src={evento.banner_url}
+              alt={evento.titulo}
+              fill
+              className="object-cover"
+              sizes="(min-width: 1024px) 768px, 100vw"
+              priority
+            />
+          </div>
+        )}
 
-      <h1 className="font-heading text-3xl font-bold sm:text-4xl">{evento.titulo}</h1>
-      {evento.subtitulo && <p className="mt-1 text-muted-foreground">{evento.subtitulo}</p>}
-
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
-          {dataFormatada}
-          {evento.horario_inicio ? ` · ${evento.horario_inicio.slice(0, 5)}` : ""}
-          {evento.horario_fim ? `–${evento.horario_fim.slice(0, 5)}` : ""}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-          {evento.local ? `${evento.local} — ` : ""}
-          {evento.cidade_uf}
-        </span>
-      </div>
-
-      <p className="mt-6 max-w-2xl whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
-
-      {(atracoes.length > 0 || mestres.length > 0) && (
-        <div
-          className={`mt-10 gap-8 ${
-            atracoes.length > 0 && mestres.length > 0 ? "grid sm:grid-cols-3" : ""
-          }`}
-        >
-          {atracoes.length > 0 && (
-            <div className={mestres.length > 0 ? "sm:col-span-2" : ""}>
-              <h2 className="font-heading text-xl font-bold">Programação</h2>
-              <ul className="mt-4 space-y-3 border-l-2 border-primary/30 pl-4">
-                {atracoes.map((a, i) => (
-                  <li key={i}>
-                    {a.horario && (
-                      <p className="flex items-center gap-1.5 text-xs font-semibold text-primary">
-                        <Clock className="size-3.5 shrink-0" aria-hidden />
-                        {a.horario}
-                      </p>
-                    )}
-                    <p className="font-medium">{a.titulo}</p>
-                    {a.descricao && <p className="text-sm text-muted-foreground">{a.descricao}</p>}
-                  </li>
-                ))}
-              </ul>
-            </div>
+        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">{evento.titulo}</h1>
+            {evento.subtitulo && <p className="mt-1 text-lg text-muted-foreground">{evento.subtitulo}</p>}
+          </div>
+          {vendaAtiva && (
+            <a href="#ingressos" className={buttonVariants({ variant: "marca", size: "lg", className: "hidden sm:inline-flex" })}>
+              <Ticket className="size-4" aria-hidden />
+              {t("verIngressos")}
+            </a>
           )}
+        </div>
 
-          {mestres.length > 0 && (
-            <div className={atracoes.length > 0 ? "sm:col-span-1" : ""}>
-              <h2 className="font-heading text-xl font-bold">Mestres confirmados</h2>
-              <div className="mt-4 grid gap-3">
-                {mestres.map((m) => (
-                  <div
-                    key={m.username}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-4"
-                  >
-                    {m.avatar_url ? (
-                      <Image
-                        src={m.avatar_url}
-                        alt={m.nome_exibicao}
-                        width={44}
-                        height={44}
-                        className="size-11 shrink-0 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-sm font-bold text-white">
-                        {m.nome_exibicao.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <div className="min-w-0">
-                      <p className="font-medium">{m.nome_exibicao}</p>
-                      {m.bio ? (
-                        <p className="truncate text-xs text-muted-foreground">{m.bio}</p>
+        <ul className="mt-5 flex flex-wrap gap-2 text-sm">
+          <li className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5">
+            <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
+            <span className="first-letter:uppercase">{dataFormatada}</span>
+          </li>
+          {horario && (
+            <li className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5">
+              <Clock className="size-4 shrink-0 text-primary" aria-hidden />
+              {horario}
+            </li>
+          )}
+          <li className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5">
+            <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+            {evento.local ? `${evento.local} — ` : ""}
+            {evento.cidade_uf}
+          </li>
+        </ul>
+
+        <p className="mt-6 max-w-3xl whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
+
+        <section id="ingressos" className="mt-12 scroll-mt-24">
+          <h2 className="flex items-center gap-2 font-heading text-2xl font-bold">
+            <Ticket className="size-5 text-primary" aria-hidden />
+            {t("ingressos")}
+          </h2>
+
+          {ingressoExistente ? (
+            <div className="mt-4 rounded-2xl border border-border bg-card/60 p-5 text-sm">
+              <p className="font-medium">{statusIngresso[ingressoExistente.status] ?? ingressoExistente.status}</p>
+              {ingressoExistente.status === "recusado" && ingressoExistente.motivo_recusa && (
+                <p className="mt-1 text-muted-foreground">{t("motivo", { motivo: ingressoExistente.motivo_recusa })}</p>
+              )}
+            </div>
+          ) : esgotado ? (
+            <p className="mt-4 rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              {t("esgotado")}
+            </p>
+          ) : tipos.length === 0 ? (
+            <p className="mt-4 rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+              {t("semIngressos")}
+            </p>
+          ) : (
+            <div
+              className={`mt-4 grid gap-4 sm:grid-cols-2 ${tipos.length === 2 || tipos.length === 4 ? "" : "lg:grid-cols-3"}`}
+            >
+              {tipos.map((tipo) => {
+                const tipoEsgotado = Boolean(
+                  tipo.quantidade_maxima && tipo.ingressos_vendidos_tipo >= tipo.quantidade_maxima,
+                );
+                return (
+                  <div key={tipo.id} className="flex flex-col rounded-2xl border border-border bg-card/60 p-5">
+                    <p className="font-heading text-lg font-bold">{tipo.nome}</p>
+                    {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
+                    <p className="mt-3 font-heading text-3xl font-bold text-primary">{formatBRL(tipo.preco_centavos)}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {tipo.limite_mesas ? t("limiteMesas", { n: tipo.limite_mesas }) : t("qualquerMesa")}
+                    </p>
+                    <div className="mt-auto pt-5">
+                      {!evento.vendas_abertas ? (
+                        <p className="rounded-full border border-dashed border-border px-3 py-2.5 text-center text-sm text-muted-foreground">
+                          {t("vendasFechadas")}
+                        </p>
+                      ) : tipoEsgotado ? (
+                        <p className="rounded-full border border-dashed border-border px-3 py-2.5 text-center text-sm text-muted-foreground">
+                          {t("tipoEsgotado")}
+                        </p>
+                      ) : !logado ? (
+                        <Link
+                          href={{ pathname: "/entrar", query: { next: `/eventos/${slug}` } }}
+                          className={buttonVariants({ variant: "marca", className: "w-full" })}
+                        >
+                          <LogIn className="size-4" aria-hidden />
+                          {t("entrarPraComprar")}
+                        </Link>
                       ) : (
-                        <p className="text-xs text-muted-foreground">@{m.username}</p>
+                        <ComprarIngressoButton
+                          eventoId={evento.id}
+                          tipoId={tipo.id}
+                          tipoNome={tipo.nome}
+                          precoCentavos={tipo.preco_centavos}
+                          slug={slug}
+                          chavePix={evento.chave_pix}
+                          whatsappConfirmacao={evento.whatsapp_confirmacao}
+                          nomeCompletoAtual={nomeCompletoAtual}
+                          telefoneAtual={telefoneAtual}
+                        />
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
           )}
-        </div>
-      )}
+        </section>
 
-      {mesas.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-heading text-xl font-bold">Mesas do evento</h2>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {mesas.map((mesa) => (
-              <MesaCard key={mesa.slug} mesa={mesa} />
-            ))}
-          </div>
-        </div>
-      )}
+        {(atracoes.length > 0 || mestres.length > 0) && (
+          <div className={`mt-12 gap-8 ${atracoes.length > 0 && mestres.length > 0 ? "grid sm:grid-cols-3" : ""}`}>
+            {atracoes.length > 0 && (
+              <section className={mestres.length > 0 ? "sm:col-span-2" : ""}>
+                <h2 className="font-heading text-2xl font-bold">{t("programacao")}</h2>
+                <ol className="mt-4 space-y-4 border-l-2 border-primary/30 pl-4">
+                  {atracoes.map((a, i) => (
+                    <li key={i}>
+                      {a.horario && (
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+                          <Clock className="size-3.5 shrink-0" aria-hidden />
+                          {a.horario}
+                        </p>
+                      )}
+                      <p className="font-medium">{a.titulo}</p>
+                      {a.descricao && <p className="text-sm text-muted-foreground">{a.descricao}</p>}
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
-      <div className="mt-10">
-        <h2 className="flex items-center gap-1.5 font-heading text-xl font-bold">
-          <Ticket className="size-5 text-primary" aria-hidden />
-          Ingressos
-        </h2>
-
-        {!logado ? (
-          <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-            Você precisa estar logado pra comprar.{" "}
-            <Link href="/entrar" className="text-primary hover:underline">
-              Entrar
-            </Link>
-          </p>
-        ) : ingressoExistente ? (
-          <div className="mt-4 rounded-xl border border-border bg-card/60 p-5 text-sm">
-            <p className="font-medium">{STATUS_INGRESSO_LABEL[ingressoExistente.status] ?? ingressoExistente.status}</p>
-            {ingressoExistente.status === "recusado" && ingressoExistente.motivo_recusa && (
-              <p className="mt-1 text-muted-foreground">Motivo: {ingressoExistente.motivo_recusa}</p>
+            {mestres.length > 0 && (
+              <section className={atracoes.length > 0 ? "sm:col-span-1" : ""}>
+                <h2 className="font-heading text-2xl font-bold">{t("mestres")}</h2>
+                <ul className="mt-4 grid gap-3">
+                  {mestres.map((m) => (
+                    <li key={m.username} className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-4">
+                      {m.avatar_url ? (
+                        <Image
+                          src={m.avatar_url}
+                          alt={m.nome_exibicao}
+                          width={44}
+                          height={44}
+                          className="size-11 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-marca text-sm font-bold text-white">
+                          {m.nome_exibicao.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-medium">{m.nome_exibicao}</p>
+                        <p className="truncate text-sm text-muted-foreground">{m.bio || `@${m.username}`}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
           </div>
-        ) : esgotado ? (
-          <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-            As vagas desse evento esgotaram.
-          </p>
-        ) : tipos.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-            Ainda não tem ingresso disponível pra esse evento.
-          </p>
-        ) : (
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tipos.map((tipo) => {
-              const tipoEsgotado = Boolean(
-                tipo.quantidade_maxima && tipo.ingressos_vendidos_tipo >= tipo.quantidade_maxima,
-              );
-              return (
-                <div key={tipo.id} className="flex flex-col rounded-xl border border-border bg-card/60 p-5">
-                  <p className="font-heading font-bold">{tipo.nome}</p>
-                  {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
-                  <p className="mt-3 font-heading text-2xl font-bold text-primary">
-                    {formatBRL(tipo.preco_centavos)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {tipo.limite_mesas
-                      ? `Candidatura em até ${tipo.limite_mesas} ${tipo.limite_mesas === 1 ? "mesa" : "mesas"} do evento`
-                      : "Candidatura em qualquer mesa do evento"}
-                  </p>
-                  <div className="mt-4">
-                    {!evento.vendas_abertas ? (
-                      <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
-                        Vendas indisponíveis no momento.
-                      </p>
-                    ) : tipoEsgotado ? (
-                      <p className="rounded-lg border border-dashed border-border px-3 py-2 text-center text-xs text-muted-foreground">
-                        Esgotado.
-                      </p>
-                    ) : (
-                      <ComprarIngressoButton
-                        eventoId={evento.id}
-                        tipoId={tipo.id}
-                        tipoNome={tipo.nome}
-                        precoCentavos={tipo.preco_centavos}
-                        slug={slug}
-                        chavePix={evento.chave_pix}
-                        whatsappConfirmacao={evento.whatsapp_confirmacao}
-                        nomeCompletoAtual={nomeCompletoAtual}
-                        telefoneAtual={telefoneAtual}
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         )}
-      </div>
 
-      {imagens.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-heading text-xl font-bold">Galeria</h2>
-          <GaleriaLightbox imagens={imagens} />
-        </div>
-      )}
+        {mesas.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-heading text-2xl font-bold">{t("mesasDoEvento")}</h2>
+            <div className="mt-4">
+              <GradeAdaptavel
+                itens={mesas}
+                chave={(m) => m.slug}
+                colunas="sm:grid-cols-2"
+                render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+              />
+            </div>
+          </section>
+        )}
 
-      {apoiadores.length > 0 && (
-        <div className="mt-10">
-          <h2 className="font-heading text-xl font-bold">Apoiadores</h2>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            {apoiadores.map((a, i) => {
-              const logo = (
-                <Image
-                  src={a.logo_url}
-                  alt={a.nome}
-                  width={72}
-                  height={72}
-                  className="size-16 rounded-lg border border-border object-cover"
-                />
-              );
-              return a.link ? (
-                <a
-                  key={i}
-                  href={a.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={a.nome}
-                  className="transition-opacity hover:opacity-80"
-                >
-                  {logo}
-                </a>
-              ) : (
-                <span key={i} title={a.nome}>
-                  {logo}
-                </span>
-              );
-            })}
-          </div>
-        </div>
+        {imagens.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-heading text-2xl font-bold">{t("galeria")}</h2>
+            <GaleriaLightbox imagens={imagens} />
+          </section>
+        )}
+
+        {apoiadores.length > 0 && (
+          <section className="mt-12">
+            <h2 className="font-heading text-2xl font-bold">{t("apoiadores")}</h2>
+            <ul className="mt-4 flex flex-wrap items-center gap-4">
+              {apoiadores.map((a, i) => {
+                const logo = (
+                  <Image
+                    src={a.logo_url}
+                    alt={a.nome}
+                    width={72}
+                    height={72}
+                    className="size-16 rounded-lg border border-border object-cover"
+                  />
+                );
+                return (
+                  <li key={i}>
+                    {a.link ? (
+                      <a
+                        href={a.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={a.nome}
+                        className="block transition-opacity hover:opacity-80"
+                      >
+                        {logo}
+                      </a>
+                    ) : (
+                      <span title={a.nome}>{logo}</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
+      </Container>
+
+      {vendaAtiva && menorPreco !== null && (
+        <BarraAcaoMovel
+          rotulo={t("aPartirDe", { preco: formatBRL(menorPreco) })}
+          acao={
+            <a href="#ingressos" className={buttonVariants({ variant: "marca" })}>
+              <Ticket className="size-4" aria-hidden />
+              {t("verIngressos")}
+            </a>
+          }
+        />
       )}
     </article>
   );

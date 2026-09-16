@@ -192,7 +192,7 @@ export function SuplementoDadosForm({
       </div>
 
       {erro && <p className="text-sm text-destructive">{erro}</p>}
-      {salvo && <p className="text-sm text-emerald-400">Dados salvos.</p>}
+      {salvo && <p className="text-sm text-sucesso">Dados salvos.</p>}
 
       <Button type="submit" disabled={pending}>
         {pending ? "Salvando..." : editando ? "Salvar dados" : "Criar e continuar"}

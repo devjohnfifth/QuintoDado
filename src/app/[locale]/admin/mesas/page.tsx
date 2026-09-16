@@ -32,7 +32,7 @@ export default async function AdminMesasPage() {
         <h1 className="font-heading text-2xl font-bold">Mesas</h1>
         <Link
           href="/admin/mesas/nova"
-          className="rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-4 py-2 text-sm font-medium text-white"
+          className="rounded-full bg-marca px-4 py-2 text-sm font-medium text-white"
         >
           + Nova mesa
         </Link>

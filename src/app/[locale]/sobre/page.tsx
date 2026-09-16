@@ -7,6 +7,9 @@ import bannerOg from "@/assets/brand/banner-og.webp";
 import grupoJogandoRpg from "@/assets/brand/grupo-jogando-rpg.jpg";
 import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
 import { Reveal } from "@/components/site/reveal";
+import { Container } from "@/components/site/container";
+import { buttonVariants } from "@/components/ui/button";
+import { SITE_LINKS } from "@/lib/site-links";
 
 export async function generateMetadata({
   params,
@@ -48,132 +51,109 @@ export default async function SobrePage({
   ];
 
   return (
-    <article className="mx-auto max-w-2xl px-4 pb-16 sm:px-6">
-      <Reveal>
-        <div className="relative aspect-[16/10] w-[calc(100%+2rem)] -translate-x-4 overflow-hidden sm:aspect-[3/1] sm:w-[calc(100%+3rem)] sm:-translate-x-6 sm:rounded-b-2xl">
+    <article className="pb-16">
+      <Container className="pt-6 sm:pt-10">
+        {/* Capa com o título dentro — um H1 só, sem repetir "Quinto Dado" logo abaixo. */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border sm:aspect-[3/1]">
           <Image
             src={grupoJogandoRpg}
             alt=""
             fill
             priority
+            placeholder="blur"
             className="object-cover"
-            sizes="(min-width: 672px) 720px, 100vw"
+            sizes="(min-width: 1024px) 768px, 100vw"
           />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-br from-[#4F7DF3]/80 via-[#0B0B14]/50 to-[#A855F7]/70 mix-blend-multiply"
-          />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#0B0B14] via-transparent to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6">
-            <p className="font-heading text-3xl font-black uppercase tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-5xl">
-              Quinto Dado
-            </p>
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-primary/70 via-background/50 to-secondary/60 mix-blend-multiply" />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
+            <p className="font-heading text-sm font-bold uppercase tracking-widest text-white/80">Quinto Dado</p>
+            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-5xl">
+              {t("titulo")}
+            </h1>
           </div>
         </div>
 
-        <h1 className="mt-6 font-heading text-4xl font-bold">{t("titulo")}</h1>
-
-        <div className="group mt-6 border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-primary hover:bg-primary/[0.03]">
-          <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
-            {t("intro")
-              .split("\n\n")
-              .map((paragrafo, i) => (
-                <p
-                  key={i}
-                  className="mt-4 text-muted-foreground transition-colors duration-300 first:mt-0 group-hover:text-foreground/90"
-                >
-                  {paragrafo}
-                </p>
-              ))}
-          </div>
+        <div className="mt-8 max-w-3xl space-y-4 border-l-2 border-primary/40 pl-6 text-lg text-muted-foreground">
+          {t("intro")
+            .split("\n\n")
+            .map((paragrafo, i) => (
+              <p key={i}>{paragrafo}</p>
+            ))}
         </div>
-      </Reveal>
 
-      <Reveal className="mt-12">
-        <h2 className="font-heading text-xl font-bold">{t("pilaresTitulo")}</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          {pilares.map((pilar) => (
-            <div
-              key={pilar.titulo}
-              className="group transform-gpu rounded-2xl border border-border bg-card/60 p-5 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40"
-            >
-              <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-                <pilar.Icon className="size-4" aria-hidden />
+        <Reveal className="mt-14">
+          <h2 className="font-heading text-2xl font-bold tracking-tight">{t("pilaresTitulo")}</h2>
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            {pilares.map((pilar) => (
+              <div
+                key={pilar.titulo}
+                className="rounded-2xl border border-border bg-card/60 p-5 transition-colors duration-300 hover:border-primary/40"
+              >
+                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+                  <pilar.Icon className="size-5" aria-hidden />
+                </div>
+                <h3 className="mt-3 font-heading text-lg font-bold">{pilar.titulo}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{pilar.corpo}</p>
               </div>
-              <h3 className="mt-3 font-heading text-sm font-bold">{pilar.titulo}</h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">{pilar.corpo}</p>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal className="mt-8">
+          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/60 to-transparent p-6 sm:p-8">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <ShieldCheck className="size-5" aria-hidden />
             </div>
-          ))}
-        </div>
-      </Reveal>
-
-      <Reveal className="mt-8">
-        <div className="relative overflow-hidden rounded-2xl border border-border p-6">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-[#4F7DF3]/10 via-transparent to-transparent"
-          />
-          <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-            <ShieldCheck className="size-4" aria-hidden />
+            <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight">{t("segurancaTitulo")}</h2>
+            <p className="mt-2 max-w-3xl text-muted-foreground">{t("segurancaCorpo")}</p>
           </div>
-          <h2 className="mt-3 font-heading text-xl font-bold">{t("segurancaTitulo")}</h2>
-          <p className="mt-2 text-muted-foreground">{t("segurancaCorpo")}</p>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <Reveal className="mt-10">
-        <div className="group flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="relative mx-auto size-28 shrink-0 sm:mx-0">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-[#4F7DF3]/30 to-[#A855F7]/30 blur-xl"
-            />
-            <Image
-              src={mestreQuintao}
-              alt="Mestre Quintão"
-              className="size-28 rounded-full object-cover object-top"
-            />
-          </div>
+        <Reveal className="mt-14">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+            <div className="relative mx-auto size-32 shrink-0 sm:mx-0">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl"
+              />
+              <Image src={mestreQuintao} alt="Mestre Quintão" className="size-32 rounded-full object-cover object-top" />
+            </div>
 
-          <div className="border-l-2 border-primary/40 pl-6 transition-[border-color,background-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:border-primary group-hover:bg-primary/[0.03]">
-            <div className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5">
-              <h2 className="font-heading text-xl font-bold">{t("mestreTitulo")}</h2>
+            <div className="max-w-3xl">
+              <h2 className="font-heading text-2xl font-bold tracking-tight">{t("mestreTitulo")}</h2>
               {t("mestreCorpo")
                 .split("\n\n")
                 .map((paragrafo, i) => (
-                  <p
-                    key={i}
-                    className="mt-3 text-muted-foreground transition-colors duration-300 group-hover:text-foreground/90"
-                  >
+                  <p key={i} className="mt-3 text-muted-foreground">
                     {paragrafo}
                   </p>
                 ))}
+              <p className="mt-4 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">{t("sistemasTitulo")}:</span> {t("sistemas")}
+              </p>
             </div>
           </div>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <Reveal className="mt-10 flex flex-wrap gap-3">
-        <Link
-          href="/mesas"
-          className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-5 py-2.5 text-sm font-medium text-white transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-6px_rgba(139,92,246,0.55)]"
-        >
-          {t("ctaMesas")}
-          <ArrowRight className="size-4" aria-hidden />
-        </Link>
-        <Link
-          href="/suplementos"
-          className="rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-        >
-          {t("ctaSuplementos")}
-        </Link>
-        <Link
-          href="/links"
-          className="rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
-        >
-          {t("ctaComunidade")}
-        </Link>
-      </Reveal>
+        <Reveal className="mt-12 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Link href="/mesas" className={buttonVariants({ variant: "marca", size: "lg" })}>
+            {t("ctaMesas")}
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <Link href="/suplementos" className={buttonVariants({ variant: "outline", size: "lg", className: "rounded-full" })}>
+            {t("ctaSuplementos")}
+          </Link>
+          <a
+            href={SITE_LINKS.whatsappComunidade}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "lg", className: "rounded-full" })}
+          >
+            {t("ctaComunidade")}
+          </a>
+        </Reveal>
+      </Container>
     </article>
   );
 }

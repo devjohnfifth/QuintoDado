@@ -1,15 +1,22 @@
+import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { BookOpen, Dices, MessageCircle, ArrowRight } from "lucide-react";
+import { BookOpen, Dices, MessageCircle, ArrowRight, ChevronDown } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
+import { Container } from "@/components/site/container";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { SuplementoCard } from "@/components/site/suplemento-card";
 import { EventoCarousel } from "@/components/site/evento-carousel";
-import type { EventoCardData } from "@/components/site/evento-card";
+import { EventoCard, type EventoCardData } from "@/components/site/evento-card";
+import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { listarSuplementos } from "@/lib/suplementos/publico";
 import { jsonLdSeguro } from "@/lib/json-ld";
 import mestreQuintao from "@/assets/brand/mestre-quintao.webp";
+import grupoJogandoRpg from "@/assets/brand/grupo-jogando-rpg.jpg";
 
 const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const jsonLd = {
@@ -77,6 +84,51 @@ async function buscarEventosAbertos(): Promise<EventoCardData[]> {
   return (data ?? []) as unknown as EventoCardData[];
 }
 
+async function contarConteudo() {
+  if (!isSupabaseConfigured()) return { mesas: 0, suplementos: 0 };
+  const supabase = await createClient();
+  const [{ count: mesas }, { count: suplementos }] = await Promise.all([
+    supabase.from("mesas").select("id", { count: "exact", head: true }).in("status", ["publicada", "confirmada", "em_andamento"]),
+    supabase.from("suplementos").select("id", { count: "exact", head: true }).eq("publicado", true).eq("gratuito", true),
+  ]);
+  return { mesas: mesas ?? 0, suplementos: suplementos ?? 0 };
+}
+
+/** Cabeçalho de seção da home: título, subtítulo e "ver todos" (no celular o link desce pro fim da seção). */
+function SecaoHome({
+  titulo,
+  subtitulo,
+  verTodos,
+  children,
+}: {
+  titulo: string;
+  subtitulo: string;
+  verTodos: { href: string; texto: string };
+  children: React.ReactNode;
+}) {
+  const link = (classe: string) => (
+    <Link href={verTodos.href} className={`items-center gap-1 text-sm font-medium text-primary hover:underline ${classe}`}>
+      {verTodos.texto}
+      <ArrowRight className="size-4" aria-hidden />
+    </Link>
+  );
+  return (
+    <Reveal className="border-t border-border/60 py-16">
+      <Container>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{titulo}</h2>
+            <p className="mt-1 text-muted-foreground">{subtitulo}</p>
+          </div>
+          {link("hidden shrink-0 sm:inline-flex")}
+        </div>
+        <div className="mt-6">{children}</div>
+        {link("mt-6 flex justify-center sm:hidden")}
+      </Container>
+    </Reveal>
+  );
+}
+
 export default async function HomePage({
   params,
 }: {
@@ -84,197 +136,133 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, mesasAbertas, eventosAbertos] = await Promise.all([
+  const [t, mesasAbertas, eventosAbertos, todosSuplementos, contagem] = await Promise.all([
     getTranslations("Home"),
     buscarMesasAbertas(),
     buscarEventosAbertos(),
+    listarSuplementos(),
+    contarConteudo(),
   ]);
+  // Na home só o que está no ar — o admin não vê rascunho misturado aqui.
+  const suplementos = todosSuplementos.filter((s) => s.publicado).slice(0, 6);
   const perguntasFaq = t.raw("faq.perguntas") as { pergunta: string; resposta: string }[];
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
-      />
-      {/* Bloco 1 — herói */}
-      <section className="relative overflow-hidden px-4 py-8 sm:px-6 sm:py-12">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-20 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1'/%3E%3C/svg%3E\")",
-            backgroundSize: "80px 92px",
-          }}
-        />
-        {/* Glows de marca — só uma sugestão de profundidade nos cantos, bem discretos pra não brigar com o texto */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-24 left-1/2 -z-10 h-[28rem] w-[28rem] -translate-x-[90%] rounded-full bg-[#4F7DF3]/10 blur-[130px]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-10 left-1/2 -z-10 h-[24rem] w-[24rem] translate-x-[40%] rounded-full bg-[#A855F7]/8 blur-[130px]"
-        />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }} />
 
-        <div className="mx-auto max-w-lg text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
-            <Dices className="size-3.5 text-primary" aria-hidden />
-            {t("hero.eyebrow")}
-          </span>
+      {/* Herói — baixo de propósito (pedido do João): a foto dá clima sem aumentar a altura. */}
+      <section className="relative isolate overflow-hidden">
+        <Image
+          src={grupoJogandoRpg}
+          alt=""
+          fill
+          priority
+          placeholder="blur"
+          className="-z-20 object-cover opacity-25"
+          sizes="100vw"
+        />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-background/60 via-background/80 to-background" />
 
-          <h1 className="mt-3 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
-            <span className="bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] bg-clip-text text-transparent">
-              {t("hero.titulo")}
-            </span>
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            {t("hero.subtitulo")}
+        <Container className="py-10 text-center sm:py-14">
+          <p className="flex flex-wrap items-center justify-center gap-2 text-sm">
+            <Link href="/mesas" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground">
+              <Dices className="size-3.5 text-primary" aria-hidden />
+              {t("hero.statMesas", { n: contagem.mesas })}
+            </Link>
+            <Link href="/suplementos" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground">
+              <BookOpen className="size-3.5 text-primary" aria-hidden />
+              {t("hero.statSuplementos", { n: contagem.suplementos })}
+            </Link>
           </p>
-          <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
+
+          <h1 className="mt-4 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
+            <span className="text-marca">{t("hero.titulo")}</span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{t("hero.subtitulo")}</p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={SITE_LINKS.whatsappComunidade}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-6 py-3 text-center text-sm font-medium text-white transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-6px_rgba(139,92,246,0.55)] sm:w-auto"
+              className={buttonVariants({ variant: "marca", size: "lg", className: "w-full sm:w-auto" })}
             >
+              <MessageCircle className="size-4" aria-hidden />
               {t("hero.ctaComunidade")}
             </a>
             <Link
               href="/mesas"
-              className="w-full rounded-full border border-border px-6 py-3 text-center text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground sm:w-auto"
+              className={buttonVariants({ variant: "outline", size: "lg", className: "w-full rounded-full bg-background/60 sm:w-auto" })}
             >
               {t("hero.ctaMesas")}
             </Link>
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* Bloco 3' — eventos publicados, some se não houver nenhum */}
-      {eventosAbertos.length > 0 && (
-        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
-          <div className="mx-auto max-w-4xl lg:max-w-5xl">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <h2 className="font-heading text-2xl font-bold">{t("eventos.titulo")}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{t("eventos.subtitulo")}</p>
-              </div>
-              <Link
-                href="/eventos"
-                className="hidden shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline sm:inline-flex"
-              >
-                {t("eventos.verTodos")}
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </div>
-            <div className="mt-6">
-              <EventoCarousel eventos={eventosAbertos} />
-            </div>
-            <Link
-              href="/eventos"
-              className="mt-4 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden"
-            >
-              {t("eventos.verTodos")}
-              <ArrowRight className="size-4" aria-hidden />
-            </Link>
-          </div>
-        </Reveal>
+      {suplementos.length > 0 && (
+        <SecaoHome
+          titulo={t("suplementosRecentes.titulo")}
+          subtitulo={t("suplementosRecentes.subtitulo")}
+          verTodos={{ href: "/suplementos", texto: t("suplementosRecentes.verTodos") }}
+        >
+          <GradeAdaptavel
+            itens={suplementos}
+            chave={(s) => s.slug}
+            render={(s, destaque) => <SuplementoCard suplemento={s} destaque={destaque} />}
+          />
+        </SecaoHome>
       )}
 
-      {/* Bloco 4 — mesas abertas de verdade, some se não houver nenhuma */}
       {mesasAbertas.length > 0 && (
-        <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6 lg:px-[10vw]">
-          <div className="mx-auto max-w-4xl lg:max-w-5xl">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <h2 className="font-heading text-2xl font-bold">{t("mesasAbertas.titulo")}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{t("mesasAbertas.subtitulo")}</p>
-              </div>
-              <Link
-                href="/mesas"
-                className="hidden shrink-0 items-center gap-1 text-sm font-medium text-primary hover:underline sm:inline-flex"
-              >
-                {t("mesasAbertas.verTodas")}
-                <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </div>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {mesasAbertas.map((mesa) => (
-                <MesaCard key={mesa.slug} mesa={mesa} />
-              ))}
-            </div>
-            <Link
-              href="/mesas"
-              className="mt-6 flex items-center justify-center gap-1 text-sm font-medium text-primary hover:underline sm:hidden"
-            >
-              {t("mesasAbertas.verTodas")}
-              <ArrowRight className="size-4" aria-hidden />
-            </Link>
-          </div>
-        </Reveal>
+        <SecaoHome
+          titulo={t("mesasAbertas.titulo")}
+          subtitulo={t("mesasAbertas.subtitulo")}
+          verTodos={{ href: "/mesas", texto: t("mesasAbertas.verTodas") }}
+        >
+          <GradeAdaptavel
+            itens={mesasAbertas}
+            chave={(m) => m.slug}
+            render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+          />
+        </SecaoHome>
       )}
 
-      {/* Blocos 4 e 5 — suplementos e mesas, lado a lado pra quebrar a pilha vertical */}
-      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
-        <div className="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2">
-          <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-              <BookOpen className="size-5" aria-hidden />
-            </div>
-            <h2 className="mt-4 font-heading text-xl font-bold">
-              {t("suplementos.titulo")}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("suplementos.corpo")}
-            </p>
-            <Link
-              href="/suplementos"
-              className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition-colors group-hover:text-primary"
-            >
-              {t("suplementos.cta")}
-              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
-            </Link>
-          </div>
-
-          <div className="group transform-gpu rounded-2xl border border-border bg-card/60 p-6 transition-[transform,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-[1.02] hover:border-primary/40">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-              <Dices className="size-5" aria-hidden />
-            </div>
-            <h2 className="mt-4 font-heading text-xl font-bold">{t("mesas.titulo")}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t("mesas.corpo")}</p>
-            <Link
-              href="/mesas"
-              className="mt-5 inline-flex items-center gap-1 text-sm font-medium transition-colors group-hover:text-primary"
-            >
-              {t("mesas.cta")}
-              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
-            </Link>
-          </div>
-        </div>
-      </Reveal>
-
-      {/* Bloco 6 — prova social entra quando depoimentos existirem no banco */}
+      {eventosAbertos.length > 0 && (
+        <SecaoHome
+          titulo={t("eventos.titulo")}
+          subtitulo={t("eventos.subtitulo")}
+          verTodos={{ href: "/eventos", texto: t("eventos.verTodos") }}
+        >
+          {eventosAbertos.length === 1 ? (
+            <EventoCard evento={eventosAbertos[0]} destaque />
+          ) : (
+            <EventoCarousel eventos={eventosAbertos} />
+          )}
+        </SecaoHome>
+      )}
 
       {/* FAQ — também vira dado estruturado FAQPage logo abaixo */}
-      <Reveal className="border-t border-border/60 px-4 py-16 sm:px-6">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="font-heading text-2xl font-bold">{t("faq.titulo")}</h2>
-          <div className="mt-6 divide-y divide-border/60 rounded-2xl border border-border">
-            {perguntasFaq.map((item) => (
-              <details key={item.pergunta} className="group px-5 py-4 open:pb-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium marker:content-none">
-                  {item.pergunta}
-                  <ArrowRight
-                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-90"
-                    aria-hidden
-                  />
-                </summary>
-                <p className="mt-2 text-sm text-muted-foreground">{item.resposta}</p>
-              </details>
-            ))}
+      <Reveal className="border-t border-border/60 py-16">
+        <Container>
+          <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
+            <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t("faq.titulo")}</h2>
+            <div className="divide-y divide-border/60 rounded-2xl border border-border bg-card/40">
+              {perguntasFaq.map((item) => (
+                <details key={item.pergunta} className="group px-5 py-4">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium marker:content-none">
+                    {item.pergunta}
+                    <ChevronDown
+                      className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+                      aria-hidden
+                    />
+                  </summary>
+                  <p className="mt-2 text-sm text-muted-foreground">{item.resposta}</p>
+                </details>
+              ))}
+            </div>
           </div>
-        </div>
+        </Container>
       </Reveal>
       <script
         type="application/ld+json"
@@ -291,29 +279,25 @@ export default async function HomePage({
         }}
       />
 
-      {/* Bloco 4' — comunidade */}
-      <Reveal className="relative overflow-hidden border-t border-border/60 px-4 py-16 sm:px-6">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-[#4F7DF3]/10 via-transparent to-transparent"
-        />
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="mx-auto flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-            <MessageCircle className="size-5" aria-hidden />
+      {/* Comunidade */}
+      <Reveal className="border-t border-border/60 py-16">
+        <Container>
+          <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card/60 to-secondary/15 px-6 py-10 text-center sm:px-10">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-marca text-white">
+              <MessageCircle className="size-6" aria-hidden />
+            </div>
+            <h2 className="mt-4 font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t("comunidade.titulo")}</h2>
+            <p className="mx-auto mt-2 max-w-lg text-muted-foreground">{t("comunidade.corpo")}</p>
+            <a
+              href={SITE_LINKS.whatsappComunidade}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "marca", size: "lg", className: "mt-6" })}
+            >
+              {t("comunidade.cta")}
+            </a>
           </div>
-          <h2 className="mt-4 font-heading text-2xl font-bold">
-            {t("comunidade.titulo")}
-          </h2>
-          <p className="mt-2 text-muted-foreground">{t("comunidade.corpo")}</p>
-          <a
-            href={SITE_LINKS.whatsappComunidade}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-block rounded-full bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] px-6 py-3 text-sm font-medium text-white transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-6px_rgba(139,92,246,0.55)]"
-          >
-            {t("comunidade.cta")}
-          </a>
-        </div>
+        </Container>
       </Reveal>
     </>
   );

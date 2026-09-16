@@ -33,7 +33,7 @@ const PAPEL_LABEL: Record<UsuarioLinha["papel"], string> = {
 const PAPEL_COR: Record<UsuarioLinha["papel"], string> = {
   usuario: "border-border text-muted-foreground",
   mestre: "border-primary/40 text-primary",
-  admin: "border-amber-500/40 text-amber-400",
+  admin: "border-alerta/40 text-alerta",
 };
 
 export function UsuariosTable({ usuarios }: { usuarios: UsuarioLinha[] }) {
@@ -124,7 +124,7 @@ function LinhaUsuario({
           {PAPEL_LABEL[papelAtual]}
         </span>
         {usuario.mestreSolicitado && papelAtual === "usuario" && (
-          <span className="ml-1.5 text-xs text-amber-400">pediu pra ser mestre</span>
+          <span className="ml-1.5 text-xs text-alerta">pediu pra ser mestre</span>
         )}
       </td>
       <td className="py-3 pr-4 text-right">

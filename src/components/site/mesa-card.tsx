@@ -1,23 +1,13 @@
 import Image from "next/image";
-import {
-  Users,
-  Globe,
-  MapPin,
-  Repeat,
-  Calendar,
-  Clock,
-  Flame,
-  UserPlus,
-  Lock,
-  Star,
-  Wallet,
-  CalendarDays,
-} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star, CalendarDays, Dices } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
 import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
 import { diaSemanaAbreviado, diasParaComeco } from "@/lib/mesas/horario";
 import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
+import { FundoSemImagem } from "@/components/site/card-midia";
+import { Selo } from "@/components/site/selo";
 
 export type MesaCardData = {
   sistema_id?: string | null;
@@ -42,7 +32,22 @@ export type MesaCardData = {
   eventos?: { titulo: string } | null;
 };
 
-export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favorito?: boolean }) {
+/**
+ * Card de mesa com cara de ingresso: o banner em cima (inteiro — a arte já
+ * traz o nome da mesa, então não sobrepomos texto), a linha picotada com as
+ * duas mordidas, e o "talão" com as informações embaixo.
+ */
+export function MesaCard({
+  mesa,
+  favorito = false,
+  destaque = false,
+}: {
+  mesa: MesaCardData;
+  favorito?: boolean;
+  /** Lista com uma mesa só: vira horizontal a partir do `sm` (banner à esquerda, picote vertical). */
+  destaque?: boolean;
+}) {
+  const t = useTranslations("MesaCard");
   const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
   const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
@@ -50,212 +55,193 @@ export function MesaCard({ mesa, favorito = false }: { mesa: MesaCardData; favor
   const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
   const lotada = vagasLivres <= 0;
   const ultimaVaga = !lotada && vagasLivres === 1;
+  const ocupacao =
+    mesa.vagas_total > 0 ? Math.min(100, Math.round((mesa.vagas_preenchidas / mesa.vagas_total) * 100)) : 0;
   const jogadores = mesa.jogadores_aprovados ?? [];
   const jogadoresVisiveis = jogadores.slice(0, 4);
   const extras = jogadores.length - jogadoresVisiveis.length;
+  const data = new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+  });
 
   return (
-    <Link href={`/mesas/${mesa.slug}`} className="group relative flex items-stretch">
-      {/* Talão — peça própria, forma e cor nunca mudam. O recorte acontece
-          neste wrapper SEM borda própria: overflow-hidden clipa filhos na
-          padding-box, que fica por dentro da borda — se a borda estivesse
-          aqui, sobraria 1px dela sempre visível, por fora da área clipada.
-          Por isso a borda mora só no filho de dentro. */}
-      <div className="relative flex-1 overflow-hidden rounded-l-2xl">
-        <span className="absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background" />
-        <span className="absolute -bottom-3 -right-3 z-10 size-6 rounded-full bg-background" />
-        <div className="flex h-full flex-col rounded-l-2xl border-y border-l border-border bg-card/60 p-3.5 transition-colors duration-300 group-hover:border-primary/40 sm:p-4">
-          <div className="flex items-start justify-between gap-2">
-            {logo ? (
-              <div className="relative h-9 w-24 shrink-0 overflow-hidden rounded-md bg-white shadow-sm">
-                <Image src={logo} alt={nomeSistema} fill className="object-cover" sizes="96px" />
-              </div>
-            ) : (
-              <span />
-            )}
-            {favorito && (
-              <span
-                title="Sistema favorito"
-                className="flex shrink-0 items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-500"
-              >
-                <Star className="size-3 fill-current" aria-hidden />
-                Favorito
-              </span>
-            )}
-          </div>
-
-          <h3 className="mt-2.5 font-heading text-base font-bold leading-tight sm:text-lg">
-            {mesa.titulo}
-          </h3>
-          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
-            {nomeSistema}
-          </p>
-
-          <div className="mt-3 space-y-1.5 text-xs text-muted-foreground sm:text-sm">
-            <p className="flex items-center gap-1.5">
-              <Users className="size-3.5 shrink-0 text-primary" aria-hidden />
-              <span className="text-foreground/90">
-                {mesa.vagas_preenchidas}/{mesa.vagas_total}
-              </span>{" "}
-              vagas preenchidas
-            </p>
-
-            <div className="flex items-center gap-1.5">
-              <Wallet className="size-3.5 shrink-0 text-primary" aria-hidden />
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold sm:text-xs ${
-                  mesa.preco_centavos === 0
-                    ? "bg-emerald-500/15 text-emerald-400"
-                    : "bg-primary/15 text-primary"
-                }`}
-              >
-                {mesa.preco_centavos === 0 ? "Gratuita" : formatBRL(mesa.preco_centavos)}
-              </span>
-            </div>
-
-            <p className="flex items-center gap-1.5">
-              {mesa.modalidade === "online" ? (
-                <Globe className="size-3.5 shrink-0 text-primary" aria-hidden />
-              ) : (
-                <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
-              )}
-              {MODALIDADE_LABEL[mesa.modalidade]}
-              {mesa.modalidade === "presencial" && mesa.cidade_uf ? ` · ${mesa.cidade_uf}` : ""}
-            </p>
-
-            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-              <span className="flex items-center gap-1.5">
-                <Repeat className="size-3.5 shrink-0 text-primary" aria-hidden />
-                {FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}
-              </span>
-              <span className="whitespace-nowrap font-semibold text-foreground">
-                {diaSemanaAbreviado(mesa.data_inicio)}
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-              <span className="flex items-center gap-1.5">
-                <Calendar className="size-3.5 shrink-0 text-primary" aria-hidden />
-                {new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR")}
-              </span>
-              <span className="flex items-center gap-1.5 whitespace-nowrap">
-                <Clock className="size-3.5 shrink-0 text-primary" aria-hidden />
-                {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Costura — fica parada, marca onde o talão se destacaria. A linha
-          pontilhada só corre entre as duas mordidas, nunca por cima delas —
-          por isso fica inset pelo raio do furo (size-6 = 24px, raio 12px),
-          em vez de esticar a costura inteira. Os furos ficam só no canhoto
-          (abaixo), pra não duplicar o círculo aqui parado e lá se movendo
-          junto no hover. */}
-      <div aria-hidden className="relative w-0 shrink-0">
-        <span className="absolute inset-y-3 left-0 border-l-2 border-dashed border-border/70" />
-      </div>
-
-      {/* Canhoto destacável — peça própria e completa, forma nunca muda, só a posição no hover.
-          Mesma lógica do talão: quem recorta (overflow-hidden) não tem borda própria, então
-          o furo cobre a borda de verdade, na mordida inteira — parada ou junto no hover. */}
-      <div className="relative w-[32%] shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:z-10 group-hover:translate-x-3 group-hover:rotate-2 sm:w-[34%]">
-        <div className="relative size-full overflow-hidden rounded-r-2xl">
-        <span className="absolute -left-3 -top-3 z-10 size-6 rounded-full bg-background" />
-        <span className="absolute -bottom-3 -left-3 z-10 size-6 rounded-full bg-background" />
-        <div className="relative size-full overflow-hidden rounded-r-2xl border-y border-r border-border bg-card transition-[box-shadow,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:border-primary/40 group-hover:shadow-2xl">
+    <Link
+      href={`/mesas/${mesa.slug}`}
+      className={`group flex h-full flex-col transition-transform duration-300 hover:-translate-y-0.5 ${destaque ? "sm:flex-row" : ""}`}
+    >
+      {/* Canhoto: o banner. */}
+      <div
+        className={`relative aspect-[21/9] w-full shrink-0 overflow-hidden rounded-t-2xl border-x border-t border-border bg-card transition-colors duration-300 group-hover:border-primary/40 ${
+          destaque ? "sm:aspect-auto sm:w-1/2 sm:rounded-l-2xl sm:rounded-tr-none sm:border-y sm:border-l sm:border-r-0" : ""
+        }`}
+      >
         {mesa.banner_url ? (
           <Image
             src={mesa.banner_url}
             alt=""
             fill
-            className="object-cover"
-            sizes="(min-width: 640px) 18vw, 32vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes={destaque ? "(min-width: 640px) 50vw, 100vw" : "(min-width: 1024px) 330px, (min-width: 640px) 45vw, 100vw"}
           />
         ) : (
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-br from-[#4F7DF3]/40 to-[#A855F7]/40"
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='69' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1.5' opacity='0.15'/%3E%3C/svg%3E\")",
-            }}
-          />
+          <FundoSemImagem icone={Dices} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 
-        <div className="absolute inset-x-1.5 top-1.5 flex flex-wrap gap-1 sm:inset-x-2 sm:top-2">
+        <div className="absolute inset-x-2.5 top-2.5 flex flex-wrap gap-1.5">
           {mesa.eventos && (
-            <span className="flex items-center gap-1 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-              <CalendarDays className="size-2.5 shrink-0" aria-hidden />
-              Evento
-            </span>
+            <Selo tom="solido" icone={CalendarDays}>
+              {t("evento")}
+            </Selo>
           )}
           {lotada ? (
-            <span className="flex items-center gap-1 rounded-full bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-              <Lock className="size-2.5 shrink-0" aria-hidden />
-              Lotada
-            </span>
+            <Selo tom="imagem" icone={Lock}>
+              {t("lotada")}
+            </Selo>
           ) : (
             <>
               {dias >= 0 && dias <= 14 && (
-                <span className="flex items-center gap-1 rounded-full bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-                  <Flame className="size-2.5 shrink-0" aria-hidden />
-                  {dias === 0 ? "Hoje" : `${dias}d`}
-                </span>
+                <Selo tom="imagem" icone={Flame} className="text-alerta">
+                  {dias === 0 ? t("hoje") : t("emDias", { n: dias })}
+                </Selo>
               )}
               {ultimaVaga ? (
-                <span className="flex animate-pulse items-center gap-1 rounded-full bg-red-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-                  <UserPlus className="size-2.5 shrink-0" aria-hidden />
-                  Última vaga!
-                </span>
+                <Selo tom="erro" icone={UserPlus} className="bg-erro text-white motion-safe:animate-pulse">
+                  {t("ultimaVaga")}
+                </Selo>
               ) : (
                 faltamPraAbrir > 0 && (
-                  <span className="flex items-center gap-1 rounded-full bg-emerald-500/90 px-1.5 py-0.5 text-[9px] font-semibold text-white sm:text-[10px]">
-                    <UserPlus className="size-2.5 shrink-0" aria-hidden />
-                    Falta {faltamPraAbrir}
-                  </span>
+                  <Selo tom="imagem" icone={UserPlus}>
+                    {t("faltamPraAbrir", { n: faltamPraAbrir })}
+                  </Selo>
                 )
               )}
             </>
           )}
         </div>
 
-        <p className="absolute inset-x-1.5 top-1/2 line-clamp-4 -translate-y-1/2 text-center font-heading text-[11px] font-bold uppercase leading-tight text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] sm:inset-x-2 sm:text-xs">
-          {mesa.titulo}
-        </p>
-
         {jogadoresVisiveis.length > 0 && (
-          <div className="absolute bottom-1.5 left-1.5 flex items-center -space-x-3 sm:bottom-2 sm:left-2 sm:-space-x-1.5">
+          <div className="absolute bottom-2.5 left-2.5 flex items-center -space-x-2" aria-label={t("jogadores")}>
             {jogadoresVisiveis.map((j, i) =>
               j.avatar_url ? (
                 <Image
                   key={i}
                   src={j.avatar_url}
                   alt={j.nome}
-                  width={33}
-                  height={33}
-                  className="size-[30px] rounded-full border-2 border-background object-cover sm:size-9"
+                  width={32}
+                  height={32}
+                  className="size-8 rounded-full border-2 border-background object-cover"
                 />
               ) : (
                 <span
                   key={i}
-                  className="flex size-[30px] items-center justify-center rounded-full border-2 border-background bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-xs font-bold text-white sm:size-9"
+                  title={j.nome}
+                  className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-marca text-xs font-bold text-white"
                 >
                   {j.nome.charAt(0).toUpperCase()}
                 </span>
               ),
             )}
             {extras > 0 && (
-              <span className="flex size-[30px] items-center justify-center rounded-full border-2 border-background bg-black/60 text-xs font-bold text-white sm:size-9">
+              <span className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-black/70 text-xs font-bold text-white">
                 +{extras}
               </span>
             )}
           </div>
         )}
+      </div>
+
+      {/* Picote: linha tracejada entre duas mordidas (círculos da cor do fundo por cima da borda). */}
+      <div aria-hidden className={`relative h-0 ${destaque ? "sm:h-auto sm:w-0" : ""}`}>
+        <span className={`absolute -left-3 -top-3 z-10 size-6 rounded-full bg-background`} />
+        <span
+          className={`absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background ${destaque ? "sm:-bottom-3 sm:right-[-12px] sm:top-auto" : ""}`}
+        />
+        <span
+          className={`absolute inset-x-4 top-0 border-t-2 border-dashed border-border/70 ${
+            destaque ? "sm:bottom-4 sm:left-0 sm:right-auto sm:top-4 sm:border-l-2 sm:border-t-0" : ""
+          }`}
+        />
+      </div>
+
+      {/* Talão: as informações. */}
+      <div
+        className={`flex flex-1 flex-col rounded-b-2xl border-x border-b border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 ${
+          destaque ? "sm:rounded-r-2xl sm:rounded-bl-none sm:border-y sm:border-l-0 sm:border-r sm:p-6" : ""
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {logo && (
+              <span className="relative h-6 w-16 shrink-0 overflow-hidden rounded bg-white">
+                <Image src={logo} alt="" fill className="object-cover" sizes="64px" />
+              </span>
+            )}
+            <span className="truncate text-sm text-muted-foreground">{nomeSistema}</span>
+          </div>
+          {favorito && (
+            <Selo tom="alerta" icone={Star}>
+              {t("favorito")}
+            </Selo>
+          )}
         </div>
+
+        <h3
+          className={`mt-2 font-heading font-bold leading-tight transition-colors group-hover:text-primary ${destaque ? "text-2xl" : "text-lg"}`}
+        >
+          {mesa.titulo}
+        </h3>
+
+        <div className="mt-3">
+          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span aria-label={t("vagasAria", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}>
+              {t("vagas", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}
+            </span>
+            <Selo tom={mesa.preco_centavos === 0 ? "sucesso" : "marca"}>
+              {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
+            </Selo>
+          </div>
+          <div aria-hidden className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className={`h-full rounded-full ${lotada ? "bg-muted-foreground" : "bg-marca"}`}
+              style={{ width: `${ocupacao}%` }}
+            />
+          </div>
         </div>
+
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <dt className="sr-only">{t("data")}</dt>
+            <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
+            <dd>
+              <span className="font-medium text-foreground">{diaSemanaAbreviado(mesa.data_inicio)}</span>, {data}
+            </dd>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <dt className="sr-only">{t("horario")}</dt>
+            <Clock className="size-4 shrink-0 text-primary" aria-hidden />
+            <dd>
+              {mesa.horario_inicio.slice(0, 5)}–{mesa.horario_fim.slice(0, 5)}
+            </dd>
+          </div>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <dt className="sr-only">{t("modalidade")}</dt>
+            {mesa.modalidade === "online" ? (
+              <Globe className="size-4 shrink-0 text-primary" aria-hidden />
+            ) : (
+              <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+            )}
+            <dd className="truncate">
+              {mesa.modalidade === "presencial" && mesa.cidade_uf ? mesa.cidade_uf : MODALIDADE_LABEL[mesa.modalidade]}
+            </dd>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <dt className="sr-only">{t("frequencia")}</dt>
+            <Repeat className="size-4 shrink-0 text-primary" aria-hidden />
+            <dd>{FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}</dd>
+          </div>
+        </dl>
       </div>
     </Link>
   );

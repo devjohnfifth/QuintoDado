@@ -83,7 +83,7 @@ export function EditarPerfilForm({
             {novoAvatar ? (
               <Image src={novoAvatar} alt="" fill className="object-cover" sizes="64px" />
             ) : (
-              <div className="flex size-full items-center justify-center bg-gradient-to-br from-[#4F7DF3] to-[#A855F7] text-lg font-semibold text-white">
+              <div className="flex size-full items-center justify-center bg-marca text-lg font-semibold text-white">
                 {nome.charAt(0).toUpperCase()}
               </div>
             )}

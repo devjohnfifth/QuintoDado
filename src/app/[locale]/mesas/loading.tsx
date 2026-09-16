@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CarregandoMesas() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
+    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-[10vw]">
       <div className="flex items-start justify-between gap-4">
         <div>
           <Skeleton className="size-10 rounded-xl" />
@@ -18,9 +18,9 @@ export default function CarregandoMesas() {
         <Skeleton className="h-9 w-24 rounded-full" />
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} className="h-40 w-full rounded-2xl" />
+          <Skeleton key={i} className="h-80 w-full rounded-2xl" />
         ))}
       </div>
     </div>

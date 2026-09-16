@@ -28,8 +28,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COR: Record<string, string> = {
-  aprovado: "border-emerald-500/40 text-emerald-400",
-  concluida: "border-emerald-500/40 text-emerald-400",
+  aprovado: "border-sucesso/40 text-sucesso",
+  concluida: "border-sucesso/40 text-sucesso",
   recusado: "border-destructive/40 text-destructive",
   cancelada_jogador: "border-border text-muted-foreground",
   cancelada_mestre: "border-destructive/40 text-destructive",
@@ -49,9 +49,9 @@ const STATUS_MESA_LABEL: Record<string, string> = {
 
 const STATUS_MESA_COR: Record<string, string> = {
   aguardando_aprovacao: "border-primary/40 text-primary",
-  publicada: "border-emerald-500/40 text-emerald-400",
-  confirmada: "border-emerald-500/40 text-emerald-400",
-  em_andamento: "border-emerald-500/40 text-emerald-400",
+  publicada: "border-sucesso/40 text-sucesso",
+  confirmada: "border-sucesso/40 text-sucesso",
+  em_andamento: "border-sucesso/40 text-sucesso",
   cancelada: "border-destructive/40 text-destructive",
 };
 
@@ -63,7 +63,7 @@ const STATUS_INGRESSO_LABEL: Record<string, string> = {
 };
 
 const STATUS_INGRESSO_COR: Record<string, string> = {
-  aprovado: "border-emerald-500/40 text-emerald-400",
+  aprovado: "border-sucesso/40 text-sucesso",
   recusado: "border-destructive/40 text-destructive",
   cancelado: "border-border text-muted-foreground",
 };
@@ -139,7 +139,7 @@ export default async function ContaPage({
       {perfil?.papel === "admin" && (
         <Link
           href="/admin"
-          className="mt-6 inline-block rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="mt-6 inline-block rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground"
         >
           Ir para o painel admin
         </Link>

@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CalendarDays } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { EventoCard, type EventoCardData } from "@/components/site/evento-card";
+import { Container } from "@/components/site/container";
+import { PageHeader } from "@/components/site/page-header";
+import { EstadoVazio } from "@/components/site/estado-vazio";
+import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 
-export const metadata: Metadata = {
-  title: "Eventos — Quinto Dado",
-  description: "Eventos presenciais de RPG de mesa organizados pelo Quinto Dado.",
-  alternates: { canonical: "/eventos" },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Eventos" });
+  const title = t("metaTitulo");
+  const description = t("metaDescricao");
+  return {
+    title,
+    description,
+    alternates: { canonical: "/eventos" },
+    openGraph: { title, description, locale, type: "website" },
+  };
+}
 
 async function buscarEventos(): Promise<EventoCardData[]> {
   if (!isSupabaseConfigured()) return [];
@@ -28,31 +40,27 @@ async function buscarEventos(): Promise<EventoCardData[]> {
   return (data ?? []) as unknown as EventoCardData[];
 }
 
-export default async function EventosPage() {
+export default async function EventosPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("Eventos");
   const eventos = await buscarEventos();
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:max-w-5xl lg:px-[10vw]">
-      <h1 className="font-heading text-3xl font-bold sm:text-4xl">Eventos</h1>
-      <p className="mt-2 text-muted-foreground">
-        Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.
-      </p>
+    <Container className="py-16">
+      <PageHeader icone={CalendarDays} titulo={t("titulo")} subtitulo={t("subtitulo")} />
 
-      {eventos.length === 0 ? (
-        <div className="mt-10 rounded-xl border border-dashed border-border py-16 text-center">
-          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4F7DF3]/20 to-[#A855F7]/20 text-primary">
-            <CalendarDays className="size-6" aria-hidden />
-          </div>
-          <p className="mt-4 font-heading text-lg font-bold">Nenhum evento aberto agora</p>
-          <p className="mt-2 text-sm text-muted-foreground">Fica de olho, tem coisa vindo por aí.</p>
-        </div>
-      ) : (
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {eventos.map((evento) => (
-            <EventoCard key={evento.slug} evento={evento} />
-          ))}
-        </div>
-      )}
-    </div>
+      <div className="mt-8">
+        {eventos.length === 0 ? (
+          <EstadoVazio icone={CalendarDays} titulo={t("vazioTitulo")} corpo={t("vazioCorpo")} />
+        ) : (
+          <GradeAdaptavel
+            itens={eventos}
+            chave={(e) => e.slug}
+            render={(evento, destaque) => <EventoCard evento={evento} destaque={destaque} />}
+          />
+        )}
+      </div>
+    </Container>
   );
 }

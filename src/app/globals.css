@@ -38,6 +38,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-sucesso: var(--qd-sucesso);
+  --color-alerta: var(--qd-alerta);
+  --color-erro: var(--qd-erro);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -181,3 +184,36 @@ select:focus-visible,
     transform: translateY(0);
   }
 }
+
+/*
+ * Marca: o gradiente azul→roxo vive num lugar só. `bg-marca` pra superfície
+ * (botão primário, ícone em destaque), `text-marca` pra texto em gradiente
+ * (logo e título do hero).
+ */
+@utility bg-marca {
+  background-image: var(--qd-gradiente);
+}
+
+@utility text-marca {
+  background-image: var(--qd-gradiente);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/*
+ * Revelar ao rolar só com CSS: o conteúdo nasce visível (sem esperar JS nem
+ * IntersectionObserver, então nunca pisca em branco). Onde o navegador
+ * suporta animação ligada à rolagem, ele sobe suavemente ao entrar na tela;
+ * onde não suporta, ou com movimento reduzido, simplesmente aparece.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .revelar {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
