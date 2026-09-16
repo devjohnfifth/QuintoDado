@@ -10,7 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { sanitizarUsername } from "@/lib/username";
 import { entrarComEmailAction, criarContaAction, esqueciSenhaAction } from "./actions";
 
-export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
+export function EntrarForm({ mensagemInicial, destino = "/" }: { mensagemInicial?: string; destino?: string }) {
   const t = useTranslations("Entrar");
   const [modo, setModo] = useState<"entrar" | "cadastrar">("entrar");
 
@@ -43,12 +43,12 @@ export function EntrarForm({ mensagemInicial }: { mensagemInicial?: string }) {
         </button>
       </div>
 
-      {modo === "entrar" ? <FormLogin /> : <FormCadastro />}
+      {modo === "entrar" ? <FormLogin destino={destino} /> : <FormCadastro />}
     </div>
   );
 }
 
-function FormLogin() {
+function FormLogin({ destino }: { destino: string }) {
   const t = useTranslations("Entrar");
   const [estado, formAction, pending] = useActionState(entrarComEmailAction, null);
   const [modo, setModo] = useState<"entrar" | "esqueci">("entrar");
@@ -59,6 +59,7 @@ function FormLogin() {
 
   return (
     <form action={formAction} className="space-y-4">
+      <input type="hidden" name="next" value={destino} />
       <div className="space-y-2">
         <Label htmlFor="email">{t("campoEmail")}</Label>
         <Input id="email" name="email" type="email" required />

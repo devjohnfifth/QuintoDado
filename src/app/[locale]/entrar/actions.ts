@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { idadeEmAnos } from "@/lib/idade";
 import { sanitizarUsername } from "@/lib/username";
+import { destinoSeguro } from "@/lib/auth/destino-seguro";
 
 export type EstadoFormEntrar = {
   erro?: string;
@@ -41,7 +42,7 @@ export async function entrarComEmailAction(
     return { erro: "E-mail ou senha incorretos." };
   }
 
-  redirect("/");
+  redirect(destinoSeguro(formData.get("next")));
 }
 
 const signupSchema = z

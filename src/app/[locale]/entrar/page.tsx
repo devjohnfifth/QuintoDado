@@ -4,6 +4,7 @@ import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { EntrarForm } from "./entrar-form";
+import { destinoSeguro } from "@/lib/auth/destino-seguro";
 
 export const metadata: Metadata = {
   title: "Entrar — Quinto Dado",
@@ -15,12 +16,13 @@ export default async function EntrarPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ erro?: string; cadastro?: string; recuperacao?: string }>;
+  searchParams: Promise<{ erro?: string; cadastro?: string; recuperacao?: string; next?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Entrar");
   const sp = await searchParams;
+  const destino = destinoSeguro(sp.next);
 
   if (isSupabaseConfigured()) {
     const supabase = await createClient();
@@ -28,7 +30,7 @@ export default async function EntrarPage({
       data: { user },
     } = await supabase.auth.getUser();
     if (user) {
-      redirect({ href: "/", locale });
+      redirect({ href: destino, locale });
     }
   }
 
@@ -44,7 +46,7 @@ export default async function EntrarPage({
   return (
     <div className="mx-auto max-w-sm px-4 py-16 sm:px-6">
       <h1 className="mb-8 text-center font-heading text-2xl font-bold">{t("titulo")}</h1>
-      <EntrarForm mensagemInicial={mensagemInicial} />
+      <EntrarForm mensagemInicial={mensagemInicial} destino={destino} />
     </div>
   );
 }
