@@ -6,7 +6,7 @@
  * cliente (os ids do banco mudam a cada save), na página pública é o id.
  */
 
-export const DADOS = ["d20", "d66", "d100"] as const;
+export const DADOS = ["d4", "d6", "d8", "d10", "d12", "d20", "d66", "d100"] as const;
 export type Dado = (typeof DADOS)[number];
 
 export type ItemTabela = {
@@ -50,14 +50,18 @@ function inteiroEntre(min: number, max: number, aleatorio: FonteAleatoria) {
   return min + Math.floor(aleatorio() * (max - min + 1));
 }
 
+/** Faces de um dado comum (tudo menos o d66): "d12" → 12. */
+function facesDoDado(dado: Exclude<Dado, "d66">): number {
+  return Number(dado.slice(1));
+}
+
 /**
  * Todos os resultados possíveis do dado, em ordem.
  * d66 são dois d6 lidos como dezena e unidade: 11–16, 21–26 … 61–66
  * (não existe 17, 20, 30 etc.).
  */
 export function valoresDoDado(dado: Dado): number[] {
-  if (dado === "d20") return Array.from({ length: 20 }, (_, i) => i + 1);
-  if (dado === "d100") return Array.from({ length: 100 }, (_, i) => i + 1);
+  if (dado !== "d66") return Array.from({ length: facesDoDado(dado) }, (_, i) => i + 1);
   const valores: number[] = [];
   for (let dezena = 1; dezena <= 6; dezena++) {
     for (let unidade = 1; unidade <= 6; unidade++) valores.push(dezena * 10 + unidade);
@@ -66,8 +70,7 @@ export function valoresDoDado(dado: Dado): number[] {
 }
 
 export function rolarDado(dado: Dado, aleatorio: FonteAleatoria = aleatorioSeguro): number {
-  if (dado === "d20") return inteiroEntre(1, 20, aleatorio);
-  if (dado === "d100") return inteiroEntre(1, 100, aleatorio);
+  if (dado !== "d66") return inteiroEntre(1, facesDoDado(dado), aleatorio);
   return inteiroEntre(1, 6, aleatorio) * 10 + inteiroEntre(1, 6, aleatorio);
 }
 

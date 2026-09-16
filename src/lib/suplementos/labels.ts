@@ -42,12 +42,13 @@ export function tipoPorSlugUrl(slugUrl: string): TipoSuplemento | null {
   return achado ?? null;
 }
 
-export const FORMATOS_ARQUIVO = ["pdf", "png", "webp", "json", "zip"] as const;
+export const FORMATOS_ARQUIVO = ["pdf", "png", "jpg", "webp", "json", "zip"] as const;
 export type FormatoArquivo = (typeof FORMATOS_ARQUIVO)[number];
 
 export const FORMATO_LABEL: Record<FormatoArquivo, string> = {
   pdf: "PDF",
   png: "PNG",
+  jpg: "JPG",
   webp: "WebP",
   json: "JSON (VTT)",
   zip: "ZIP",
@@ -57,10 +58,18 @@ export const FORMATO_LABEL: Record<FormatoArquivo, string> = {
 export const MIME_POR_FORMATO: Record<FormatoArquivo, string> = {
   pdf: "application/pdf",
   png: "image/png",
+  jpg: "image/jpeg",
   webp: "image/webp",
   json: "application/json",
   zip: "application/zip",
 };
+
+/** Formato pela extensão do nome do arquivo (jpeg conta como jpg). */
+export function formatoPorNome(nome: string): FormatoArquivo | null {
+  const ext = nome.split(".").pop()?.toLowerCase();
+  const normalizada = ext === "jpeg" ? "jpg" : ext;
+  return (FORMATOS_ARQUIVO as readonly string[]).includes(normalizada ?? "") ? (normalizada as FormatoArquivo) : null;
+}
 
 export const TAMANHO_MAXIMO_ARQUIVO = 100 * 1024 * 1024;
 

@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { ClipboardList, Dices, UserCheck, Users, Ticket, CalendarDays } from "lucide-react";
+import { ClipboardList, Dices, UserCheck, Users, Ticket, CalendarDays, BookOpen } from "lucide-react";
 
 async function buscarNumeros() {
   if (!isSupabaseConfigured())
@@ -83,7 +83,7 @@ export default async function AdminHomePage() {
         ))}
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/admin/mesas"
           className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
@@ -103,6 +103,18 @@ export default async function AdminHomePage() {
           </p>
           <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
             Criar eventos, gerenciar ingressos e aprovar pedidos de compra.
+          </p>
+        </Link>
+        <Link
+          href="/admin/suplementos"
+          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+        >
+          <p className="flex items-center gap-1.5 font-heading font-bold transition-colors group-hover:text-primary">
+            <BookOpen className="size-4" aria-hidden />
+            Suplementos
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
+            Publicar material, subir arquivos e montar tabelas aleatórias.
           </p>
         </Link>
         <Link

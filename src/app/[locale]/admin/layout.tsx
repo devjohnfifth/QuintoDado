@@ -58,6 +58,9 @@ export default async function AdminLayout({
         <Link href="/admin/eventos" className="text-muted-foreground hover:text-foreground">
           Eventos
         </Link>
+        <Link href="/admin/suplementos" className="text-muted-foreground hover:text-foreground">
+          Suplementos
+        </Link>
         <Link href="/admin/usuarios" className="text-muted-foreground hover:text-foreground">
           Usuários
         </Link>

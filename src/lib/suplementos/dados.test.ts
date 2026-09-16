@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  DADOS,
   acharItem,
   parseItensColados,
   PROFUNDIDADE_MAXIMA,
@@ -33,6 +34,11 @@ describe("valoresDoDado", () => {
     expect(valoresDoDado("d20")).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
   });
 
+  it("dados comuns vão de 1 ao número de faces", () => {
+    expect(valoresDoDado("d4")).toEqual([1, 2, 3, 4]);
+    expect(valoresDoDado("d12")).toEqual(Array.from({ length: 12 }, (_, i) => i + 1));
+  });
+
   it("d100 vai de 1 a 100", () => {
     const v = valoresDoDado("d100");
     expect(v).toHaveLength(100);
@@ -57,10 +63,13 @@ describe("rolarDado", () => {
     expect(rolarDado("d100", fixo(0.9999))).toBe(100);
     expect(rolarDado("d66", fixo(0))).toBe(11);
     expect(rolarDado("d66", fixo(0.9999))).toBe(66);
+    expect(rolarDado("d4", fixo(0.9999))).toBe(4);
+    expect(rolarDado("d12", fixo(0))).toBe(1);
+    expect(rolarDado("d12", fixo(0.9999))).toBe(12);
   });
 
   it("com a fonte segura, nunca sai do conjunto válido", () => {
-    for (const dado of ["d20", "d66", "d100"] as const) {
+    for (const dado of DADOS) {
       const validos = new Set(valoresDoDado(dado));
       for (let i = 0; i < 2000; i++) expect(validos.has(rolarDado(dado))).toBe(true);
     }
