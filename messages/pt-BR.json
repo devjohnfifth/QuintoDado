@@ -255,7 +255,9 @@
     "data": "Data",
     "horario": "Horário",
     "modalidade": "Modalidade",
-    "frequencia": "Frequência"
+    "frequencia": "Frequência",
+    "vagaLivre": "Vaga livre",
+    "vagaOcupada": "Vaga ocupada"
   },
   "Eventos": {
     "metaTitulo": "Eventos de RPG de mesa em BH — Quinto Dado",

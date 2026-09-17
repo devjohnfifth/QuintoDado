@@ -8,6 +8,7 @@ import { diaSemanaAbreviado, diasParaComeco } from "@/lib/mesas/horario";
 import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
 import { FundoSemImagem } from "@/components/site/card-midia";
 import { Selo } from "@/components/site/selo";
+import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
 
 export type MesaCardData = {
   sistema_id?: string | null;
@@ -55,11 +56,6 @@ export function MesaCard({
   const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
   const lotada = vagasLivres <= 0;
   const ultimaVaga = !lotada && vagasLivres === 1;
-  const ocupacao =
-    mesa.vagas_total > 0 ? Math.min(100, Math.round((mesa.vagas_preenchidas / mesa.vagas_total) * 100)) : 0;
-  const jogadores = mesa.jogadores_aprovados ?? [];
-  const jogadoresVisiveis = jogadores.slice(0, 4);
-  const extras = jogadores.length - jogadoresVisiveis.length;
   const data = new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
     day: "2-digit",
     month: "2-digit",
@@ -121,35 +117,6 @@ export function MesaCard({
           )}
         </div>
 
-        {jogadoresVisiveis.length > 0 && (
-          <div className="absolute bottom-2.5 left-2.5 flex items-center -space-x-2" aria-label={t("jogadores")}>
-            {jogadoresVisiveis.map((j, i) =>
-              j.avatar_url ? (
-                <Image
-                  key={i}
-                  src={j.avatar_url}
-                  alt={j.nome}
-                  width={32}
-                  height={32}
-                  className="size-8 rounded-full border-2 border-background object-cover"
-                />
-              ) : (
-                <span
-                  key={i}
-                  title={j.nome}
-                  className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-marca text-xs font-bold text-white"
-                >
-                  {j.nome.charAt(0).toUpperCase()}
-                </span>
-              ),
-            )}
-            {extras > 0 && (
-              <span className="flex size-8 items-center justify-center rounded-full border-2 border-background bg-black/70 text-xs font-bold text-white">
-                +{extras}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Picote: linha tracejada entre duas mordidas (círculos da cor do fundo por cima da borda). */}
@@ -193,21 +160,15 @@ export function MesaCard({
           {mesa.titulo}
         </h3>
 
-        <div className="mt-3">
-          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-            <span aria-label={t("vagasAria", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}>
-              {t("vagas", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}
-            </span>
-            <Selo tom={mesa.preco_centavos === 0 ? "sucesso" : "marca"}>
-              {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
-            </Selo>
-          </div>
-          <div aria-hidden className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-            <div
-              className={`h-full rounded-full ${lotada ? "bg-muted-foreground" : "bg-marca"}`}
-              style={{ width: `${ocupacao}%` }}
-            />
-          </div>
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <CadeirasVagas
+            total={mesa.vagas_total}
+            preenchidas={mesa.vagas_preenchidas}
+            jogadores={mesa.jogadores_aprovados ?? []}
+          />
+          <Selo tom={mesa.preco_centavos === 0 ? "sucesso" : "marca"} className="shrink-0">
+            {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
+          </Selo>
         </div>
 
         <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm text-muted-foreground">

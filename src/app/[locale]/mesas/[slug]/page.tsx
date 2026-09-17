@@ -6,6 +6,7 @@ import { Calendar, CalendarDays, CheckCircle2, Clock, Globe, LogIn, MapPin, Repe
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
+import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
 import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -214,7 +215,6 @@ export default async function MesaDetalhePage({
 
   const vagasLivres = Math.max(0, mesa.vagas_total - mesa.vagas_preenchidas);
   const lotada = vagasLivres === 0;
-  const ocupacao = mesa.vagas_total > 0 ? Math.min(100, Math.round((mesa.vagas_preenchidas / mesa.vagas_total) * 100)) : 0;
   const diaSemana = new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", { weekday: "long" });
   const preco = mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos);
   const jogadores = mesa.jogadores_aprovados ?? [];
@@ -343,50 +343,18 @@ export default async function MesaDetalhePage({
                 </li>
               </ul>
 
-              <div className="mt-4">
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span className="text-muted-foreground">
-                    {t("vagasPreenchidas", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })}
-                  </span>
-                  <span className={lotada ? "text-muted-foreground" : "font-medium text-foreground"}>
-                    {t("vagasRestantes", { n: vagasLivres })}
-                  </span>
-                </div>
-                <div aria-hidden className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={`h-full rounded-full ${lotada ? "bg-muted-foreground" : "bg-marca"}`}
-                    style={{ width: `${ocupacao}%` }}
-                  />
-                </div>
+              <div className="mt-5">
+                <CadeirasVagas
+                  total={mesa.vagas_total}
+                  preenchidas={mesa.vagas_preenchidas}
+                  jogadores={jogadores}
+                  tamanho="md"
+                />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t("vagasPreenchidas", { preenchidas: mesa.vagas_preenchidas, total: mesa.vagas_total })} ·{" "}
+                  <span className={lotada ? "" : "font-medium text-foreground"}>{t("vagasRestantes", { n: vagasLivres })}</span>
+                </p>
               </div>
-
-              {jogadores.length > 0 && (
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="flex items-center -space-x-2">
-                    {jogadores.map((jogador, i) =>
-                      jogador.avatar_url ? (
-                        <Image
-                          key={i}
-                          src={jogador.avatar_url}
-                          alt={jogador.nome}
-                          width={36}
-                          height={36}
-                          className="size-9 rounded-full border-2 border-background object-cover"
-                        />
-                      ) : (
-                        <span
-                          key={i}
-                          className="flex size-9 items-center justify-center rounded-full border-2 border-background bg-marca text-sm font-bold text-white"
-                          title={jogador.nome}
-                        >
-                          {jogador.nome.charAt(0).toUpperCase()}
-                        </span>
-                      ),
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{t("confirmados")}</p>
-                </div>
-              )}
             </div>
 
             {(acaoPrincipal || statusResumo) && (
