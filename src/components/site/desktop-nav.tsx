@@ -20,7 +20,7 @@ export function DesktopNav() {
   ] as const;
 
   return (
-    <nav className="hidden items-center gap-1 text-sm sm:flex">
+    <nav className="hidden items-center gap-0.5 text-sm lg:flex">
       {links.map((link) => {
         const ativo = pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (
@@ -28,14 +28,14 @@ export function DesktopNav() {
             key={link.href}
             href={link.href}
             aria-current={ativo ? "page" : undefined}
-            className={`group relative px-3 py-2 font-medium transition-colors ${
+            className={`group relative whitespace-nowrap px-2.5 py-2 font-medium transition-colors xl:px-3 ${
               ativo ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {link.label}
             <span
               aria-hidden
-              className={`absolute inset-x-3 -bottom-px h-px origin-left scale-x-0 bg-marca transition-transform duration-200 ease-out group-hover:scale-x-100 ${
+              className={`absolute inset-x-2.5 -bottom-px xl:inset-x-3 h-px origin-left scale-x-0 bg-marca transition-transform duration-200 ease-out group-hover:scale-x-100 ${
                 ativo ? "scale-x-100" : ""
               }`}
             />

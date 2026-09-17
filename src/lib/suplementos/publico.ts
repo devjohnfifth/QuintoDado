@@ -12,15 +12,17 @@ export type SuplementoCardData = {
   capa_url: string | null;
   classificacao: string;
   publicado: boolean;
+  publicado_em: string | null;
   sistemas: { nome: string; slug: string } | null;
 };
 
-export async function listarSuplementos(): Promise<SuplementoCardData[]> {
+/** Suplementos gratuitos que quem pede pode ver (o RLS filtra idade; admin também vê rascunho). */
+export const listarSuplementos = cache(async (): Promise<SuplementoCardData[]> => {
   if (!isSupabaseConfigured()) return [];
   const supabase = await createClient();
   const query = supabase
     .from("suplementos")
-    .select("slug, titulo, resumo, tipo, capa_url, classificacao, publicado, sistemas(nome, slug)")
+    .select("slug, titulo, resumo, tipo, capa_url, classificacao, publicado, publicado_em, sistemas(nome, slug)")
     .eq("gratuito", true)
     .order("publicado_em", { ascending: false, nullsFirst: true })
     .order("criado_em", { ascending: false });
@@ -32,7 +34,7 @@ export async function listarSuplementos(): Promise<SuplementoCardData[]> {
   }
 
   return data as unknown as SuplementoCardData[];
-}
+});
 
 export const buscarSuplemento = cache(async (slug: string) => {
   if (!isSupabaseConfigured()) return null;

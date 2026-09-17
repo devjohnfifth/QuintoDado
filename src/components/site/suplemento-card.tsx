@@ -1,11 +1,20 @@
 import { useTranslations } from "next-intl";
-import { Dices } from "lucide-react";
+import { Dices, Sparkles } from "lucide-react";
 import { TIPO_SUPLEMENTO, type TipoSuplemento } from "@/lib/suplementos/labels";
 import type { SuplementoCardData } from "@/lib/suplementos/publico";
 import { CardMidia } from "@/components/site/card-midia";
 import { Selo } from "@/components/site/selo";
 
-export function SuplementoCard({ suplemento, destaque = false }: { suplemento: SuplementoCardData; destaque?: boolean }) {
+export function SuplementoCard({
+  suplemento,
+  destaque = false,
+  noticia = false,
+}: {
+  suplemento: SuplementoCardData;
+  destaque?: boolean;
+  /** No carrossel de notícias: selo "Novo" + "Suplemento", e o tipo desce pros selos de baixo. */
+  noticia?: boolean;
+}) {
   const t = useTranslations("Suplementos");
   const tipo = TIPO_SUPLEMENTO[suplemento.tipo as TipoSuplemento]?.rotulo ?? suplemento.tipo;
 
@@ -17,8 +26,18 @@ export function SuplementoCard({ suplemento, destaque = false }: { suplemento: S
       destaque={destaque}
       selosImagem={
         <>
-          {suplemento.publicado ? <span /> : <Selo tom="alerta" className="bg-alerta text-black">{t("rascunho")}</Selo>}
-          <Selo tom="solido">{tipo}</Selo>
+          {!suplemento.publicado ? (
+            <Selo tom="alerta" className="bg-alerta text-black">
+              {t("rascunho")}
+            </Selo>
+          ) : noticia ? (
+            <Selo tom="imagem" icone={Sparkles}>
+              {t("novo")}
+            </Selo>
+          ) : (
+            <span />
+          )}
+          <Selo tom="solido">{noticia ? t("seloNoticia") : tipo}</Selo>
         </>
       }
     >
@@ -29,6 +48,7 @@ export function SuplementoCard({ suplemento, destaque = false }: { suplemento: S
       </p>
       <p className={`mt-1 text-sm text-muted-foreground ${destaque ? "line-clamp-4" : "line-clamp-3"}`}>{suplemento.resumo}</p>
       <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+        {noticia && <Selo tom="neutro">{tipo}</Selo>}
         <Selo>{suplemento.sistemas?.nome ?? t("generico")}</Selo>
         <Selo tom="sucesso">{t("gratuito")}</Selo>
       </div>

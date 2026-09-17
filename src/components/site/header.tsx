@@ -8,7 +8,6 @@ import { AccountMenu } from "./account-menu";
 import { NotificationBell } from "./notification-bell";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { Container } from "./container";
 import { buttonVariants } from "@/components/ui/button";
 
 async function buscarSessao() {
@@ -60,10 +59,13 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <Container className="flex h-16 items-center justify-between gap-4">
+      {/* Largura própria: segue a coluna do conteúdo (que tem a margem de 10vw),
+          mas nunca fica abaixo de 60rem — senão logo, menu e conta não cabem
+          numa linha só em telas largas, onde os 10vw comem muito espaço. */}
+      <div className="mx-auto flex h-16 w-full max-w-[max(60rem,calc(min(64rem,100vw)_-_20vw))] items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="group flex items-center gap-2 font-heading text-lg font-bold tracking-tight"
+          className="group flex shrink-0 items-center gap-2 whitespace-nowrap font-heading text-lg font-bold tracking-tight"
         >
           <Image
             src={logo5d}
@@ -78,7 +80,7 @@ export async function SiteHeader() {
 
         <DesktopNav />
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {sessao ? (
             <>
               <NotificationBell naoLidasIniciais={sessao.naoLidas} />
@@ -94,7 +96,7 @@ export async function SiteHeader() {
           )}
           <MobileNav logado={Boolean(sessao)} />
         </div>
-      </Container>
+      </div>
     </header>
   );
 }

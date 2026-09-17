@@ -41,7 +41,8 @@ export function AccountMenu({ perfil }: { perfil: Perfil }) {
         render={
           <button
             type="button"
-            className="flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 transition-colors hover:border-primary/40"
+            aria-label={perfil.nomeExibicao}
+            className="flex items-center gap-2 rounded-full border border-border p-1 transition-colors hover:border-primary/40 sm:pr-3"
           />
         }
       >
@@ -51,7 +52,7 @@ export function AccountMenu({ perfil }: { perfil: Perfil }) {
             {iniciais(perfil.nomeExibicao)}
           </AvatarFallback>
         </Avatar>
-        <span className="max-w-24 truncate text-sm font-semibold">
+        <span className="hidden max-w-24 truncate text-sm font-semibold sm:inline">
           {primeiroNome(perfil.nomeExibicao)}
         </span>
       </DropdownMenuTrigger>

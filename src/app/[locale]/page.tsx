@@ -8,7 +8,7 @@ import { Container } from "@/components/site/container";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { SuplementoCard } from "@/components/site/suplemento-card";
-import { EventoCarousel } from "@/components/site/evento-carousel";
+import { Carrossel } from "@/components/site/carrossel";
 import { EventoCard, type EventoCardData } from "@/components/site/evento-card";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -65,13 +65,18 @@ async function buscarMesasAbertas(): Promise<MesaCardData[]> {
   return (data ?? []) as unknown as MesaCardData[];
 }
 
-async function buscarEventosAbertos(): Promise<EventoCardData[]> {
+type EventoNoticia = EventoCardData & { criado_em: string };
+
+/** Suplemento publicado há até tantos dias entra no carrossel de notícias como novidade. */
+const DIAS_SUPLEMENTO_NOVO = 30;
+
+async function buscarEventosAbertos(): Promise<EventoNoticia[]> {
   if (!isSupabaseConfigured()) return [];
 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("eventos")
-    .select("slug, titulo, subtitulo, cidade_uf, data_inicio, banner_url, evento_ingresso_tipos(preco_centavos)")
+    .select("slug, titulo, subtitulo, cidade_uf, data_inicio, banner_url, criado_em, evento_ingresso_tipos(preco_centavos)")
     .eq("status", "publicado")
     .order("data_inicio", { ascending: true })
     .limit(6);
@@ -81,7 +86,7 @@ async function buscarEventosAbertos(): Promise<EventoCardData[]> {
     return [];
   }
 
-  return (data ?? []) as unknown as EventoCardData[];
+  return (data ?? []) as unknown as EventoNoticia[];
 }
 
 async function contarConteudo() {
@@ -144,7 +149,32 @@ export default async function HomePage({
     contarConteudo(),
   ]);
   // Na home só o que está no ar — o admin não vê rascunho misturado aqui.
-  const suplementos = todosSuplementos.filter((s) => s.publicado).slice(0, 6);
+  const publicados = todosSuplementos.filter((s) => s.publicado);
+
+  // Notícias: eventos abertos + até 3 suplementos publicados recentemente, do
+  // mais novo pro mais antigo (evento conta pela data em que foi criado). Os
+  // suplementos que entram aqui saem de "Últimos suplementos", logo abaixo,
+  // pra mesma capa não aparecer duas vezes seguidas.
+  const limiteNovidade = Date.now() - DIAS_SUPLEMENTO_NOVO * 86_400_000;
+  const suplementosNovos = publicados
+    .filter((s) => s.publicado_em && new Date(s.publicado_em).getTime() >= limiteNovidade)
+    .slice(0, 3);
+  const suplementos = publicados.filter((s) => !suplementosNovos.includes(s)).slice(0, 6);
+  const noticias = [
+    ...eventosAbertos.map((e) => ({ tipo: "evento" as const, chave: `evento-${e.slug}`, data: e.criado_em, evento: e })),
+    ...suplementosNovos.map((s) => ({
+      tipo: "suplemento" as const,
+      chave: `suplemento-${s.slug}`,
+      data: s.publicado_em!,
+      suplemento: s,
+    })),
+  ].sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+  const renderNoticia = (n: (typeof noticias)[number], destaque: boolean) =>
+    n.tipo === "evento" ? (
+      <EventoCard evento={n.evento} destaque={destaque} />
+    ) : (
+      <SuplementoCard suplemento={n.suplemento} destaque={destaque} noticia />
+    );
   const perguntasFaq = t.raw("faq.perguntas") as { pergunta: string; resposta: string }[];
 
   return (
@@ -200,6 +230,20 @@ export default async function HomePage({
         </Container>
       </section>
 
+      {noticias.length > 0 && (
+        <SecaoHome
+          titulo={t("eventos.titulo")}
+          subtitulo={t("eventos.subtitulo")}
+          verTodos={{ href: "/eventos", texto: t("eventos.verTodos") }}
+        >
+          {noticias.length <= 3 ? (
+            <GradeAdaptavel itens={noticias} chave={(n) => n.chave} render={renderNoticia} />
+          ) : (
+            <Carrossel itens={noticias.map((n) => ({ chave: n.chave, conteudo: renderNoticia(n, false) }))} />
+          )}
+        </SecaoHome>
+      )}
+
       {suplementos.length > 0 && (
         <SecaoHome
           titulo={t("suplementosRecentes.titulo")}
@@ -225,20 +269,6 @@ export default async function HomePage({
             chave={(m) => m.slug}
             render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
           />
-        </SecaoHome>
-      )}
-
-      {eventosAbertos.length > 0 && (
-        <SecaoHome
-          titulo={t("eventos.titulo")}
-          subtitulo={t("eventos.subtitulo")}
-          verTodos={{ href: "/eventos", texto: t("eventos.verTodos") }}
-        >
-          {eventosAbertos.length === 1 ? (
-            <EventoCard evento={eventosAbertos[0]} destaque />
-          ) : (
-            <EventoCarousel eventos={eventosAbertos} />
-          )}
         </SecaoHome>
       )}
 

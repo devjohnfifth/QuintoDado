@@ -37,7 +37,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
           fica coberto assim que abre — sem sentido animar ele pra virar X
           se ninguém vê. O X visível é só o de dentro da gaveta (SheetContent). */}
       <SheetTrigger
-        render={<Button variant="ghost" size="icon" className="sm:hidden" />}
+        render={<Button variant="ghost" size="icon" className="lg:hidden" />}
         aria-label={aberto ? t("fecharMenu") : t("abrirMenu")}
       >
         <Menu className="size-5" />

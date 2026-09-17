@@ -85,8 +85,10 @@
     },
     "eventos": {
       "titulo": "Notícias",
-      "subtitulo": "Novidades do Quinto Dado — por enquanto, os eventos presenciais organizados por aqui.",
-      "verTodos": "Ver todos os eventos"
+      "subtitulo": "O que está acontecendo no Quinto Dado: eventos e suplementos novos.",
+      "verTodos": "Ver eventos",
+      "anterior": "Anterior",
+      "proximo": "Próximo"
     },
     "mesasAbertas": {
       "titulo": "Mesas abertas",
@@ -393,7 +395,9 @@
     "downloads": "{n, plural, =0 {Nenhum download ainda} one {# download} other {# downloads}}",
     "voltar": "Ver todos os suplementos",
     "naoEncontrado": "Suplemento não encontrado — Quinto Dado",
-    "maisSuplementos": "Mais suplementos"
+    "maisSuplementos": "Mais suplementos",
+    "novo": "Novo",
+    "seloNoticia": "Suplemento"
   },
   "Legal": {
     "termosTitulo": "Termos de uso",
