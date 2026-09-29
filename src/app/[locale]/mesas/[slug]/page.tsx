@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Calendar, CalendarDays, CheckCircle2, Clock, Globe, LogIn, MapPin, Repeat, Ticket, UserPlus } from "lucide-react";
+import { BookOpen, Calendar, CalendarDays, CheckCircle2, Clock, Globe, LogIn, MapPin, Repeat, Ticket, UserPlus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
@@ -156,6 +156,7 @@ export default async function MesaDetalhePage({
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Mesas");
+  const tPainel = await getTranslations("Painel");
 
   const resultado = await buscarMesa(slug);
   if (!resultado) notFound();
@@ -237,6 +238,8 @@ export default async function MesaDetalhePage({
       {t("candidatar")}
     </a>
   ) : null;
+  // Membro da mesa (mestre ou candidatura aprovada) tem acesso ao painel da campanha.
+  const podeAbrirPainel = ehMestre || inscricao?.status === "aprovado";
   const statusResumo = ehMestre
     ? t("voceMestra")
     : inscricao?.status === "aprovado"
@@ -357,14 +360,27 @@ export default async function MesaDetalhePage({
               </div>
             </div>
 
-            {(acaoPrincipal || statusResumo) && (
-              <div className="sm:w-64 sm:shrink-0">
+            {(acaoPrincipal || statusResumo || podeAbrirPainel) && (
+              <div className="space-y-2 sm:w-64 sm:shrink-0">
                 {acaoPrincipal}
                 {statusResumo && (
                   <p className="flex items-center justify-center gap-2 rounded-full bg-primary/10 px-4 py-2.5 text-center text-sm font-medium text-primary">
                     <CheckCircle2 className="size-4 shrink-0" aria-hidden />
                     {statusResumo}
                   </p>
+                )}
+                {podeAbrirPainel && (
+                  <Link
+                    href={`/mesas/${slug}/painel`}
+                    className={buttonVariants({
+                      variant: acaoPrincipal ? "outline" : "marca",
+                      size: "lg",
+                      className: "w-full rounded-full",
+                    })}
+                  >
+                    <BookOpen className="size-4" aria-hidden />
+                    {tPainel("abrirPainel")}
+                  </Link>
                 )}
               </div>
             )}

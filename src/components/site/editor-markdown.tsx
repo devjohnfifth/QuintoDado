@@ -30,14 +30,27 @@ export function EditorMarkdown({
   name,
   defaultValue = "",
   bucket = "mesa-banners",
+  aoMudar,
 }: {
   name: string;
   defaultValue?: string;
   bucket?: string;
+  /**
+   * Chamado a cada mudança do texto, inclusive quando ela vem dos botões da
+   * barra (que mexem no estado de dentro, sem disparar evento do textarea).
+   * Quem usa o editor dentro de um `<form>` não precisa disso: o próprio
+   * campo com `name` leva o valor no envio.
+   */
+  aoMudar?: (texto: string) => void;
 }) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [texto, setTexto] = useState(defaultValue);
+  const [texto, definirTexto] = useState(defaultValue);
+
+  function setTexto(novo: string) {
+    definirTexto(novo);
+    aoMudar?.(novo);
+  }
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [previa, setPrevia] = useState(false);
