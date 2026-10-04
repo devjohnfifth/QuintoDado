@@ -4,16 +4,11 @@ import { Pencil, ExternalLink, Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatBRL } from "@/lib/format";
+import { STATUS_INGRESSO_LABEL } from "@/lib/eventos/labels";
 import { IngressoActions } from "./ingresso-actions";
 import { EventoStatusActions } from "./evento-status-actions";
 import { VendasToggle } from "./vendas-toggle";
-
-const STATUS_LABEL: Record<string, string> = {
-  pendente: "Pendente",
-  aprovado: "Aprovado",
-  recusado: "Recusado",
-  cancelado: "Cancelado",
-};
+import { ExportarIngressos } from "./exportar-ingressos";
 
 const STATUS_EVENTO_LABEL: Record<string, string> = {
   rascunho: "Rascunho",
@@ -52,7 +47,7 @@ export default async function AdminEventoDetalhePage({
     supabase
       .from("evento_ingressos")
       .select(
-        "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url), evento_ingresso_tipos(nome, preco_centavos)",
+        "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url, telefone), evento_ingresso_tipos(nome, preco_centavos)",
       )
       .eq("evento_id", id)
       .order("criado_em", { ascending: true }),
@@ -138,7 +133,10 @@ export default async function AdminEventoDetalhePage({
         </ul>
       )}
 
-      <h2 className="mt-10 font-heading text-lg font-bold">Pedidos de ingresso ({ingressos?.length ?? 0})</h2>
+      <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="font-heading text-lg font-bold">Pedidos de ingresso ({ingressos?.length ?? 0})</h2>
+        {ingressos && ingressos.length > 0 && <ExportarIngressos eventoId={id} />}
+      </div>
 
       {!ingressos || ingressos.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
@@ -152,6 +150,7 @@ export default async function AdminEventoDetalhePage({
               nome_completo: string | null;
               username: string;
               avatar_url: string | null;
+              telefone: string | null;
             } | null;
             const tipo = ingresso.evento_ingresso_tipos as unknown as {
               nome: string;
@@ -178,15 +177,25 @@ export default async function AdminEventoDetalhePage({
                         {(perfil?.nome_exibicao ?? "?").charAt(0).toUpperCase()}
                       </span>
                     )}
-                    <div>
-                      <p className="font-medium">
-                        {perfil?.nome_completo || perfil?.nome_exibicao || "Pessoa"}
+                    <div className="min-w-0">
+                      <p className="font-medium">{perfil?.nome_completo || perfil?.nome_exibicao || "Pessoa"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {/* Quando há nome completo, o de exibição ainda importa: é como a pessoa aparece no site. */}
+                        {perfil?.nome_completo && perfil.nome_exibicao !== perfil.nome_completo
+                          ? `${perfil.nome_exibicao} · @${perfil?.username}`
+                          : `@${perfil?.username}`}
                       </p>
-                      <p className="text-xs text-muted-foreground">@{perfil?.username}</p>
+                      {perfil?.telefone && (
+                        <p className="text-xs text-muted-foreground">
+                          <a href={`tel:${perfil.telefone}`} className="hover:text-foreground hover:underline">
+                            {perfil.telefone}
+                          </a>
+                        </p>
+                      )}
                     </div>
                   </div>
                   <span className="rounded-full border border-border px-2 py-0.5 text-xs">
-                    {STATUS_LABEL[ingresso.status] ?? ingresso.status}
+                    {STATUS_INGRESSO_LABEL[ingresso.status] ?? ingresso.status}
                   </span>
                 </div>
 
