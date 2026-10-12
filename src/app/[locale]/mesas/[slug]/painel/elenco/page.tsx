@@ -16,5 +16,13 @@ export default async function ElencoPage({ params }: { params: Promise<{ locale:
   // A lista de membros só serve pro seletor de "revelar pra jogadores específicos".
   const membros = acesso.ehMestre ? await membrosDaMesa(acesso.mesa.id) : [];
 
-  return <Elenco slug={slug} entidades={entidades} membros={membros} ehMestre={acesso.ehMestre} />;
+  return (
+    <Elenco
+      slug={slug}
+      entidades={entidades}
+      membros={membros}
+      ehMestre={acesso.ehMestre}
+      usuarioId={acesso.usuarioId}
+    />
+  );
 }

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { exigirMestreDaMesa } from "@/lib/painel/acesso";
+import { exigirMembroDaMesa, exigirMestreDaMesa } from "@/lib/painel/acesso";
 import { TIPOS_ENTIDADE, VISIBILIDADES } from "@/lib/painel/tipos";
 
 type Resultado<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -26,11 +26,18 @@ export async function criarEntidadeAction(slug: string, input: unknown): Promise
   const parsed = entidadeSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: primeiroErro(parsed.error) };
 
-  const { supabase, mesaId } = await exigirMestreDaMesa(slug);
-  // Nasce oculta: revelar é sempre um ato deliberado.
+  const { supabase, mesaId, usuarioId, ehMestre } = await exigirMembroDaMesa(slug);
+  // Do mestre nasce oculta (revelar é ato deliberado); do jogador nasce
+  // visível — segredo é ferramenta de quem mestra.
   const { data, error } = await supabase
     .from("painel_entidades")
-    .insert({ mesa_id: mesaId, tipo: parsed.data.tipo, nome: parsed.data.nome, oculta: true })
+    .insert({
+      mesa_id: mesaId,
+      tipo: parsed.data.tipo,
+      nome: parsed.data.nome,
+      oculta: ehMestre,
+      criado_por: usuarioId,
+    })
     .select("id")
     .single();
 
@@ -47,7 +54,8 @@ export async function renomearEntidadeAction(slug: string, id: string, nome: str
   const parsed = z.string().trim().min(1, "Dê um nome.").max(120).safeParse(nome);
   if (!parsed.success) return { ok: false, error: primeiroErro(parsed.error) };
 
-  const { supabase } = await exigirMestreDaMesa(slug);
+  // Jogador renomeia a própria ficha; o RLS recusa a dos outros.
+  const { supabase } = await exigirMembroDaMesa(slug);
   const { error } = await supabase.from("painel_entidades").update({ nome: parsed.data }).eq("id", id);
   if (error) {
     console.error("[painel] erro ao renomear entidade:", error.message);
@@ -71,7 +79,7 @@ export async function alternarEntidadeAction(slug: string, id: string, oculta: b
 }
 
 export async function apagarEntidadeAction(slug: string, id: string): Promise<Resultado> {
-  const { supabase } = await exigirMestreDaMesa(slug);
+  const { supabase } = await exigirMembroDaMesa(slug);
   const { error } = await supabase.from("painel_entidades").delete().eq("id", id);
   if (error) {
     console.error("[painel] erro ao apagar entidade:", error.message);
@@ -98,10 +106,15 @@ export async function salvarCampoAction(
   const parsed = campoSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: primeiroErro(parsed.error) };
 
-  const { supabase, mesaId } = await exigirMestreDaMesa(slug);
+  const { supabase, mesaId, ehMestre } = await exigirMembroDaMesa(slug);
   // "Específicos" sem ninguém escolhido é o mesmo que oculto — evita um campo
   // que parece revelado na tela do mestre e não chega em ninguém.
-  const vis = parsed.data.vis === "especificos" && parsed.data.reveladoPara.length === 0 ? "oculto" : parsed.data.vis;
+  // Campo escrito por jogador é sempre da mesa: ele não controla segredo.
+  const vis = !ehMestre
+    ? "mesa"
+    : parsed.data.vis === "especificos" && parsed.data.reveladoPara.length === 0
+      ? "oculto"
+      : parsed.data.vis;
   const valores = {
     mesa_id: mesaId,
     entidade_id: parsed.data.entidadeId,
@@ -125,7 +138,7 @@ export async function salvarCampoAction(
 }
 
 export async function apagarCampoAction(slug: string, id: string): Promise<Resultado> {
-  const { supabase } = await exigirMestreDaMesa(slug);
+  const { supabase } = await exigirMembroDaMesa(slug);
   const { error } = await supabase.from("painel_campos").delete().eq("id", id);
   if (error) {
     console.error("[painel] erro ao apagar campo:", error.message);
@@ -146,7 +159,7 @@ const sessaoSchema = z.object({
 });
 
 export async function criarSessaoAction(slug: string): Promise<Resultado<{ id: string }>> {
-  const { supabase, mesaId } = await exigirMestreDaMesa(slug);
+  const { supabase, mesaId, usuarioId, ehMestre } = await exigirMembroDaMesa(slug);
 
   // Numera sozinho a partir da última: o mestre não deveria ter que lembrar.
   const { data: ultima, error: erroUltima } = await supabase
@@ -162,9 +175,15 @@ export async function criarSessaoAction(slug: string): Promise<Resultado<{ id: s
     return { ok: false, error: "Não deu pra criar a sessão." };
   }
 
+  // Resumo de jogador já nasce publicado: relato não tem rascunho.
   const { data, error } = await supabase
     .from("painel_sessoes")
-    .insert({ mesa_id: mesaId, numero: (ultima?.numero ?? 0) + 1 })
+    .insert({
+      mesa_id: mesaId,
+      numero: (ultima?.numero ?? 0) + 1,
+      criado_por: usuarioId,
+      publicado: !ehMestre,
+    })
     .select("id")
     .single();
 
@@ -181,7 +200,7 @@ export async function salvarSessaoAction(slug: string, id: string, input: unknow
   const parsed = sessaoSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: primeiroErro(parsed.error) };
 
-  const { supabase } = await exigirMestreDaMesa(slug);
+  const { supabase } = await exigirMembroDaMesa(slug);
   const { error } = await supabase
     .from("painel_sessoes")
     .update({ data: parsed.data.data || null, resumo_md: parsed.data.resumoMd || null })
@@ -209,7 +228,7 @@ export async function publicarSessaoAction(slug: string, id: string, publicado: 
 }
 
 export async function apagarSessaoAction(slug: string, id: string): Promise<Resultado> {
-  const { supabase } = await exigirMestreDaMesa(slug);
+  const { supabase } = await exigirMembroDaMesa(slug);
   const { error } = await supabase.from("painel_sessoes").delete().eq("id", id);
   if (error) {
     console.error("[painel] erro ao apagar sessão:", error.message);

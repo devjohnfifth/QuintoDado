@@ -19,7 +19,17 @@ import {
   salvarSessaoAction,
 } from "../actions";
 
-export function Sessoes({ slug, sessoes, ehMestre }: { slug: string; sessoes: Sessao[]; ehMestre: boolean }) {
+export function Sessoes({
+  slug,
+  sessoes,
+  ehMestre,
+  usuarioId,
+}: {
+  slug: string;
+  sessoes: Sessao[];
+  ehMestre: boolean;
+  usuarioId: string;
+}) {
   const t = useTranslations("Painel");
   const router = useRouter();
   const [erro, setErro] = useState<string | null>(null);
@@ -36,15 +46,14 @@ export function Sessoes({ slug, sessoes, ehMestre }: { slug: string; sessoes: Se
 
   return (
     <div className="space-y-4">
-      {ehMestre && (
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="marca" onClick={criar} disabled={pendente}>
-            {pendente ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" aria-hidden />}
-            {t("novaSessao")}
-          </Button>
-          {erro && <p className="text-sm text-destructive">{erro}</p>}
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button variant="marca" onClick={criar} disabled={pendente}>
+          {pendente ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" aria-hidden />}
+          {ehMestre ? t("novaSessao") : t("novoResumo")}
+        </Button>
+        {!ehMestre && <p className="text-sm text-muted-foreground">{t("avisoJogador")}</p>}
+        {erro && <p className="text-sm text-destructive">{erro}</p>}
+      </div>
 
       {sessoes.length === 0 ? (
         <EstadoVazio
@@ -56,7 +65,7 @@ export function Sessoes({ slug, sessoes, ehMestre }: { slug: string; sessoes: Se
         <ol className="space-y-4">
           {sessoes.map((sessao) => (
             <li key={sessao.id}>
-              <CartaoSessao slug={slug} sessao={sessao} ehMestre={ehMestre} />
+              <CartaoSessao slug={slug} sessao={sessao} ehMestre={ehMestre} usuarioId={usuarioId} />
             </li>
           ))}
         </ol>
@@ -65,7 +74,17 @@ export function Sessoes({ slug, sessoes, ehMestre }: { slug: string; sessoes: Se
   );
 }
 
-function CartaoSessao({ slug, sessao, ehMestre }: { slug: string; sessao: Sessao; ehMestre: boolean }) {
+function CartaoSessao({
+  slug,
+  sessao,
+  ehMestre,
+  usuarioId,
+}: {
+  slug: string;
+  sessao: Sessao;
+  ehMestre: boolean;
+  usuarioId: string;
+}) {
   const t = useTranslations("Painel");
   const router = useRouter();
   const [editando, setEditando] = useState(false);
@@ -105,6 +124,10 @@ function CartaoSessao({ slug, sessao, ehMestre }: { slug: string; sessao: Sessao
 
   // Rascunho é conteúdo que só o mestre vê: mesma convenção do elenco.
   const borda = ehMestre && !sessao.publicado ? "border-dashed border-erro/60" : "border-border";
+  // Cada um edita o próprio registro; o mestre edita qualquer um.
+  const meu = sessao.criado_por === usuarioId;
+  const podeEditar = ehMestre || meu;
+  const autor = sessao.criado_por && !meu ? sessao.profiles?.nome_exibicao : null;
 
   return (
     <article className={`rounded-2xl border bg-card/60 p-5 ${borda}`}>
@@ -120,16 +143,21 @@ function CartaoSessao({ slug, sessao, ehMestre }: { slug: string; sessao: Sessao
             {t("rascunho")}
           </Selo>
         )}
+        {autor && <Selo tom="neutro">{t("resumoDe", { nome: autor })}</Selo>}
+        {meu && sessao.criado_por && <Selo tom="neutro">{t("criadoPorVoce")}</Selo>}
 
-        {ehMestre && !editando && (
+        {podeEditar && !editando && (
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setEditando(true)} disabled={pendente}>
               {t("editar")}
             </Button>
-            <Button variant="outline" size="sm" className="rounded-full" onClick={publicar} disabled={pendente}>
-              {sessao.publicado ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
-              {sessao.publicado ? t("despublicar") : t("publicar")}
-            </Button>
+            {/* Publicar é decisão de quem mestra; relato de jogador já nasce publicado. */}
+            {ehMestre && (
+              <Button variant="outline" size="sm" className="rounded-full" onClick={publicar} disabled={pendente}>
+                {sessao.publicado ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                {sessao.publicado ? t("despublicar") : t("publicar")}
+              </Button>
+            )}
             {confirmando ? (
               <Button variant="destructive" size="sm" className="rounded-full" onClick={apagar} disabled={pendente}>
                 {pendente ? <Loader2 className="size-4 animate-spin" /> : t("confirmarExcluir")}

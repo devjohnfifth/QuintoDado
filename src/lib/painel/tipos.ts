@@ -39,6 +39,9 @@ export type Campo = {
 
 export type Entidade = {
   id: string;
+  /** Quem criou — jogador edita só o que é dele; o mestre mexe em tudo. */
+  criado_por: string | null;
+  profiles: { nome_exibicao: string } | null;
   tipo: TipoEntidade;
   nome: string;
   imagem_url: string | null;

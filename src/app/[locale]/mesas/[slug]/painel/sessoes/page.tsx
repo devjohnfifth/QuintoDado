@@ -14,5 +14,5 @@ export default async function SessoesPage({ params }: { params: Promise<{ locale
   // Sessão em rascunho só chega aqui pro mestre — quem filtra é o RLS.
   const sessoes = await listarSessoes(acesso.mesa.id);
 
-  return <Sessoes slug={slug} sessoes={sessoes} ehMestre={acesso.ehMestre} />;
+  return <Sessoes slug={slug} sessoes={sessoes} ehMestre={acesso.ehMestre} usuarioId={acesso.usuarioId} />;
 }

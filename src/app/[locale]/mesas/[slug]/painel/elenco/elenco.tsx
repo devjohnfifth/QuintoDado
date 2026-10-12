@@ -37,11 +37,13 @@ export function Elenco({
   entidades,
   membros,
   ehMestre,
+  usuarioId,
 }: {
   slug: string;
   entidades: Entidade[];
   membros: Membro[];
   ehMestre: boolean;
+  usuarioId: string;
 }) {
   const t = useTranslations("Painel");
   const router = useRouter();
@@ -69,8 +71,7 @@ export function Elenco({
 
   return (
     <div className="space-y-6">
-      {ehMestre && (
-        <div className="rounded-2xl border border-border bg-card/60 p-4">
+      <div className="rounded-2xl border border-border bg-card/60 p-4">
           {criando ? (
             <div className="grid gap-3 sm:grid-cols-[1fr_12rem_auto]">
               <div className="space-y-1.5">
@@ -113,9 +114,9 @@ export function Elenco({
               {t("novaFicha")}
             </button>
           )}
-          {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
-        </div>
-      )}
+        {!ehMestre && <p className="mt-2 text-sm text-muted-foreground">{t("avisoJogador")}</p>}
+        {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
+      </div>
 
       {grupos.length === 0 ? (
         <EstadoVazio
@@ -130,7 +131,13 @@ export function Elenco({
             <ul className="mt-3 space-y-3">
               {grupo.itens.map((entidade) => (
                 <li key={entidade.id}>
-                  <FichaEntidade slug={slug} entidade={entidade} membros={membros} ehMestre={ehMestre} />
+                  <FichaEntidade
+                    slug={slug}
+                    entidade={entidade}
+                    membros={membros}
+                    ehMestre={ehMestre}
+                    usuarioId={usuarioId}
+                  />
                 </li>
               ))}
             </ul>
@@ -146,11 +153,13 @@ function FichaEntidade({
   entidade,
   membros,
   ehMestre,
+  usuarioId,
 }: {
   slug: string;
   entidade: Entidade;
   membros: Membro[];
   ehMestre: boolean;
+  usuarioId: string;
 }) {
   const t = useTranslations("Painel");
   const router = useRouter();
@@ -180,6 +189,9 @@ function FichaEntidade({
 
   // Vermelho tracejado quando só o mestre vê: a mesma convenção do campo.
   const borda = ehMestre && entidade.oculta ? "border-dashed border-erro/60" : "border-border";
+  // Jogador mexe só no que é dele; o mestre mexe em tudo.
+  const minha = entidade.criado_por === usuarioId;
+  const podeEditar = ehMestre || minha;
 
   return (
     <div className={`rounded-2xl border bg-card/60 ${borda}`}>
@@ -193,6 +205,30 @@ function FichaEntidade({
           <ChevronDown className={`size-4 shrink-0 transition-transform ${aberta ? "rotate-180" : ""}`} aria-hidden />
           <span className="truncate font-heading font-bold">{entidade.nome}</span>
         </button>
+
+        {entidade.criado_por && (
+          <Selo tom="neutro">
+            {minha ? t("criadoPorVoce") : t("criadoPor", { nome: entidade.profiles?.nome_exibicao ?? "?" })}
+          </Selo>
+        )}
+
+        {!ehMestre &&
+          minha &&
+          (confirmando ? (
+            <Button variant="destructive" size="sm" onClick={apagar} disabled={pendente} className="rounded-full">
+              {pendente ? <Loader2 className="size-4 animate-spin" /> : t("confirmarExcluir")}
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("excluir")}
+              onClick={() => setConfirmando(true)}
+              disabled={pendente}
+            >
+              <Trash2 className="size-4" aria-hidden />
+            </Button>
+          ))}
 
         {ehMestre && (
           <>
@@ -229,16 +265,25 @@ function FichaEntidade({
           )}
 
           {entidade.painel_campos.map((campo) => (
-            <CampoFicha key={campo.id} slug={slug} entidadeId={entidade.id} campo={campo} membros={membros} ehMestre={ehMestre} />
+            <CampoFicha
+              key={campo.id}
+              slug={slug}
+              entidadeId={entidade.id}
+              campo={campo}
+              membros={membros}
+              ehMestre={ehMestre}
+              podeEditar={podeEditar}
+            />
           ))}
 
-          {ehMestre &&
+          {podeEditar &&
             (novoCampo ? (
               <CampoFicha
                 slug={slug}
                 entidadeId={entidade.id}
                 membros={membros}
-                ehMestre
+                ehMestre={ehMestre}
+                podeEditar
                 aoFechar={() => setNovoCampo(false)}
               />
             ) : (
@@ -261,13 +306,16 @@ function CampoFicha({
   campo,
   membros,
   ehMestre,
+  podeEditar,
   aoFechar,
 }: {
   slug: string;
   entidadeId: string;
   campo?: Campo;
   membros: Membro[];
+  /** Mestre escolhe quem vê cada campo; jogador escreve sempre pra mesa toda. */
   ehMestre: boolean;
+  podeEditar: boolean;
   aoFechar?: () => void;
 }) {
   const t = useTranslations("Painel");
@@ -301,17 +349,23 @@ function CampoFicha({
     });
   }
 
-  if (!ehMestre || !editando) {
+  if (!podeEditar || !editando) {
     // Leitura. Pro jogador não existe estado "oculto": o RLS não manda o campo.
     return (
       <div className={`rounded-xl p-3 ${ehMestre ? CLASSE_VISIBILIDADE[campo!.vis] : "border border-border"}`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{campo!.rotulo}</p>
-          {ehMestre && (
+          {podeEditar && (
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">
-                {campo!.vis === "oculto" ? t("seloOculto") : campo!.vis === "mesa" ? t("seloMesa") : t("seloEspecificos")}
-              </span>
+              {ehMestre && (
+                <span className="text-xs font-medium">
+                  {campo!.vis === "oculto"
+                    ? t("seloOculto")
+                    : campo!.vis === "mesa"
+                      ? t("seloMesa")
+                      : t("seloEspecificos")}
+                </span>
+              )}
               <Button variant="ghost" size="sm" onClick={() => setEditando(true)}>
                 {t("editar")}
               </Button>
@@ -336,7 +390,7 @@ function CampoFicha({
             onChange={(e) => setRotulo(e.target.value)}
           />
         </div>
-        <div className="space-y-1.5">
+        <div className={`space-y-1.5 ${ehMestre ? "" : "hidden"}`}>
           <Label htmlFor={`vis-${campo?.id ?? "novo"}`}>{t("quemVe")}</Label>
           <select
             id={`vis-${campo?.id ?? "novo"}`}
@@ -362,7 +416,7 @@ function CampoFicha({
         />
       </div>
 
-      {vis === "especificos" && (
+      {ehMestre && vis === "especificos" && (
         <ul className="flex flex-wrap gap-2">
           {membros.map((m) => {
             const marcado = reveladoPara.includes(m.id);

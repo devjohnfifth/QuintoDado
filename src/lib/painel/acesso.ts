@@ -56,13 +56,25 @@ export const acessoAoPainel = cache(async (slug: string): Promise<AcessoPainel |
   };
 });
 
-/** Usada pelas Server Actions: recusa quem não mestra a mesa. */
+/** Usada pelas Server Actions do mestre: recusa quem não mestra a mesa. */
 export async function exigirMestreDaMesa(slug: string) {
   const acesso = await acessoAoPainel(slug);
   if (!acesso) throw new Error("Mesa não encontrada.");
   if (!acesso.ehMestre) throw new Error("Só quem mestra esta mesa pode fazer isso.");
   const supabase = await createClient();
   return { supabase, mesaId: acesso.mesa.id, usuarioId: acesso.usuarioId };
+}
+
+/**
+ * Usada pelas Server Actions que o jogador também pode chamar (criar ficha
+ * visível, registrar resumo de sessão). A garantia continua sendo o RLS; isto
+ * aqui só dá erro claro e diz se quem chamou é o mestre.
+ */
+export async function exigirMembroDaMesa(slug: string) {
+  const acesso = await acessoAoPainel(slug);
+  if (!acesso) throw new Error("Mesa não encontrada.");
+  const supabase = await createClient();
+  return { supabase, mesaId: acesso.mesa.id, usuarioId: acesso.usuarioId, ehMestre: acesso.ehMestre };
 }
 
 /** Membros aprovados da mesa — alvo do "revelar pra jogadores específicos". */

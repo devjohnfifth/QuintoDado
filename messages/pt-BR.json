@@ -271,7 +271,7 @@
     "elencoVazioMestre": "Nenhuma ficha ainda",
     "elencoVazioMestreCorpo": "Crie o primeiro NPC, local, item ou facção. Tudo nasce oculto: o jogador só vê depois que você revelar.",
     "elencoVazioJogador": "Nada revelado ainda",
-    "elencoVazioJogadorCorpo": "Conforme a história avança, o que vocês descobrirem aparece aqui.",
+    "elencoVazioJogadorCorpo": "Conforme a história avança, o que vocês descobrirem aparece aqui. Você também pode criar ficha de NPC, local, item ou facção que o grupo conheceu.",
     "novaFicha": "Nova ficha",
     "nome": "Nome",
     "tipo": "Tipo",
@@ -297,7 +297,7 @@
     "sessoesVazioMestre": "Nenhuma sessão registrada",
     "sessoesVazioMestreCorpo": "Registre a sessão com um resumo; publique quando quiser que a mesa leia.",
     "sessoesVazioJogador": "Nenhum resumo publicado",
-    "sessoesVazioJogadorCorpo": "Quando o mestre publicar o resumo de uma sessão, ele aparece aqui.",
+    "sessoesVazioJogadorCorpo": "Quando o mestre publicar o resumo de uma sessão, ele aparece aqui. Você também pode escrever o seu relato.",
     "novaSessao": "Nova sessão",
     "sessaoNumero": "Sessão {n}",
     "sessaoData": "Data",
@@ -308,7 +308,13 @@
     "visaoResumo": "{entidades, plural, =0 {Nenhuma ficha} one {# ficha} other {# fichas}} · {sessoes, plural, =0 {nenhuma sessão} one {# sessão} other {# sessões}}",
     "ultimaSessao": "Última sessão",
     "semSessao": "Nenhuma sessão registrada ainda.",
-    "editar": "Editar"
+    "editar": "Editar",
+    "criadoPor": "Criado por {nome}",
+    "criadoPorVoce": "Criado por você",
+    "avisoJogador": "O que você criar aqui já aparece pra mesa toda.",
+    "novoResumo": "Escrever resumo",
+    "resumoDe": "Resumo de {nome}",
+    "resumoDoMestre": "Resumo do mestre"
   },
   "Eventos": {
     "metaTitulo": "Eventos de RPG de mesa em BH — Quinto Dado",
