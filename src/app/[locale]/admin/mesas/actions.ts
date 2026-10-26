@@ -147,6 +147,14 @@ const schema = z
     cobrancaGerenciadaPeloSite: z.coerce.boolean(),
     publicarAgora: z.coerce.boolean(),
     bannerUrl: z.string().url().nullable().optional(),
+    // Mesa vendida fora daqui (MesaQuest): a vaga é garantida lá.
+    linkExterno: z
+      .string()
+      .trim()
+      .url("O link precisa começar com https://")
+      .max(300)
+      .optional()
+      .or(z.literal("")),
     eventoId: z.string().uuid().nullable().optional(),
   })
   .refine((d) => d.minJogadores <= d.vagasTotal, {
@@ -239,6 +247,7 @@ export async function criarMesaAdmin(input: unknown): Promise<CriarMesaAdminResu
       modalidade: d.modalidade,
       cidade_uf: d.modalidade === "presencial" ? (eventoCheck.cidadeUf ?? d.cidadeUf) : null,
       plataforma_vtt: d.plataformaVtt || null,
+      link_externo: d.linkExterno || null,
       plataforma_voz: d.plataformaVoz || null,
       classificacao: d.classificacao,
       nivel_experiencia: d.nivelExperiencia,
@@ -351,6 +360,7 @@ export async function atualizarMesaAction(mesaId: string, input: unknown): Promi
       modalidade: d.modalidade,
       cidade_uf: d.modalidade === "presencial" ? (eventoCheck.cidadeUf ?? d.cidadeUf) : null,
       plataforma_vtt: d.plataformaVtt || null,
+      link_externo: d.linkExterno || null,
       plataforma_voz: d.plataformaVoz || null,
       classificacao: d.classificacao,
       nivel_experiencia: d.nivelExperiencia,

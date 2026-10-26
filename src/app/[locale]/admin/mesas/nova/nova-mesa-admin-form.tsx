@@ -55,6 +55,7 @@ export type MesaExistente = {
   modalidade: "online" | "presencial";
   cidadeUf: string | null;
   plataformaVtt: string | null;
+  linkExterno: string | null;
   plataformaVoz: string | null;
   frequencia: string;
   qtdSessoes: number | null;
@@ -132,6 +133,7 @@ export function NovaMesaAdminForm({
       modalidade,
       cidadeUf: formData.get("cidadeUf") || undefined,
       plataformaVtt: formData.get("plataformaVtt") || undefined,
+      linkExterno: formData.get("linkExterno") || undefined,
       plataformaVoz: formData.get("plataformaVoz") || undefined,
       frequencia,
       qtdSessoes: formData.get("qtdSessoes") || undefined,
@@ -298,6 +300,23 @@ export function NovaMesaAdminForm({
             </div>
           </div>
         )}
+
+        <div className="space-y-2">
+          <Label htmlFor="linkExterno">Link pra garantir a vaga (opcional)</Label>
+          <Input
+            id="linkExterno"
+            name="linkExterno"
+            type="url"
+            inputMode="url"
+            placeholder="https://mesaquest.com.br/mesas/..."
+            maxLength={300}
+            defaultValue={mesaExistente?.linkExterno ?? ""}
+          />
+          <p className="text-xs text-muted-foreground">
+            Pra mesa vendida fora do site. Preenchendo, a página da mesa troca o formulário de candidatura por um botão
+            que leva pra esse endereço.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

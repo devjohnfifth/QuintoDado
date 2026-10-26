@@ -15,7 +15,7 @@ export default async function EditarMesaAdminPage({
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id, eventos(id, titulo, cidade_uf, data_inicio, data_fim)",
+        "titulo, sistema_id, sistema_outro, sinopse, tipo, modalidade, cidade_uf, plataforma_vtt, plataforma_voz, link_externo, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, cobranca_gerenciada_pelo_site, banner_url, evento_id, eventos(id, titulo, cidade_uf, data_inicio, data_fim)",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -50,6 +50,7 @@ export default async function EditarMesaAdminPage({
     modalidade: mesa.modalidade,
     cidadeUf: mesa.cidade_uf,
     plataformaVtt: mesa.plataforma_vtt,
+    linkExterno: mesa.link_externo,
     plataformaVoz: mesa.plataforma_voz,
     frequencia: mesa.frequencia,
     qtdSessoes: mesa.qtd_sessoes,

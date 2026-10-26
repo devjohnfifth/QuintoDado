@@ -2,7 +2,20 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { BookOpen, Calendar, CalendarDays, CheckCircle2, Clock, Globe, LogIn, MapPin, Repeat, Ticket, UserPlus } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Globe,
+  LogIn,
+  MapPin,
+  Repeat,
+  Ticket,
+  UserPlus,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
@@ -53,8 +66,20 @@ type MesaDetalhe = {
   banner_url: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
   evento_id: string | null;
+  link_externo: string | null;
   eventos: { slug: string; titulo: string } | null;
 };
+
+/** "mesaquest.com.br" vira "MesaQuest" — só pro botão falar o nome do lugar. */
+function nomeDoSite(url: string) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    const nome = host.split(".")[0];
+    return nome === "mesaquest" ? "MesaQuest" : nome.charAt(0).toUpperCase() + nome.slice(1);
+  } catch {
+    return null;
+  }
+}
 
 async function buscarMesa(slug: string) {
   if (!isSupabaseConfigured()) return null;
@@ -63,7 +88,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados, evento_id, eventos(slug, titulo)",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados, evento_id, eventos(slug, titulo), link_externo",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -224,7 +249,20 @@ export default async function MesaDetalhePage({
   // e na barra fixa do celular. `null` = não há o que fazer (só mostra o status).
   const podeCandidatar =
     logado && !ehMestre && !inscricao && !idadeInsuficiente && !(mesa.eventos && !ingressoEventoAprovado) && !lotada;
-  const acaoPrincipal = ehMestre ? null : !logado ? (
+  // Mesa vendida fora do site (MesaQuest): o botão leva pra lá, e o
+  // formulário de candidatura some — a vaga não se resolve aqui.
+  const siteExterno = mesa.link_externo ? nomeDoSite(mesa.link_externo) : null;
+  const acaoPrincipal = mesa.link_externo ? (
+    <a
+      href={mesa.link_externo}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonVariants({ variant: "marca", size: "lg", className: "w-full" })}
+    >
+      <ExternalLink className="size-4" aria-hidden />
+      {siteExterno ? t("garantirVagaEm", { site: siteExterno }) : t("garantirVaga")}
+    </a>
+  ) : ehMestre ? null : !logado ? (
     <Link
       href={{ pathname: "/entrar", query: { next: `/mesas/${slug}` } }}
       className={buttonVariants({ variant: "marca", size: "lg", className: "w-full" })}
@@ -415,7 +453,11 @@ export default async function MesaDetalhePage({
           </dl>
         </section>
 
-        {!ehMestre && logado && (
+        {mesa.link_externo && (
+          <p className="mt-6 text-sm text-muted-foreground">{t("vagaForaDoSite")}</p>
+        )}
+
+        {!mesa.link_externo && !ehMestre && logado && (
           <section id="candidatura" className="mt-10 scroll-mt-24">
             <h2 className="font-heading text-2xl font-bold">{t("candidatar")}</h2>
 

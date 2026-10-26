@@ -238,7 +238,10 @@
     "precisaIngresso": "Essa mesa é do evento {evento} — você precisa ter um ingresso aprovado pra se candidatar.",
     "verIngressos": "Ver ingressos",
     "voceMestra": "Você é quem mestra esta mesa.",
-    "detalhes": "Detalhes"
+    "detalhes": "Detalhes",
+    "garantirVaga": "Garantir vaga",
+    "garantirVagaEm": "Garantir vaga no {site}",
+    "vagaForaDoSite": "A inscrição dessa mesa acontece em outro site."
   },
   "MesaCard": {
     "favorito": "Favorito",
