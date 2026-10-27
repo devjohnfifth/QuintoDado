@@ -1,5 +1,5 @@
 import { redirect } from "@/i18n/navigation";
-import { Link } from "@/i18n/navigation";
+import { AdminNav } from "./admin-nav";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 
@@ -48,23 +48,7 @@ export default async function AdminLayout({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-[10vw]">
-      <nav className="mb-8 flex gap-4 border-b border-border/60 pb-4 text-sm font-medium">
-        <Link href="/admin" className="text-muted-foreground hover:text-foreground">
-          Painel
-        </Link>
-        <Link href="/admin/mesas" className="text-muted-foreground hover:text-foreground">
-          Mesas
-        </Link>
-        <Link href="/admin/eventos" className="text-muted-foreground hover:text-foreground">
-          Eventos
-        </Link>
-        <Link href="/admin/suplementos" className="text-muted-foreground hover:text-foreground">
-          Suplementos
-        </Link>
-        <Link href="/admin/usuarios" className="text-muted-foreground hover:text-foreground">
-          Usuários
-        </Link>
-      </nav>
+      <AdminNav />
       {children}
     </div>
   );
