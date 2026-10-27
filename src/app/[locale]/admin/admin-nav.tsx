@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
@@ -24,17 +24,34 @@ const EH_FORMULARIO = /\/(nova|novo|editar)$/;
  */
 export function AdminNav() {
   const caminho = usePathname();
+  const router = useRouter();
   const atual = SECOES.find((s) => s.href !== "/admin" && caminho.includes(s.href));
 
   if (EH_FORMULARIO.test(caminho)) {
+    /*
+     * "Voltar" volta pra onde a pessoa estava, não pra um lugar fixo. O
+     * formulário de nova mesa é alcançado tanto pelo /admin/mesas quanto
+     * pelo botão de admin na /mesas pública — mandar sempre pro admin
+     * tirava quem veio da lista pública do lugar dela.
+     *
+     * O href continua apontando pra seção: é o que vale sem JS e pra quem
+     * abriu o endereço direto, sem histórico pra onde voltar.
+     */
+    const destino = atual?.href ?? "/admin";
     return (
       <p className="mb-8 text-sm">
         <Link
-          href={atual?.href ?? "/admin"}
+          href={destino}
+          onClick={(e) => {
+            if (window.history.length > 1) {
+              e.preventDefault();
+              router.back();
+            }
+          }}
           className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          Voltar pra {atual?.label.toLowerCase() ?? "o painel"}
+          Voltar
         </Link>
       </p>
     );
