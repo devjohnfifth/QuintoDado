@@ -12,7 +12,10 @@
     "voltarHome": "Voltar pra home",
     "naoEncontradoTitulo": "Página não encontrada",
     "naoEncontradoCorpo": "Esse endereço não existe ou foi movido. Confere o link ou volta pra home.",
-    "naoEncontradoCta": "Voltar pra home"
+    "naoEncontradoCta": "Voltar pra home",
+    "naoEncontradoRolou": "Você rolou 1 na navegação",
+    "naoEncontradoMesas": "Ver mesas abertas",
+    "naoEncontradoSuplementos": "Ver a biblioteca"
   },
   "Nav": {
     "suplementos": "Suplementos",
@@ -372,7 +375,13 @@
     "valorHandouts": "Valor sugerido para handouts",
     "vagas": "{vagas, plural, one {# vaga} other {# vagas}}",
     "verMesa": "Ver mesa",
-    "ilustracaoAlt": "Aventureiro de capuz à mesa com pão de queijo, café e um d20, ao lado de uma capivara"
+    "ilustracaoAlt": "Aventureiro de capuz à mesa com pão de queijo, café e um d20, ao lado de uma capivara",
+    "passo1Titulo": "Publique a mesa",
+    "passo1Corpo": "Qualquer mestre cadastrado cria a própria mesa presencial aqui. Ela entra em análise e vai ao ar quando aprovada.",
+    "passo2Titulo": "Combine na conversa",
+    "passo2Corpo": "O valor mostrado é só informativo. Quando existir, é combinado direto entre jogador e mestre — o site não processa esse pagamento.",
+    "passo3Titulo": "Joguem",
+    "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado."
   },
   "PresencialBhNova": {
     "titulo": "Criar mesa presencial em BH",

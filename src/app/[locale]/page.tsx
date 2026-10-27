@@ -297,7 +297,15 @@ export default async function HomePage({
           {noticias.length <= 3 ? (
             <GradeAdaptavel itens={noticias} chave={(n) => n.chave} render={renderNoticia} />
           ) : (
-            <Carrossel itens={noticias.map((n) => ({ chave: n.chave, conteudo: renderNoticia(n, false) }))} />
+            <>
+              {/* O item mais novo abre a seção em destaque, largo; o resto
+                  segue na trilha. Antes todos tinham o mesmo peso e nada
+                  dizia o que era novidade de verdade. */}
+              <div className="mb-4">{renderNoticia(noticias[0], true)}</div>
+              <Carrossel
+                itens={noticias.slice(1).map((n) => ({ chave: n.chave, conteudo: renderNoticia(n, false) }))}
+              />
+            </>
           )}
         </SecaoHome>
       )}
@@ -336,19 +344,29 @@ export default async function HomePage({
         <Container>
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
             <h2 className="titulo-display titulo-secao">{t("faq.titulo")}</h2>
-            <div className="divide-y divide-border/60 rounded-2xl painel">
-              {perguntasFaq.map((item) => (
-                <details key={item.pergunta} className="group px-5 py-4">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium marker:content-none">
-                    {item.pergunta}
-                    <ChevronDown
-                      className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
-                      aria-hidden
-                    />
-                  </summary>
-                  <p className="mt-2 text-sm text-muted-foreground">{item.resposta}</p>
-                </details>
-              ))}
+            <div className="relative overflow-hidden rounded-2xl painel">
+              <D20MarcaDagua className="pointer-events-none absolute -right-14 -top-14 size-64 text-foreground/[0.035]" />
+              <div className="relative divide-y divide-border/60">
+                {perguntasFaq.map((item, i) => (
+                  <details key={item.pergunta} className="group px-5 py-4">
+                    <summary className="flex cursor-pointer list-none items-center gap-3 font-medium marker:content-none">
+                      {/* O número vira face de dado — o mesmo tratamento das
+                          faixas da tabela aleatória. */}
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-acento/50 bg-acento/10 font-heading text-xs font-bold tabular-nums text-acento">
+                        {i + 1}
+                      </span>
+                      <span className="flex-1">{item.pergunta}</span>
+                      <ChevronDown
+                        className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+                        aria-hidden
+                      />
+                    </summary>
+                    <p className="mt-2 pl-10 text-sm text-muted-foreground motion-safe:animate-[reveal-up_0.25s_ease-out]">
+                      {item.resposta}
+                    </p>
+                  </details>
+                ))}
+              </div>
             </div>
           </div>
         </Container>

@@ -62,9 +62,17 @@ export function Sessoes({
           corpo={ehMestre ? t("sessoesVazioMestreCorpo") : t("sessoesVazioJogadorCorpo")}
         />
       ) : (
-        <ol className="space-y-4">
+        // Linha do tempo: uma campanha é uma sequência, e a lista plana não
+        // mostrava isso. O número sai do cabeçalho do card e vira o marco.
+        <ol className="relative space-y-4 border-l border-border/60 pl-7 sm:pl-9">
           {sessoes.map((sessao) => (
-            <li key={sessao.id}>
+            <li key={sessao.id} className="relative">
+              <span
+                aria-hidden
+                className="absolute -left-[2.2rem] top-5 flex size-7 items-center justify-center rounded-full border border-acento/50 bg-background font-heading text-xs font-bold tabular-nums text-acento sm:-left-[2.7rem]"
+              >
+                {sessao.numero}
+              </span>
               <CartaoSessao slug={slug} sessao={sessao} ehMestre={ehMestre} usuarioId={usuarioId} />
             </li>
           ))}
@@ -122,32 +130,43 @@ function CartaoSessao({
     });
   }
 
-  // Rascunho é conteúdo que só o mestre vê: mesma convenção do elenco.
-  const borda = ehMestre && !sessao.publicado ? "border-dashed border-erro/60" : "border-border";
+  // Rascunho é conteúdo que só o mestre vê: mesma convenção do elenco —
+  // fio de cor na lateral em vez de borda tracejada.
+  const corFio = ehMestre && !sessao.publicado ? "bg-erro/70" : "bg-sucesso/60";
   // Cada um edita o próprio registro; o mestre edita qualquer um.
   const meu = sessao.criado_por === usuarioId;
   const podeEditar = ehMestre || meu;
   const autor = sessao.criado_por && !meu ? sessao.profiles?.nome_exibicao : null;
 
   return (
-    <article className={`rounded-2xl border bg-card/60 p-5 ${borda}`}>
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="font-heading text-lg font-bold">{t("sessaoNumero", { n: sessao.numero })}</h2>
-        {sessao.data && !editando && (
-          <span className="text-sm text-muted-foreground">
-            {new Date(`${sessao.data}T00:00:00`).toLocaleDateString("pt-BR")}
-          </span>
-        )}
-        {ehMestre && !sessao.publicado && (
-          <Selo tom="erro" className="border border-dashed border-erro/60 bg-transparent">
-            {t("rascunho")}
-          </Selo>
-        )}
-        {autor && <Selo tom="neutro">{t("resumoDe", { nome: autor })}</Selo>}
-        {meu && sessao.criado_por && <Selo tom="neutro">{t("criadoPorVoce")}</Selo>}
+    <article className="relative overflow-hidden rounded-2xl painel p-5 pl-6">
+      <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${corFio}`} />
+
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="titulo-display titulo-bloco">{t("sessaoNumero", { n: sessao.numero })}</h2>
+          {sessao.data && !editando && (
+            <p className="mt-0.5 text-sm text-muted-foreground first-letter:uppercase">
+              {new Date(`${sessao.data}T00:00:00`).toLocaleDateString("pt-BR", {
+                weekday: "long",
+                day: "2-digit",
+                month: "long",
+              })}
+            </p>
+          )}
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {ehMestre && !sessao.publicado && (
+              <Selo tom="erro" className="border border-dashed border-erro/60 bg-transparent">
+                {t("rascunho")}
+              </Selo>
+            )}
+            {autor && <Selo tom="neutro">{t("resumoDe", { nome: autor })}</Selo>}
+            {meu && sessao.criado_por && <Selo tom="neutro">{t("criadoPorVoce")}</Selo>}
+          </div>
+        </div>
 
         {podeEditar && !editando && (
-          <div className="ml-auto flex flex-wrap items-center gap-2">
+          <div className="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto">
             <Button variant="ghost" size="sm" onClick={() => setEditando(true)} disabled={pendente}>
               {t("editar")}
             </Button>

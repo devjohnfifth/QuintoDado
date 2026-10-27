@@ -112,9 +112,43 @@ Pedido do João: "as informações ficam muito misturadas".
 | SO6 | Os sistemas viraram **logos em linha** (as mesmas do card de mesa) no lugar de nomes separados por ponto; o texto fica pra leitor de tela e pra busca |
 | H19 | Bloco de comunidade da home com brilho e d20 atrás |
 
+**Lote D entregue** (identidade e refinamento):
+
+| Item | O que foi feito |
+|---|---|
+| G10 | **Cor por sistema de RPG** (`COR_SISTEMA`): fio da cor no card de mesa e o nome do sistema na mesma cor. Uma lista de mesas de sistemas diferentes parecia a mesma mesa repetida — é variedade de cor sem pedir arte nova |
+| G20 | `BrilhoCursor`: brilho que segue o ponteiro dentro do card, na cor do sistema. Componente cliente mínimo que escuta o pai, então o card continua sendo de servidor; não liga em toque nem com movimento reduzido |
+| H8 | A notícia mais nova abre a seção em destaque, larga; o resto segue na trilha |
+| H17 · H18 | FAQ com número em face de dado âmbar, d20 no fundo e resposta animada ao abrir |
+| P2 | "Como funciona" do presencial virou três passos numerados — o parágrafo corrido respondia o mesmo, mas era fácil de pular |
+| NAV4 | Menu móvel mais largo, itens maiores e título em display |
+| NAV7 | 404 com "você rolou 1 na navegação", d20 no fundo e três caminhos de volta. **E uma lacuna fechada:** endereços que não casam com rota nenhuma caíam no 404 preto-e-branco do Next, porque não chegam no layout de `[locale]`. Agora há um `app/not-found.tsx` global que monta o próprio documento |
+| PN5 | Sessões em linha do tempo vertical, com o número no marco; o cabeçalho do card recebeu a mesma separação da ficha de entidade |
+| C4 | Ingressos da conta com cara de ingresso: canhoto, picote e as duas mordidas |
+
+### O que eu não fiz do lote D, e por quê
+
+- **G14 (divisor de seção com d20)**: você recusou ornamento entre seções
+  duas vezes. Não vou reintroduzir por conta própria — se quiser tentar a
+  versão com d20, é só pedir.
+- **G12 (textura de mapa)**: já existem trama de hexágono, grão e a silhueta
+  do d20. Uma quarta camada de textura vira ruído, não identidade.
+- **G13 (moldura de ficha chanfrada)**: brigaria com o picote de ingresso,
+  que já é a moldura característica dos cards.
+- **G17 (transição com morph de capa)** e **C1 (capa de perfil na conta)**:
+  os dois já estavam na lista de "recomendo cortar".
+
+### Correção de rota no caminho
+
+A troca de `backwards` por `forwards` no menu móvel estava errada: com atraso,
+`forwards` faz o item aparecer, sumir e voltar. O certo ali é `both` — e é
+seguro porque a gaveta monta no toque, com a página já pintando. O caso
+perigoso era o `/links`, conteúdo de primeira pintura, e esse usa entrada
+ligada à rolagem.
+
 ### Próximos
-D (identidade e refinamento): cor por sistema, moldura de ficha, hover que
-segue o cursor, linha do tempo de sessões, menu móvel em tela cheia e 404.
+Lote E, que depende de você: capas dos suplementos, fotos de eventos passados
+pra galeria "já aconteceu" (E3) e a lista de locais do presencial (P5).
 
 ---
 

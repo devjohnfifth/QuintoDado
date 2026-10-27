@@ -131,12 +131,22 @@ export default async function PresencialBhPage({
       </section>
 
       <Container className="pb-20">
-        <div className="rounded-2xl border border-border bg-card/40 p-5">
-          <h2 className="font-heading text-sm font-bold uppercase tracking-wide text-muted-foreground">
-            {t("comoFunciona")}
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground">{t("comoFuncionaCorpo")}</p>
-        </div>
+        {/* Três passos numerados no lugar de um parágrafo corrido: o texto
+            respondia as mesmas perguntas, mas era fácil de pular. */}
+        <section>
+          <h2 className="rotulo-caps text-muted-foreground">{t("comoFunciona")}</h2>
+          <ol className="cascata mt-5 grid gap-4 sm:grid-cols-3">
+            {[1, 2, 3].map((n) => (
+              <li key={n} className="rounded-2xl painel p-5">
+                <span className="flex size-10 items-center justify-center rounded-xl border border-acento/50 bg-acento/10 font-heading font-bold tabular-nums text-acento">
+                  {n}
+                </span>
+                <h3 className="titulo-display titulo-bloco mt-4">{t(`passo${n}Titulo`)}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{t(`passo${n}Corpo`)}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
 
         <div className="mt-8">
           {mesas.length === 0 ? (

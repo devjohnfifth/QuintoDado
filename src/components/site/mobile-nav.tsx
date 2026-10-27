@@ -42,11 +42,18 @@ export function MobileNav({ logado }: { logado: boolean }) {
       >
         <Menu className="size-5" />
       </SheetTrigger>
-      <SheetContent side="right" className="flex w-72 flex-col">
+      <SheetContent side="right" className="flex w-[min(20rem,88vw)] flex-col">
         <SheetHeader>
-          <SheetTitle className="text-left">Quinto Dado</SheetTitle>
+          <SheetTitle className="titulo-display text-left text-xl">Quinto Dado</SheetTitle>
         </SheetHeader>
-        <nav className="mt-2 flex flex-1 flex-col gap-1 px-4">
+        <nav className="mt-2 flex flex-1 flex-col gap-1.5 px-4">
+          {/*
+           * `both` (e não `backwards`) com atraso: o item nasce invisível e
+           * aparece na cascata. Isso só é seguro porque a gaveta monta no
+           * toque da pessoa — a página já está pintando. Em conteúdo de
+           * primeira pintura o mesmo padrão deixou o /links invisível, então
+           * lá a entrada é ligada à rolagem.
+           */}
           {links.map(({ href, label, Icon }, i) => {
             const ativo = pathname === href || pathname.startsWith(`${href}/`);
             return (
@@ -55,8 +62,8 @@ export function MobileNav({ logado }: { logado: boolean }) {
                 href={href}
                 onClick={() => setAberto(false)}
                 aria-current={ativo ? "page" : undefined}
-                style={{ animationDelay: `${i * 50}ms` }}
-                className={`motion-safe:animate-[menu-item-in_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards] flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                style={{ animationDelay: `${i * 45}ms` }}
+                className={`motion-safe:animate-[menu-item-in_0.3s_cubic-bezier(0.16,1,0.3,1)_both] flex items-center gap-3 rounded-xl px-3 py-3 font-medium transition-colors ${
                   ativo
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -73,8 +80,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
             <Link
               href="/entrar"
               onClick={() => setAberto(false)}
-              style={{ animationDelay: `${links.length * 50}ms` }}
-              className={buttonVariants({ variant: "marca", className: "w-full motion-safe:animate-[reveal-up_0.3s_cubic-bezier(0.16,1,0.3,1)_backwards]" })}
+              className={buttonVariants({ variant: "marca", size: "lg", className: "w-full" })}
             >
               {t("entrar")}
             </Link>

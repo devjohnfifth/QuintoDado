@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Ticket } from "lucide-react";
 import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -244,29 +245,41 @@ export default async function ContaPage({
 
       {ingressos && ingressos.length > 0 && (
         <>
-          <h2 className="mt-10 font-heading text-lg font-bold">Meus ingressos</h2>
-          <ul className="mt-3 space-y-3">
+          <h2 className="titulo-display titulo-secao mt-12">Meus ingressos</h2>
+          {/* Com cara de ingresso de verdade: o canhoto à esquerda com o
+              picote, igual ao card de mesa e aos ingressos do evento. Antes
+              era uma linha de lista que não parecia valer nada. */}
+          <ul className="cascata mt-5 grid gap-3 sm:grid-cols-2">
             {ingressos.map((ingresso) => {
               const evento = ingresso.eventos as unknown as { titulo: string; slug: string } | null;
               const tipo = ingresso.evento_ingresso_tipos as unknown as { nome: string } | null;
               return (
-                <li
-                  key={ingresso.id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
-                >
-                  <div>
-                    <Link href={`/eventos/${evento?.slug}`} className="font-medium hover:underline">
-                      {evento?.titulo ?? "Evento"}
-                    </Link>
-                    {tipo && <p className="text-xs text-muted-foreground">{tipo.nome}</p>}
-                  </div>
+                <li key={ingresso.id} className="relative flex overflow-hidden rounded-2xl painel-alto">
                   <span
-                    className={`rounded-full border px-2 py-0.5 text-xs ${
-                      STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
-                    }`}
+                    aria-hidden
+                    className="flex w-14 shrink-0 items-center justify-center bg-marca text-white"
                   >
-                    {STATUS_INGRESSO_LABEL[ingresso.status] ?? ingresso.status}
+                    <Ticket className="size-5" aria-hidden />
                   </span>
+                  <span aria-hidden className="my-3 border-l-2 border-dashed border-foreground/25" />
+                  <span aria-hidden className="absolute -top-3 left-[3.4rem] size-6 rounded-full bg-background" />
+                  <span aria-hidden className="absolute -bottom-3 left-[3.4rem] size-6 rounded-full bg-background" />
+
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 p-4">
+                    <div className="min-w-0">
+                      <Link href={`/eventos/${evento?.slug}`} className="font-heading font-bold hover:underline">
+                        {evento?.titulo ?? "Evento"}
+                      </Link>
+                      {tipo && <p className="text-sm text-muted-foreground">{tipo.nome}</p>}
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
+                      }`}
+                    >
+                      {STATUS_INGRESSO_LABEL[ingresso.status] ?? ingresso.status}
+                    </span>
+                  </div>
                 </li>
               );
             })}

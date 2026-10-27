@@ -9,6 +9,8 @@ import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
 import { FundoSemImagem } from "@/components/site/card-midia";
 import { Selo } from "@/components/site/selo";
 import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
+import { BrilhoCursor } from "@/components/site/brilho-cursor";
+import { corDoSistema } from "@/lib/mesas/cores-sistemas";
 
 export type MesaCardData = {
   sistema_id?: string | null;
@@ -51,6 +53,8 @@ export function MesaCard({
   const t = useTranslations("MesaCard");
   const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
   const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
+  // Cor do sistema: dá variedade a uma lista que antes era toda azul e roxa.
+  const cor = corDoSistema(mesa.sistemas?.slug);
   const dias = diasParaComeco(mesa.data_inicio);
   const faltamPraAbrir = mesa.min_jogadores - mesa.vagas_preenchidas;
   const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
@@ -84,6 +88,7 @@ export function MesaCard({
           <FundoSemImagem icone={Dices} chave={mesa.slug} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+        <BrilhoCursor cor={cor} />
 
         <div className="absolute inset-x-2.5 top-2.5 flex flex-wrap gap-1.5">
           {mesa.eventos && (
@@ -138,6 +143,10 @@ export function MesaCard({
           destaque ? "sm:rounded-r-2xl sm:rounded-bl-none sm:border-y sm:border-l-0 sm:border-r sm:p-6" : ""
         }`}
       >
+        {/* Fio da cor do sistema entre o canhoto e o talão: é a única
+            coisa colorida do card quando a mesa não tem capa. */}
+        <span aria-hidden className="-mx-4 -mt-4 mb-4 block h-0.5" style={{ backgroundColor: cor }} />
+
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             {logo && (
@@ -145,7 +154,9 @@ export function MesaCard({
                 <Image src={logo} alt="" fill className="object-cover" sizes="64px" />
               </span>
             )}
-            <span className="truncate text-sm text-muted-foreground">{nomeSistema}</span>
+            <span className="truncate text-sm font-medium" style={{ color: cor }}>
+              {nomeSistema}
+            </span>
           </div>
           {favorito && (
             <Selo tom="alerta" icone={Star}>

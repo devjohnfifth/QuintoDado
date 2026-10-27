@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import { BrilhoCursor } from "@/components/site/brilho-cursor";
 
 /** Número estável entre 0 e 1 a partir de um texto — mesma capa pro mesmo item, sempre. */
 function semente(texto: string) {
@@ -97,7 +98,8 @@ export function CardMidia({
         ) : (
           <FundoSemImagem icone={iconeSemImagem} chave={href} />
         )}
-        {selosImagem && <div className="absolute inset-x-3 top-3 flex flex-wrap justify-between gap-2">{selosImagem}</div>}
+        <BrilhoCursor cor="var(--qd-secundaria)" />
+        {selosImagem && <div className="absolute inset-x-3 top-3 z-20 flex flex-wrap justify-between gap-2">{selosImagem}</div>}
       </div>
       <div className={`flex flex-1 flex-col ${destaque ? "p-5 sm:p-6" : "p-4"}`}>{children}</div>
     </Link>
