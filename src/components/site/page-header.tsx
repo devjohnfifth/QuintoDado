@@ -31,7 +31,7 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0">
-        <div className="flex size-12 items-center justify-center rounded-2xl bg-acento/15 text-acento">
+        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
           <Icone className="size-6" aria-hidden />
         </div>
         <h1 className={`titulo-display mt-5 ${TAMANHOS[tamanho]}`}>{titulo}</h1>

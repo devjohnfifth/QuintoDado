@@ -85,7 +85,7 @@ export default async function EntrarPage({
             <ul className="mt-4 space-y-3">
               {beneficios.map((b) => (
                 <li key={b} className="flex items-start gap-2.5 text-foreground/85">
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-acento" aria-hidden />
+                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
                   {b}
                 </li>
               ))}

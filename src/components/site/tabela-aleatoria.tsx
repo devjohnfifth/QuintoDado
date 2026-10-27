@@ -96,13 +96,13 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
                     onClick={() => setSelecionada(tabela.chave)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 ${
                       ativa
-                        ? "border-acento/60 bg-acento/15 text-acento"
+                        ? "border-primary/60 bg-primary/15 text-primary"
                         : "border-border painel text-muted-foreground hover:border-primary/40 hover:text-foreground"
                     }`}
                   >
                     {rotulos[indice]}
                     {destaques[tabela.chave] !== undefined && (
-                      <span className="ml-1.5 text-xs tabular-nums text-acento">({destaques[tabela.chave]})</span>
+                      <span className="ml-1.5 text-xs tabular-nums text-primary">({destaques[tabela.chave]})</span>
                     )}
                   </button>
                 );
@@ -191,7 +191,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
                           <span
                             className={`inline-flex min-w-9 items-center justify-center rounded-lg border px-2 py-1 font-heading text-sm font-bold tabular-nums transition-colors duration-300 ${
                               ativo
-                                ? "border-acento/60 bg-acento/15 text-acento"
+                                ? "border-primary/60 bg-primary/15 text-primary"
                                 : "border-border/60 text-muted-foreground"
                             }`}
                           >
@@ -292,7 +292,7 @@ function ResultadoDado({ valor, chave, dado }: { valor: number; chave: string; d
   return (
     <span
       key={chave}
-      className="resultado-entra flex size-11 shrink-0 items-center justify-center rounded-xl border border-acento/50 bg-acento/10 font-heading text-xl font-bold tabular-nums text-acento shadow-[0_0_24px_-6px_color-mix(in_oklch,var(--qd-acento)_60%,transparent)]"
+      className="resultado-entra flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/50 bg-primary/10 font-heading text-xl font-bold tabular-nums text-primary shadow-[0_0_24px_-6px_color-mix(in_oklch,var(--qd-primaria)_70%,transparent)]"
     >
       {mostrado}
     </span>
@@ -305,7 +305,7 @@ function LinhaHistorico({ rolagem, nivel = 0 }: { rolagem: Rolagem; nivel?: numb
       <p style={{ paddingLeft: `${nivel}rem` }}>
         {nivel > 0 && "↳ "}
         <span className="font-medium">{rolagem.tabelaTitulo}</span>{" "}
-        <span className="tabular-nums text-acento">({rolagem.valor})</span>: {rolagem.item?.valores.join(" — ") ?? "—"}
+        <span className="tabular-nums text-primary">({rolagem.valor})</span>: {rolagem.item?.valores.join(" — ") ?? "—"}
       </p>
       {rolagem.aninhadas.map((a, i) => (
         <LinhaHistorico key={i} rolagem={a} nivel={nivel + 1} />

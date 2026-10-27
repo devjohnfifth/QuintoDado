@@ -116,7 +116,7 @@ export default async function PresencialBhPage({
             <div className="relative mx-auto w-full max-w-xs md:max-w-sm">
               <div
                 aria-hidden
-                className="absolute -inset-6 -z-10 rounded-full bg-acento/20 blur-3xl"
+                className="absolute -inset-6 -z-10 rounded-full bg-primary/20 blur-3xl"
               />
               <Image
                 src={capivaraAventureiro}
@@ -138,7 +138,7 @@ export default async function PresencialBhPage({
           <ol className="cascata mt-5 grid gap-4 sm:grid-cols-3">
             {[1, 2, 3].map((n) => (
               <li key={n} className="rounded-2xl painel p-5">
-                <span className="flex size-10 items-center justify-center rounded-xl border border-acento/50 bg-acento/10 font-heading font-bold tabular-nums text-acento">
+                <span className="flex size-10 items-center justify-center rounded-xl border border-primary/50 bg-primary/10 font-heading font-bold tabular-nums text-primary">
                   {n}
                 </span>
                 <h3 className="titulo-display titulo-bloco mt-4">{t(`passo${n}Titulo`)}</h3>

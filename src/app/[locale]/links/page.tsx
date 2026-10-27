@@ -37,7 +37,7 @@ const linksEstaticos: {
   cor: string;
 }[] = [
   { chave: "comunidade", href: SITE_LINKS.whatsappComunidade, Icon: MessageCircle, cor: "text-[#25D366]" },
-  { chave: "mesas", href: SITE_LINKS.mesaquest, Icon: Dices, cor: "text-acento" },
+  { chave: "mesas", href: SITE_LINKS.mesaquest, Icon: Dices, cor: "text-secondary" },
   { chave: "suplementos", href: "/suplementos", Icon: BookOpen, cor: "text-primary" },
   { chave: "instagram", href: SITE_LINKS.instagram, Icon: Camera, cor: "text-[#E1306C]" },
   { chave: "tiktok", href: SITE_LINKS.tiktok, Icon: Music2, cor: "text-[#69C9D0]" },

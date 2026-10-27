@@ -100,7 +100,7 @@ export default async function EventosPage({
                 className="absolute inset-0 -z-10 bg-[radial-gradient(80%_70%_at_50%_30%,transparent,var(--qd-fundo)_85%)]"
               />
               <div className="px-6 py-16 text-center sm:px-10 sm:py-20">
-                <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-acento/15 text-acento">
+                <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-primary">
                   <CalendarDays className="size-7" aria-hidden />
                 </div>
                 <h2 className="titulo-display titulo-secao mt-5">{t("vazioTitulo")}</h2>

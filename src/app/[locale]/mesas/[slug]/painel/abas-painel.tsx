@@ -40,7 +40,7 @@ export function AbasPainel({
             aria-current={ativa ? "page" : undefined}
             className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
               ativa
-                ? "border-acento/60 bg-acento/15 text-acento"
+                ? "border-primary/60 bg-primary/15 text-primary"
                 : "border-border painel text-muted-foreground hover:border-primary/40 hover:text-foreground"
             }`}
           >
@@ -49,7 +49,7 @@ export function AbasPainel({
             {aba.n !== null && (
               <span
                 className={`rounded-full px-1.5 text-xs tabular-nums ${
-                  ativa ? "bg-acento/25" : "bg-foreground/10"
+                  ativa ? "bg-primary/25" : "bg-foreground/10"
                 }`}
               >
                 {aba.n}

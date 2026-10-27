@@ -43,7 +43,7 @@ export function BlocoFechamento({ caminhos }: { caminhos: CaminhoFechamento[] })
             const { href, Icone, externo } = CAMINHOS[chave];
             const conteudo = (
               <>
-                <span className="flex size-11 items-center justify-center rounded-xl bg-acento/15 text-acento transition-colors duration-300 group-hover:bg-acento/25">
+                <span className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary transition-colors duration-300 group-hover:bg-primary/25">
                   <Icone className="size-5" aria-hidden />
                 </span>
                 <span className="mt-4 block font-heading text-lg font-bold">{t(`${chave}.titulo`)}</span>

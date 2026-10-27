@@ -33,11 +33,11 @@ export default async function PainelVisaoGeralPage({
     <div className="grid items-start gap-5 lg:grid-cols-2">
       <section className="flex flex-col rounded-2xl painel p-6">
         <p className="rotulo-caps flex items-center gap-2 text-muted-foreground">
-          <Users className="size-4 text-acento" aria-hidden />
+          <Users className="size-4 text-primary" aria-hidden />
           {t("abaElenco")}
         </p>
         {/* O número primeiro, grande: é o que a pessoa quer saber de relance. */}
-        <p className="titulo-display mt-3 text-5xl text-acento tabular-nums">{entidades.length}</p>
+        <p className="titulo-display mt-3 text-5xl text-primary tabular-nums">{entidades.length}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("visaoResumo", { entidades: entidades.length, sessoes: sessoes.length })}
         </p>
@@ -61,12 +61,12 @@ export default async function PainelVisaoGeralPage({
 
       <section className="flex flex-col rounded-2xl painel p-6">
         <p className="rotulo-caps flex items-center gap-2 text-muted-foreground">
-          <CalendarDays className="size-4 text-acento" aria-hidden />
+          <CalendarDays className="size-4 text-primary" aria-hidden />
           {t("ultimaSessao")}
         </p>
         {ultima ? (
           <>
-            <p className="titulo-display titulo-bloco mt-3 text-acento">
+            <p className="titulo-display titulo-bloco mt-3 text-primary">
               {t("sessaoNumero", { n: ultima.numero })}
             </p>
             {ultima.data && (

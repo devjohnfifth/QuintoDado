@@ -81,7 +81,7 @@ export function Paginacao({
           ) : (
             <li key={p}>
               {p === pagina ? (
-                <span aria-current="page" className={`${CLASSE_BOTAO} border-acento/60 bg-acento/15 text-acento`}>
+                <span aria-current="page" className={`${CLASSE_BOTAO} border-primary/60 bg-primary/15 text-primary`}>
                   {p}
                 </span>
               ) : (

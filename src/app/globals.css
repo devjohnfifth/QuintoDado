@@ -42,8 +42,6 @@
   /* Superfícies: três níveis pra existir profundidade de verdade. */
   --color-superficie: var(--qd-superficie-1);
   --color-superficie-alta: var(--qd-superficie-2);
-  --color-acento: var(--qd-acento);
-  --color-acento-suave: var(--qd-acento-suave);
   --color-sucesso: var(--qd-sucesso);
   --color-alerta: var(--qd-alerta);
   --color-erro: var(--qd-erro);
@@ -64,12 +62,11 @@
   --qd-secundaria: #9b5cf6;
   --qd-gradiente: linear-gradient(135deg, #4f7df3, #a855f7);
   /*
-   * Acento quente: o azul/roxo vira ambiente e este âmbar carrega o que
-   * precisa de atenção — número de dado, selo de novidade, detalhe de
-   * ornamento. Sem ele, tudo no site competia na mesma faixa de cor.
+   * Sem cor de acento fora da paleta. A hierarquia sai do azul, do roxo e do
+   * gradiente da marca (ver CLAUDE.md > Identidade visual) — um âmbar tinha
+   * sido introduzido aqui e acabou espalhado pelo site inteiro, puxando tudo
+   * pra fora da identidade.
    */
-  --qd-acento: #f2a93b;
-  --qd-acento-suave: #f8d08a;
   /* Superfícies empilhadas: fundo < painel < destaque. */
   --qd-superficie-1: #12121f;
   --qd-superficie-2: #1a1a2e;
@@ -307,11 +304,6 @@ select:focus-visible,
     radial-gradient(50% 50% at 85% 10%, color-mix(in oklch, var(--qd-secundaria) 20%, transparent), transparent 70%);
 }
 
-/** Acento quente em texto — número de dado, destaque de título. */
-@utility text-acento {
-  color: var(--qd-acento);
-}
-
 /** Título de display: fonte própria, escala fluida e aperto de entrelinha. */
 @utility titulo-display {
   font-family: var(--font-display), var(--font-heading), sans-serif;
@@ -483,7 +475,7 @@ select:focus-visible,
 }
 
 @keyframes linha-acende {
-  0% { background-color: color-mix(in oklch, var(--qd-acento) 38%, transparent); }
+  0% { background-color: color-mix(in oklch, var(--qd-secundaria) 42%, transparent); }
   100% { background-color: color-mix(in oklch, var(--qd-primaria) 15%, transparent); }
 }
 

@@ -367,7 +367,7 @@ export default async function MesaDetalhePage({
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1">
               <p className="rotulo-caps text-muted-foreground">{t("preco")}</p>
-              <p className="titulo-display mt-1 text-4xl text-acento sm:text-5xl">{preco}</p>
+              <p className="titulo-display mt-1 text-4xl text-primary sm:text-5xl">{preco}</p>
               <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                 <li className="flex items-center gap-2">
                   <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
@@ -461,7 +461,7 @@ export default async function MesaDetalhePage({
               { rotulo: t("nivel"), Icone: Sparkles, valor: NIVEL_LABEL[mesa.nivel_experiencia] },
             ].map((ficha) => (
               <div key={ficha.rotulo} className="rounded-2xl painel p-5">
-                <ficha.Icone className="size-6 text-acento" aria-hidden />
+                <ficha.Icone className="size-6 text-primary" aria-hidden />
                 <dt className="rotulo-caps mt-3 text-muted-foreground">{ficha.rotulo}</dt>
                 <dd className="titulo-display titulo-bloco mt-1">{ficha.valor}</dd>
               </div>

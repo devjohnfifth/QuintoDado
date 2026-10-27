@@ -267,8 +267,8 @@ export default async function HomePage({
                   href={stat.href}
                   className="group flex h-full flex-col items-center gap-0.5 px-2 py-4 transition-colors hover:bg-foreground/5"
                 >
-                  <stat.Icone className="size-4 text-acento transition-transform duration-300 group-hover:scale-110" aria-hidden />
-                  <span className="titulo-display mt-1 text-3xl text-acento sm:text-4xl">
+                  <stat.Icone className="size-4 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden />
+                  <span className="titulo-display mt-1 text-3xl text-primary sm:text-4xl">
                     <NumeroAnimado valor={stat.n} />
                   </span>
                   {/* O rótulo já traz o número por causa do plural; aqui só
@@ -352,7 +352,7 @@ export default async function HomePage({
                     <summary className="flex cursor-pointer list-none items-center gap-3 font-medium marker:content-none">
                       {/* O número vira face de dado — o mesmo tratamento das
                           faixas da tabela aleatória. */}
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-acento/50 bg-acento/10 font-heading text-xs font-bold tabular-nums text-acento">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-primary/50 bg-primary/10 font-heading text-xs font-bold tabular-nums text-primary">
                         {i + 1}
                       </span>
                       <span className="flex-1">{item.pergunta}</span>

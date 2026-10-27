@@ -15,9 +15,8 @@ function semente(texto: string) {
  * Fundo de quando não há imagem.
  *
  * Varia por item (`chave`): ângulo, cores e trama mudam, então uma grade de
- * cards sem capa deixa de ser cinco retângulos idênticos. Continua sendo a
- * paleta da marca, só que cada peça ganha rosto próprio — e um toque do
- * âmbar de acento, que é o que tira o roxo do piloto automático.
+ * cards sem capa deixa de ser cinco retângulos idênticos — tudo dentro do
+ * azul e do roxo da marca, sem cor de fora da paleta.
  */
 export function FundoSemImagem({ icone: Icone, chave = "" }: { icone?: LucideIcon; chave?: string }) {
   const s = semente(chave);
@@ -48,7 +47,7 @@ export function FundoSemImagem({ icone: Icone, chave = "" }: { icone?: LucideIco
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `radial-gradient(60% 70% at ${Math.round(20 + s * 60)}% ${Math.round(10 + s * 40)}%, color-mix(in oklch, var(--qd-acento) 28%, transparent), transparent 70%)`,
+          backgroundImage: `radial-gradient(60% 70% at ${Math.round(20 + s * 60)}% ${Math.round(10 + s * 40)}%, color-mix(in oklch, var(--qd-secundaria) 45%, transparent), transparent 70%)`,
         }}
       />
       {Icone && <Icone className="relative size-10 text-white/80 drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]" />}

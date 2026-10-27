@@ -51,7 +51,7 @@ export function AdminNav() {
             aria-current={ativo ? "page" : undefined}
             className={
               ativo
-                ? "border-b-2 border-acento pb-1 text-foreground"
+                ? "border-b-2 border-primary pb-1 text-foreground"
                 : "pb-1 text-muted-foreground transition-colors hover:text-foreground"
             }
           >

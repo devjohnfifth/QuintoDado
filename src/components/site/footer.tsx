@@ -24,7 +24,7 @@ const COR_REDE: Record<string, string> = {
   whatsapp: "text-[#25D366]",
   instagram: "text-[#E1306C]",
   youtube: "text-[#FF0000]",
-  mesaquest: "text-acento",
+  mesaquest: "text-secondary",
 };
 
 export function SiteFooter() {

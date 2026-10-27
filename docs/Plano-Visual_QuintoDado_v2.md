@@ -146,6 +146,35 @@ seguro porque a gaveta monta no toque, com a página já pintando. O caso
 perigoso era o `/links`, conteúdo de primeira pintura, e esse usa entrada
 ligada à rolagem.
 
+### Volta à paleta da marca (27/10/2026)
+
+Pedido do João: "uso muito exagerado da cor amarela que sai completamente da
+minha paleta". Ele está certo — e o erro foi meu. O token `--qd-acento`
+(#f2a93b) não existe em `CLAUDE.md`: eu o inventei numa rodada anterior como
+"acento quente" e depois fui usando em tudo — números do herói, ícones de
+capa, abas, paginação, preços, FAQ, marcos da linha do tempo, passos
+numerados. Virou a cor dominante de um site cuja identidade é azul e roxo.
+
+O que foi feito:
+
+- `--qd-acento` e `--qd-acento-suave` saíram dos tokens, junto com o
+  utilitário `text-acento` e os mapeamentos de tema
+- as 48 ocorrências viraram `primary` (azul da marca); o MesaQuest ficou em
+  `secondary` (roxo) pra não deixar tudo de uma cor só
+- o clarão do fundo gerado e o brilho do resultado do dado voltaram pro roxo
+  e pro azul
+- `--qd-sucesso`, `--qd-alerta` e `--qd-erro` **ficam**: são semânticas
+  (confirmado, atenção, erro), já existiam antes e têm uso pontual. Se o
+  amarelo do `alerta` também incomodar, é um ajuste separado
+
+**Um bug que apareceu na conferência:** os três números do herói apareciam
+como **0**. O `NumeroAnimado` zerava e contava via `requestAnimationFrame`,
+que não roda com a aba em segundo plano — o número ficava parado no zero e
+mostrava "0 mesas abertas". Agora ele não começa com a página escondida e tem
+um `setTimeout` de garantia que crava o valor final mesmo sem quadro nenhum.
+É a mesma família do bug do `/links`: **nada que o visitante precisa ver pode
+depender de uma animação rodar.**
+
 ### Próximos
 Lote E, que depende de você: capas dos suplementos, fotos de eventos passados
 pra galeria "já aconteceu" (E3) e a lista de locais do presencial (P5).
@@ -208,7 +237,7 @@ Esta parte é o alicerce. Se só der pra fazer uma parte do plano, faça esta.
 | ID | O que está hoje | O que fazer | Impacto | Esforço |
 |---|---|---|---|---|
 | G6 | Preto chapado em 90% da tela | Fundo com **halo de marca fixo** no topo de cada página (azul→roxo a 12% de opacidade, 400px de altura) — a página nasce colorida, não preta | Alto | Baixo |
-| G7 | `--qd-acento` (âmbar) existe mas quase não aparece | Usar o âmbar como **cor do dado e do "grátis"**: número sorteado, preço zerado, selo de novidade, hover de link | Alto | Baixo |
+| G7 | ~~Usar um âmbar como cor do dado e do "grátis"~~ | **Revertido em 27/10/2026.** O âmbar não está em `CLAUDE.md` — foi introduzido por mim e acabou espalhado pelo site inteiro, puxando tudo pra fora da identidade. A hierarquia volta a sair do azul, do roxo e do gradiente | — | — |
 | G8 | Uma superfície só (`card/60`) | Três degraus de superfície já existem (`painel`, `painel-alto`) mas são usados pouco — padronizar: fundo < painel < painel-alto < card em destaque | Médio | Médio |
 | G9 | Bordas todas iguais (`border-border`) | Borda superior clareada (fio de luz) em todo painel; borda colorida só no item em foco | Médio | Baixo |
 | G10 | Sem cor por sistema de RPG | Cada sistema ganha um matiz (Ordem = vermelho, Tormenta = dourado, Daggerheart = teal…) usado no selo e no fio da capa. Dá variedade de cor de graça | Alto | Médio |

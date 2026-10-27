@@ -94,7 +94,7 @@ export function Carrossel({ itens }: { itens: { chave: string; conteudo: ReactNo
             aria-label={t("irPara", { n: i + 1 })}
             aria-current={i === ativo}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              i === ativo ? "w-6 bg-acento" : "w-1.5 bg-foreground/25"
+              i === ativo ? "w-6 bg-primary" : "w-1.5 bg-foreground/25"
             }`}
           />
         ))}

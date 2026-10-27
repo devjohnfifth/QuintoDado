@@ -91,7 +91,7 @@ export default async function SobrePage({
           </div>
         </div>
 
-        <div className="mt-10 max-w-[65ch] space-y-5 border-l-2 border-acento/50 pl-6 text-lg leading-relaxed text-foreground/85">
+        <div className="mt-10 max-w-[65ch] space-y-5 border-l-2 border-primary/50 pl-6 text-lg leading-relaxed text-foreground/85">
           {t("intro")
             .split("\n\n")
             .map((paragrafo, i) => (
@@ -107,7 +107,7 @@ export default async function SobrePage({
                 key={pilar.titulo}
                 className="elevar hover:elevar-hover rounded-2xl painel p-6"
               >
-                <div className="flex size-12 items-center justify-center rounded-2xl bg-acento/15 text-acento">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
                   <pilar.Icon className="size-6" aria-hidden />
                 </div>
                 <h3 className="titulo-display titulo-bloco mt-4">{pilar.titulo}</h3>

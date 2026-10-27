@@ -205,7 +205,7 @@ export default async function EventoDetalhePage({
             <div className="flex min-w-0 items-end gap-5">
               <div className="painel-alto flex size-20 shrink-0 flex-col items-center justify-center rounded-2xl sm:size-24">
                 <span className="rotulo-caps text-muted-foreground">{diaSemanaCurto}</span>
-                <span className="titulo-display text-3xl text-acento sm:text-4xl">{diaNumero}</span>
+                <span className="titulo-display text-3xl text-primary sm:text-4xl">{diaNumero}</span>
                 <span className="rotulo-caps text-muted-foreground">{mesCurto}</span>
               </div>
               <div className="min-w-0">
@@ -249,7 +249,7 @@ export default async function EventoDetalhePage({
 
         <section id="ingressos" className="mt-12 scroll-mt-24">
           <h2 className="titulo-display titulo-secao flex items-center gap-2.5">
-            <Ticket className="size-6 shrink-0 text-acento" aria-hidden />
+            <Ticket className="size-6 shrink-0 text-primary" aria-hidden />
             {t("ingressos")}
           </h2>
 
@@ -261,7 +261,7 @@ export default async function EventoDetalhePage({
                 <span className="text-muted-foreground">
                   {t("lotacao", { vendidos: evento.ingressos_vendidos, total: evento.capacidade_maxima })}
                 </span>
-                <span className="tabular-nums text-acento">
+                <span className="tabular-nums text-primary">
                   {Math.round((evento.ingressos_vendidos / evento.capacidade_maxima) * 100)}%
                 </span>
               </div>
@@ -318,12 +318,12 @@ export default async function EventoDetalhePage({
 
                     <span aria-hidden className="my-4 border-t-2 border-dashed border-border/70" />
 
-                    <p className="titulo-display text-4xl text-acento">{formatBRL(tipo.preco_centavos)}</p>
+                    <p className="titulo-display text-4xl text-primary">{formatBRL(tipo.preco_centavos)}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {tipo.limite_mesas ? t("limiteMesas", { n: tipo.limite_mesas }) : t("qualquerMesa")}
                     </p>
                     {acabando && (
-                      <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-acento/15 px-2.5 py-0.5 text-xs font-semibold text-acento">
+                      <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                         {t("restamIngressos", { n: restamTipo })}
                       </p>
                     )}

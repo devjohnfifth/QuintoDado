@@ -43,7 +43,7 @@ export function CapaPagina({
       <Container className="py-14 sm:py-20">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div className="min-w-0">
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-acento/15 text-acento">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
               <Icone className="size-6" aria-hidden />
             </div>
             <h1 className="titulo-display titulo-pagina mt-5">{titulo}</h1>

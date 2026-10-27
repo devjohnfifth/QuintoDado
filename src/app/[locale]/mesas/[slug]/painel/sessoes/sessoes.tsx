@@ -69,7 +69,7 @@ export function Sessoes({
             <li key={sessao.id} className="relative">
               <span
                 aria-hidden
-                className="absolute -left-[2.2rem] top-5 flex size-7 items-center justify-center rounded-full border border-acento/50 bg-background font-heading text-xs font-bold tabular-nums text-acento sm:-left-[2.7rem]"
+                className="absolute -left-[2.2rem] top-5 flex size-7 items-center justify-center rounded-full border border-primary/50 bg-background font-heading text-xs font-bold tabular-nums text-primary sm:-left-[2.7rem]"
               >
                 {sessao.numero}
               </span>
