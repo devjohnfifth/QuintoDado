@@ -76,7 +76,9 @@
       "ctaComunidade": "Entrar na comunidade",
       "ctaMesas": "Ver mesas abertas",
       "statMesas": "{n, plural, =0 {Mesas abertas em breve} one {# mesa aberta} other {# mesas abertas}}",
-      "statSuplementos": "{n, plural, =0 {Material gratuito} one {# suplemento gratuito} other {# suplementos gratuitos}}"
+      "statSuplementos": "{n, plural, =0 {Material gratuito} one {# suplemento gratuito} other {# suplementos gratuitos}}",
+      "statTabelas": "{n, plural, =0 {Tabelas pra rolar} one {# tabela pra rolar} other {# tabelas pra rolar}}",
+      "rolar": "Role pra ver"
     },
     "suplementosRecentes": {
       "titulo": "Últimos suplementos",
@@ -88,7 +90,8 @@
       "subtitulo": "O que está acontecendo no Quinto Dado: eventos e suplementos novos.",
       "verTodos": "Ver eventos",
       "anterior": "Anterior",
-      "proximo": "Próximo"
+      "proximo": "Próximo",
+      "irPara": "Ir para o item {n}"
     },
     "mesasAbertas": {
       "titulo": "Mesas abertas",
@@ -325,7 +328,7 @@
     "titulo": "Eventos",
     "subtitulo": "Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.",
     "vazioTitulo": "Nenhum evento aberto agora",
-    "vazioCorpo": "Fica de olho, tem coisa vindo por aí.",
+    "vazioCorpo": "O próximo encontro presencial ainda não tem data pública. Quando abrir, quem está no grupo do WhatsApp fica sabendo primeiro — normalmente antes de o ingresso aparecer aqui.",
     "selo": "Evento",
     "aPartirDe": "A partir de {preco}",
     "verEvento": "Ver evento",
@@ -348,7 +351,10 @@
     "statusAprovado": "Aprovado! Te esperamos lá.",
     "statusRecusado": "Não aprovado.",
     "statusCancelado": "Cancelado.",
-    "breadcrumbInicio": "Início"
+    "breadcrumbInicio": "Início",
+    "vazioCta": "Entrar no grupo e ser avisado",
+    "vazioSecundario": "Ver mesas abertas",
+    "vazioEnquantoIsso": "Enquanto isso"
   },
   "PresencialBh": {
     "titulo": "RPG de mesa presencial em BH",
@@ -363,7 +369,8 @@
     "gratuita": "Gratuita",
     "valorHandouts": "Valor sugerido para handouts",
     "vagas": "{vagas, plural, one {# vaga} other {# vagas}}",
-    "verMesa": "Ver mesa"
+    "verMesa": "Ver mesa",
+    "ilustracaoAlt": "Aventureiro de capuz à mesa com pão de queijo, café e um d20, ao lado de uma capivara"
   },
   "PresencialBhNova": {
     "titulo": "Criar mesa presencial em BH",
@@ -416,6 +423,51 @@
     "mesaquest": "Mesas no MesaQuest",
     "direitos": "© {ano} Quinto Dado",
     "navRodape": "Rodapé"
+  },
+  "Fechamento": {
+    "rotulo": "Pra onde ir agora",
+    "titulo": "Tem mais por aqui",
+    "comunidadeTitulo": "Fica sabendo primeiro",
+    "comunidadeCorpo": "No grupo do WhatsApp eu aviso de mesa nova, solto material antes e a galera combina jogo.",
+    "comunidadeCta": "Entrar no grupo",
+    "mesas": {
+      "titulo": "Mesas abertas",
+      "corpo": "One-shots e campanhas online e presenciais com vaga agora.",
+      "cta": "Ver mesas"
+    },
+    "suplementos": {
+      "titulo": "Material gratuito",
+      "corpo": "Tabelas pra rolar aqui mesmo, mapas e homebrews pra baixar.",
+      "cta": "Ver a biblioteca"
+    },
+    "eventos": {
+      "titulo": "Eventos em BH",
+      "corpo": "Encontros presenciais com várias mesas no mesmo dia.",
+      "cta": "Ver eventos"
+    },
+    "presencial": {
+      "titulo": "Presencial em BH",
+      "corpo": "Mesas de mestres da cidade, combinadas direto com quem mestra.",
+      "cta": "Ver mesas em BH"
+    },
+    "mesaquest": {
+      "titulo": "Minhas mesas no MesaQuest",
+      "corpo": "A maior parte das mesas comissionadas do Quintão fica por lá.",
+      "cta": "Abrir o MesaQuest"
+    },
+    "sobre": {
+      "titulo": "O que é o Quinto Dado",
+      "corpo": "Quem mestra, como funciona e por que segurança vem primeiro.",
+      "cta": "Conhecer"
+    }
+  },
+  "Paginacao": {
+    "rotulo": "Paginação",
+    "anterior": "Anterior",
+    "proxima": "Próxima",
+    "irPara": "Ir para a página {n}",
+    "de": "Página {atual} de {total}",
+    "contagem": "{total, plural, one {# resultado} other {# resultados}}"
   },
   "Suplementos": {
     "titulo": "Material para a sua mesa",

@@ -57,12 +57,15 @@ export async function SiteHeader() {
   const t = await getTranslations("Nav");
   const sessao = await buscarSessao();
 
+  // `barra-assenta` e `barra-encolhe` são ligadas à rolagem: a barra baixa de
+  // 64 pra 52px e ganha sombra conforme a página desce, pra devolver altura ao
+  // conteúdo sem sumir com a navegação.
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
+    <header id="cabecalho-site" className="barra-assenta sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
       {/* Largura própria: segue a coluna do conteúdo (que tem a margem de 10vw),
           mas nunca fica abaixo de 60rem — senão logo, menu e conta não cabem
           numa linha só em telas largas, onde os 10vw comem muito espaço. */}
-      <div className="mx-auto flex h-16 w-full max-w-[max(60rem,calc(min(64rem,100vw)_-_20vw))] items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="barra-encolhe mx-auto flex h-16 w-full max-w-[max(60rem,calc(min(64rem,100vw)_-_20vw))] items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
           className="group flex shrink-0 items-center gap-2 whitespace-nowrap font-heading text-lg font-bold tracking-tight"

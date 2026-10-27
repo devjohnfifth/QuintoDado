@@ -94,7 +94,11 @@ export default async function LocaleLayout({
           >
             Pular pro conteúdo
           </a>
-          <div className="flex min-h-screen flex-col">
+          <div className="relative isolate flex min-h-screen flex-col">
+            {/* Halo de marca: o azul e o roxo presentes no alto de qualquer
+                página, atrás de tudo. Sem ele o site abria preto chapado e a
+                paleta só aparecia em botão e selo. */}
+            <div aria-hidden className="halo-marca pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem]" />
             <SiteHeader />
             <main id="conteudo" className="flex-1">
               {children}

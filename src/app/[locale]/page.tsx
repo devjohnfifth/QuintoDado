@@ -5,11 +5,11 @@ import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
 import { Container } from "@/components/site/container";
-import { Filete } from "@/components/site/filete";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Carrossel } from "@/components/site/carrossel";
+import { NumeroAnimado } from "@/components/site/numero-animado";
 import { EventoCard, type EventoCardData } from "@/components/site/evento-card";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -91,13 +91,20 @@ async function buscarEventosAbertos(): Promise<EventoNoticia[]> {
 }
 
 async function contarConteudo() {
-  if (!isSupabaseConfigured()) return { mesas: 0, suplementos: 0 };
+  if (!isSupabaseConfigured()) return { mesas: 0, suplementos: 0, tabelas: 0 };
   const supabase = await createClient();
-  const [{ count: mesas }, { count: suplementos }] = await Promise.all([
+  const [{ count: mesas }, { count: suplementos }, { count: tabelas }] = await Promise.all([
     supabase.from("mesas").select("id", { count: "exact", head: true }).in("status", ["publicada", "confirmada", "em_andamento"]),
     supabase.from("suplementos").select("id", { count: "exact", head: true }).eq("publicado", true).eq("gratuito", true),
+    // `!inner` pra só contar tabela que está mesmo no ar: a contagem aparece
+    // no herói e não pode incluir rascunho.
+    supabase
+      .from("tabelas_aleatorias")
+      .select("id, suplementos!inner(publicado, gratuito)", { count: "exact", head: true })
+      .eq("suplementos.publicado", true)
+      .eq("suplementos.gratuito", true),
   ]);
-  return { mesas: mesas ?? 0, suplementos: suplementos ?? 0 };
+  return { mesas: mesas ?? 0, suplementos: suplementos ?? 0, tabelas: tabelas ?? 0 };
 }
 
 /** Cabeçalho de seção da home: título, subtítulo e "ver todos" (no celular o link desce pro fim da seção). */
@@ -124,12 +131,11 @@ function SecaoHome({
   return (
     // `fundo` alterna entre o preto do site e um painel um degrau acima:
     // é o que dá ritmo à rolagem, em vez de tudo chapado igual.
-    <Reveal className={`relative py-20 ${fundo ? "textura-grao bg-superficie" : ""}`}>
-      <Filete className="absolute inset-x-0 top-0" />
+    <Reveal className={`relative border-t border-border/60 py-20 ${fundo ? "textura-grao bg-superficie" : ""}`}>
       <Container className="relative">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="titulo-display text-3xl sm:text-4xl">{titulo}</h2>
+            <h2 className="titulo-display titulo-secao">{titulo}</h2>
             <p className="mt-2 max-w-xl text-muted-foreground">{subtitulo}</p>
           </div>
           {link("hidden shrink-0 sm:inline-flex")}
@@ -188,17 +194,18 @@ export default async function HomePage({
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }} />
 
-      {/* Herói — baixo de propósito (pedido do João): a foto dá clima sem aumentar a altura. */}
-      <section className="textura-grao relative isolate overflow-hidden">
-        {/* A foto agora aparece de verdade (era 25% sobre preto, sumia) e o
-            degradê só protege a leitura do texto, em vez de apagar a imagem. */}
+      {/* Herói: ocupa 78vh pra abrir a página com presença, e o primeiro card
+          da seção seguinte fica espiando na borda — é o que convida a rolar. */}
+      <section className="textura-grao relative isolate flex min-h-[78vh] items-center overflow-hidden">
+        {/* A foto aparece de verdade (era 25% sobre preto, sumia) e sobe
+            devagar com a rolagem. O degradê só protege a leitura do texto. */}
         <Image
           src={grupoJogandoRpg}
           alt=""
           fill
           priority
           placeholder="blur"
-          className="-z-20 object-cover opacity-60"
+          className="parallax-heroi -z-20 object-cover opacity-60"
           sizes="100vw"
         />
         <div
@@ -210,23 +217,15 @@ export default async function HomePage({
           className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-background to-transparent"
         />
 
-        <Container className="py-16 text-center sm:py-24">
-          <p className="flex flex-wrap items-center justify-center gap-2 text-sm">
-            <Link href="/mesas" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 font-medium text-foreground/80 backdrop-blur-md transition-colors hover:text-foreground">
-              <Dices className="size-3.5 text-primary" aria-hidden />
-              {t("hero.statMesas", { n: contagem.mesas })}
-            </Link>
-            <Link href="/suplementos" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 font-medium text-foreground/80 backdrop-blur-md transition-colors hover:text-foreground">
-              <BookOpen className="size-3.5 text-primary" aria-hidden />
-              {t("hero.statSuplementos", { n: contagem.suplementos })}
-            </Link>
-          </p>
+        <Container className="py-16 text-center sm:py-20">
+          <p className="rotulo-caps text-foreground/70">{t("hero.eyebrow")}</p>
 
-          <h1 className="titulo-display mt-5 text-6xl sm:text-8xl">
+          <h1 className="titulo-display titulo-hero mt-4">
             <span className="text-marca drop-shadow-[0_4px_24px_rgba(79,125,243,0.35)]">{t("hero.titulo")}</span>
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-foreground/80 sm:text-xl">{t("hero.subtitulo")}</p>
-          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+
+          <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={SITE_LINKS.whatsappComunidade}
               target="_blank"
@@ -243,7 +242,49 @@ export default async function HomePage({
               {t("hero.ctaMesas")}
             </Link>
           </div>
+
+          {/* Os três números num bloco só: antes eram dois selos que empilhavam
+              tortos no celular e não diziam o tamanho do acervo. */}
+          <ul className="mx-auto mt-10 grid max-w-lg grid-cols-3 divide-x divide-border/50 overflow-hidden rounded-2xl border border-border/60 bg-background/50 backdrop-blur-md">
+            {[
+              { href: "/mesas", Icone: Dices, n: contagem.mesas, rotulo: t("hero.statMesas", { n: contagem.mesas }) },
+              {
+                href: "/suplementos",
+                Icone: BookOpen,
+                n: contagem.suplementos,
+                rotulo: t("hero.statSuplementos", { n: contagem.suplementos }),
+              },
+              {
+                href: "/suplementos",
+                Icone: Dices,
+                n: contagem.tabelas,
+                rotulo: t("hero.statTabelas", { n: contagem.tabelas }),
+              },
+            ].map((stat, i) => (
+              <li key={i}>
+                <Link
+                  href={stat.href}
+                  className="group flex h-full flex-col items-center gap-0.5 px-2 py-4 transition-colors hover:bg-foreground/5"
+                >
+                  <stat.Icone className="size-4 text-acento transition-transform duration-300 group-hover:scale-110" aria-hidden />
+                  <span className="titulo-display mt-1 text-3xl text-acento sm:text-4xl">
+                    <NumeroAnimado valor={stat.n} />
+                  </span>
+                  {/* O rótulo já traz o número por causa do plural; aqui só
+                      interessa a palavra, então o número sai do texto. */}
+                  <span className="text-xs leading-tight text-muted-foreground">
+                    {stat.rotulo.replace(/^\d+\s*/, "")}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Container>
+
+        <p className="rotulo-caps absolute inset-x-0 bottom-5 flex flex-col items-center gap-1 text-foreground/45">
+          {t("hero.rolar")}
+          <ChevronDown className="size-4 motion-safe:animate-bounce" aria-hidden />
+        </p>
       </section>
 
       {noticias.length > 0 && (
@@ -290,11 +331,10 @@ export default async function HomePage({
       )}
 
       {/* FAQ — também vira dado estruturado FAQPage logo abaixo */}
-      <Reveal className="relative py-20">
-        <Filete className="absolute inset-x-0 top-0" />
+      <Reveal className="relative border-t border-border/60 py-20">
         <Container>
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-            <h2 className="titulo-display text-3xl sm:text-4xl">{t("faq.titulo")}</h2>
+            <h2 className="titulo-display titulo-secao">{t("faq.titulo")}</h2>
             <div className="divide-y divide-border/60 rounded-2xl painel">
               {perguntasFaq.map((item) => (
                 <details key={item.pergunta} className="group px-5 py-4">
@@ -328,14 +368,13 @@ export default async function HomePage({
       />
 
       {/* Comunidade */}
-      <Reveal className="relative py-20">
-        <Filete className="absolute inset-x-0 top-0" />
+      <Reveal className="relative border-t border-border/60 py-20">
         <Container>
           <div className="brilho-marca textura-grao relative overflow-hidden rounded-3xl border border-primary/30 px-6 py-12 text-center sm:px-10">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-marca text-white">
               <MessageCircle className="size-6" aria-hidden />
             </div>
-            <h2 className="titulo-display mt-5 text-3xl sm:text-4xl">{t("comunidade.titulo")}</h2>
+            <h2 className="titulo-display titulo-secao mt-5">{t("comunidade.titulo")}</h2>
             <p className="mx-auto mt-2 max-w-lg text-muted-foreground">{t("comunidade.corpo")}</p>
             <a
               href={SITE_LINKS.whatsappComunidade}

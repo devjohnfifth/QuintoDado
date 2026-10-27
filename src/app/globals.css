@@ -154,6 +154,9 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    /* 17px de base: o corpo a 16px ficava miúdo ao lado dos títulos grandes.
+       Só afeta texto sem classe explícita de tamanho. */
+    font-size: 1.0625rem;
   }
 }
 
@@ -317,17 +320,148 @@ select:focus-visible,
   line-height: 1.05;
 }
 
-/** Filete ornamental: linha fina com um losango no meio, entre seções. */
-@utility filete {
-  position: relative;
-  height: 1px;
-  background-image: linear-gradient(
-    to right,
-    transparent,
-    color-mix(in oklch, var(--qd-texto) 14%, transparent),
-    transparent
-  );
+/* =====================================================================
+ * Escala tipográfica fluida.
+ *
+ * A escala antiga ia de 30px a 36px nos títulos contra 16px de corpo —
+ * perto demais pra existir hierarquia. Estes quatro degraus crescem com a
+ * tela via clamp(), então o celular não fica apertado nem o desktop
+ * tímido, e a diferença entre níveis é grande o bastante pro olho ler a
+ * ordem sem esforço.
+ * ===================================================================== */
+
+/** Herói da home: o maior texto do site. */
+@utility titulo-hero {
+  font-size: clamp(2.5rem, 1rem + 7.5vw, 6rem);
 }
+
+/** Título de página (listas e detalhes). */
+@utility titulo-pagina {
+  font-size: clamp(2.25rem, 1.25rem + 4.5vw, 4.5rem);
+}
+
+/** Título de seção dentro de uma página. */
+@utility titulo-secao {
+  font-size: clamp(1.875rem, 1.25rem + 2.6vw, 3rem);
+}
+
+/** Título de bloco menor (card em destaque, caixa de apoio). */
+@utility titulo-bloco {
+  font-size: clamp(1.25rem, 1rem + 1.1vw, 1.75rem);
+}
+
+/** Rótulo em caixa-alta: metadado, "o que é isto", eyebrow de seção. */
+@utility rotulo-caps {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* =====================================================================
+ * Halo de marca: toda página nasce colorida.
+ *
+ * O site era preto chapado do topo ao rodapé e a paleta só aparecia em
+ * botão e selo. Este halo fica atrás do conteúdo no alto de qualquer
+ * página e some num degradê, então a cor da marca está presente sem
+ * competir com texto nenhum.
+ * ===================================================================== */
+@utility halo-marca {
+  background-image:
+    radial-gradient(58% 100% at 16% 0%, color-mix(in oklch, var(--qd-primaria) 28%, transparent), transparent 70%),
+    radial-gradient(50% 92% at 84% 2%, color-mix(in oklch, var(--qd-secundaria) 24%, transparent), transparent 68%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 100%);
+}
+
+/** Fio de luz no topo de uma superfície, sem trocar o fundo dela. */
+@utility borda-luz {
+  box-shadow: inset 0 1px 0 0 color-mix(in oklch, var(--qd-texto) 9%, transparent);
+}
+
+/* =====================================================================
+ * Movimento ligado à rolagem.
+ *
+ * Tudo aqui é CSS puro com `animation-timeline`, sem JS e sem
+ * IntersectionObserver: o conteúdo sai visível do servidor e quem não
+ * tem suporte (ou pediu menos movimento) simplesmente vê a versão
+ * parada. Nada nunca fica preso invisível.
+ * ===================================================================== */
+
+@keyframes entra-cascata {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes parallax-heroi {
+  from {
+    transform: translateY(-6%) scale(1.18);
+  }
+  to {
+    transform: translateY(6%) scale(1.18);
+  }
+}
+
+@keyframes barra-encolhe {
+  to {
+    height: 3.25rem;
+  }
+}
+
+@keyframes barra-assenta {
+  to {
+    box-shadow: 0 14px 34px -18px rgb(0 0 0 / 90%);
+    border-bottom-color: color-mix(in oklch, var(--qd-texto) 16%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    /* Cada filho entra ao alcançar a tela. O desencontro por coluna faz a
+       fileira entrar da esquerda pra direita em vez de tudo de uma vez —
+       `animation-delay` não vale em linha do tempo de rolagem, então o
+       atraso vem de deslocar a faixa. */
+    .cascata > * {
+      animation: entra-cascata linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 38%;
+    }
+    .cascata > :nth-child(3n + 2) {
+      animation-range: entry 6% entry 46%;
+    }
+    .cascata > :nth-child(3n) {
+      animation-range: entry 12% entry 54%;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .parallax-heroi {
+      animation: parallax-heroi linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 80vh;
+      will-change: transform;
+    }
+    .barra-encolhe {
+      animation: barra-encolhe linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 140px;
+    }
+    .barra-assenta {
+      animation: barra-assenta linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 140px;
+    }
+  }
+}
+
+
 
 /* =====================================================================
  * Teatro do dado: rolar é a assinatura do site e acontecia sem graça.
