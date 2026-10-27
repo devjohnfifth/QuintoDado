@@ -24,7 +24,9 @@ async function buscarEvento(slug: string) {
   const { data: evento } = await supabase
     .from("eventos")
     .select(
-      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, ingressos_vendidos, vendas_abertas",
+      // Sem `chave_pix` e `whatsapp_confirmacao`: são dados de pagamento e
+      // saem só pela dadosPagamentoAction, pra quem tem sessão.
+      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, capacidade_maxima, ingressos_vendidos, vendas_abertas",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -351,8 +353,6 @@ export default async function EventoDetalhePage({
                           tipoNome={tipo.nome}
                           precoCentavos={tipo.preco_centavos}
                           slug={slug}
-                          chavePix={evento.chave_pix}
-                          whatsappConfirmacao={evento.whatsapp_confirmacao}
                           nomeCompletoAtual={nomeCompletoAtual}
                           telefoneAtual={telefoneAtual}
                         />

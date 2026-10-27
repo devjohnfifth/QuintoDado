@@ -175,9 +175,48 @@ um `setTimeout` de garantia que crava o valor final mesmo sem quadro nenhum.
 É a mesma família do bug do `/links`: **nada que o visitante precisa ver pode
 depender de uma animação rodar.**
 
+### Achado de segurança (27/10/2026) — fora do plano visual
+
+Fui implementar o E3 (seção "já aconteceu" em `/eventos`), li a RLS de
+eventos pra entender o filtro de status e encontrei outra coisa.
+
+**O problema.** A política `evento_leitura` é por LINHA
+(`status = 'publicado' or eh_admin()`) e os grants do projeto são de tabela
+inteira (`grant all on all tables in schema public to anon`). Juntando as
+duas, qualquer visitante com a chave anônima — que é pública por definição,
+vai no bundle do navegador — conseguiria ler de um evento publicado:
+
+    GET /rest/v1/eventos?select=chave_pix,whatsapp_confirmacao
+
+Havia ainda uma segunda via: `ComprarIngressoButton` é componente de cliente
+e recebia `chavePix` e `whatsappConfirmacao` como props, então os dois
+viajavam no **payload de RSC** de uma página pública, visíveis pra quem nem
+tem conta. É literalmente o que a regra 4 do `CLAUDE.md` proíbe.
+
+Hoje nada vaza porque não existe evento publicado. Vazaria no próximo.
+
+**O que foi feito no código (já commitado):**
+
+- a página do evento não lê mais `chave_pix` nem `whatsapp_confirmacao`
+- os dois saem por uma `dadosPagamentoAction`, que exige sessão e só é
+  chamada quando a pessoa abre o diálogo de compra
+- o botão de comprar não recebe mais esses dados como prop
+
+**O que falta — e depende de você rodar:** a migration
+`20261027120000_eventos_colunas_sensiveis.sql` revoga o `select` de tabela
+cheia do `anon` e devolve só as colunas públicas. `authenticated` continua
+lendo, porque quem compra precisa da chave.
+
+**Confirmado que ainda NÃO rodou**: pela chave anônima,
+`select=chave_pix,whatsapp_confirmacao` ainda responde 200. O código novo
+funciona antes e depois da migration, então não há pressa de ordem — mas o
+buraco só fecha quando ela for aplicada.
+
 ### Próximos
-Lote E, que depende de você: capas dos suplementos, fotos de eventos passados
-pra galeria "já aconteceu" (E3) e a lista de locais do presencial (P5).
+Lote E, que depende de você: capas dos suplementos e a lista de locais do
+presencial (P5). O E3 ("já aconteceu") precisa de uma decisão sua: hoje a RLS
+esconde evento encerrado do público, então a seção exige abrir `encerrado`
+pra leitura anônima.
 
 ---
 

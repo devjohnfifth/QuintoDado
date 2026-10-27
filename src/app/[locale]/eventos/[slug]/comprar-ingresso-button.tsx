@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Copy, Check, MessageCircle } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { formatBRL } from "@/lib/format";
-import { comprarIngressoAction } from "./actions";
+import { comprarIngressoAction, dadosPagamentoAction } from "./actions";
 
 export function ComprarIngressoButton({
   eventoId,
@@ -23,8 +23,6 @@ export function ComprarIngressoButton({
   tipoNome,
   precoCentavos,
   slug,
-  chavePix,
-  whatsappConfirmacao,
   nomeCompletoAtual,
   telefoneAtual,
 }: {
@@ -33,8 +31,6 @@ export function ComprarIngressoButton({
   tipoNome: string;
   precoCentavos: number;
   slug: string;
-  chavePix: string | null;
-  whatsappConfirmacao: string | null;
   nomeCompletoAtual: string | null;
   telefoneAtual: string | null;
 }) {
@@ -45,6 +41,23 @@ export function ComprarIngressoButton({
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [telefone, setTelefone] = useState("");
   const [copiado, setCopiado] = useState(false);
+  // Chave Pix e WhatsApp chegam só quando o diálogo abre, e só pra quem tem
+  // sessão — nunca junto com a página.
+  const [chavePix, setChavePix] = useState<string | null>(null);
+  const [whatsappConfirmacao, setWhatsapp] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelado = false;
+    dadosPagamentoAction(slug).then((r) => {
+      if (cancelado || !r.ok) return;
+      setChavePix(r.chavePix);
+      setWhatsapp(r.whatsapp);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [open, slug]);
 
   function copiarChave() {
     if (!chavePix) return;

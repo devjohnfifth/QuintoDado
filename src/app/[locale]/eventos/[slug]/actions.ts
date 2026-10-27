@@ -106,3 +106,41 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
   revalidatePath("/conta");
   return { ok: true };
 }
+
+/**
+ * Dados de pagamento do evento (chave Pix e WhatsApp de confirmação).
+ *
+ * Eles NÃO podem sair junto com a página: o botão de comprar é componente de
+ * cliente, então qualquer prop que ele receba viaja no payload de RSC e fica
+ * visível pra quem só abriu o endereço — inclusive quem nem tem conta. É o
+ * que a regra 4 do CLAUDE.md proíbe.
+ *
+ * Aqui eles só saem depois de confirmar que há sessão, e só quando a pessoa
+ * abre o diálogo de compra.
+ */
+export type DadosPagamento =
+  | { ok: true; chavePix: string | null; whatsapp: string | null }
+  | { ok: false; error: string };
+
+export async function dadosPagamentoAction(slug: string): Promise<DadosPagamento> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Você precisa estar logado." };
+
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("chave_pix, whatsapp_confirmacao")
+    .eq("slug", slug)
+    .eq("status", "publicado")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[eventos/pagamento] erro ao buscar dados:", error.message);
+    return { ok: false, error: "Não deu pra carregar os dados de pagamento agora." };
+  }
+  if (!data) return { ok: false, error: "Esse evento não está mais disponível." };
+
+  return { ok: true, chavePix: data.chave_pix, whatsapp: data.whatsapp_confirmacao };
+}
