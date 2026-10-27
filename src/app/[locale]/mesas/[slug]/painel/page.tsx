@@ -30,55 +30,66 @@ export default async function PainelVisaoGeralPage({
   }, {});
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <section className="rounded-2xl border border-border bg-card/60 p-5">
-        <h2 className="flex items-center gap-2 font-heading text-lg font-bold">
-          <Users className="size-5 text-primary" aria-hidden />
+    <div className="grid items-start gap-5 lg:grid-cols-2">
+      <section className="flex flex-col rounded-2xl painel p-6">
+        <p className="rotulo-caps flex items-center gap-2 text-muted-foreground">
+          <Users className="size-4 text-acento" aria-hidden />
           {t("abaElenco")}
-        </h2>
+        </p>
+        {/* O número primeiro, grande: é o que a pessoa quer saber de relance. */}
+        <p className="titulo-display mt-3 text-5xl text-acento tabular-nums">{entidades.length}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {t("visaoResumo", { entidades: entidades.length, sessoes: sessoes.length })}
         </p>
         {entidades.length > 0 && (
-          <ul className="mt-4 flex flex-wrap gap-2 text-sm">
+          <ul className="mt-5 flex flex-wrap gap-2 text-sm">
             {Object.entries(porTipo).map(([tipo, n]) => (
               <li key={tipo} className="rounded-full border border-border px-3 py-1 text-muted-foreground">
-                {TIPO_ENTIDADE_LABEL[tipo as TipoEntidade]?.plural ?? tipo}: <span className="text-foreground">{n}</span>
+                {TIPO_ENTIDADE_LABEL[tipo as TipoEntidade]?.plural ?? tipo}:{" "}
+                <span className="font-medium text-foreground tabular-nums">{n}</span>
               </li>
             ))}
           </ul>
         )}
         <Link
           href={`/mesas/${slug}/painel/elenco`}
-          className={buttonVariants({ variant: "outline", className: "mt-5 rounded-full" })}
+          className={buttonVariants({ variant: "outline", className: "mt-6 self-start rounded-full" })}
         >
           {t("abaElenco")}
         </Link>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card/60 p-5">
-        <h2 className="flex items-center gap-2 font-heading text-lg font-bold">
-          <CalendarDays className="size-5 text-primary" aria-hidden />
+      <section className="flex flex-col rounded-2xl painel p-6">
+        <p className="rotulo-caps flex items-center gap-2 text-muted-foreground">
+          <CalendarDays className="size-4 text-acento" aria-hidden />
           {t("ultimaSessao")}
-        </h2>
+        </p>
         {ultima ? (
           <>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="titulo-display titulo-bloco mt-3 text-acento">
               {t("sessaoNumero", { n: ultima.numero })}
-              {ultima.data ? ` · ${new Date(`${ultima.data}T00:00:00`).toLocaleDateString("pt-BR")}` : ""}
             </p>
+            {ultima.data && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {new Date(`${ultima.data}T00:00:00`).toLocaleDateString("pt-BR", {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                })}
+              </p>
+            )}
             {ultima.resumo_md && (
-              <div className="mt-3 line-clamp-6 text-sm">
+              <div className="mt-4 line-clamp-6 border-l-2 border-border pl-4 text-sm text-muted-foreground">
                 <DescricaoMarkdown texto={ultima.resumo_md} />
               </div>
             )}
           </>
         ) : (
-          <p className="mt-1 text-sm text-muted-foreground">{t("semSessao")}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{t("semSessao")}</p>
         )}
         <Link
           href={`/mesas/${slug}/painel/sessoes`}
-          className={buttonVariants({ variant: "outline", className: "mt-5 rounded-full" })}
+          className={buttonVariants({ variant: "outline", className: "mt-6 self-start rounded-full" })}
         >
           {t("abaSessoes")}
         </Link>

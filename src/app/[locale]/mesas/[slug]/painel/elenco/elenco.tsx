@@ -70,8 +70,8 @@ export function Elenco({
   })).filter((g) => g.itens.length > 0);
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-2xl border border-border bg-card/60 p-4">
+    <div className="space-y-10">
+      <div className="rounded-2xl painel p-4">
           {criando ? (
             <div className="grid gap-3 sm:grid-cols-[1fr_12rem_auto]">
               <div className="space-y-1.5">
@@ -127,8 +127,13 @@ export function Elenco({
       ) : (
         grupos.map((grupo) => (
           <section key={grupo.tipo}>
-            <h2 className="font-heading text-lg font-bold">{TIPO_ENTIDADE_LABEL[grupo.tipo].plural}</h2>
-            <ul className="mt-3 space-y-3">
+            {/* Grupo com contagem e um fio embaixo: sem isso, as fichas de
+                tipos diferentes viravam uma lista só. */}
+            <h2 className="titulo-display titulo-bloco flex items-baseline gap-2 border-b border-border/60 pb-2">
+              {TIPO_ENTIDADE_LABEL[grupo.tipo].plural}
+              <span className="text-sm font-normal tabular-nums text-muted-foreground">{grupo.itens.length}</span>
+            </h2>
+            <ul className="mt-4 space-y-3">
               {grupo.itens.map((entidade) => (
                 <li key={entidade.id}>
                   <FichaEntidade
@@ -187,59 +192,62 @@ function FichaEntidade({
     });
   }
 
-  // Vermelho tracejado quando só o mestre vê: a mesma convenção do campo.
-  const borda = ehMestre && entidade.oculta ? "border-dashed border-erro/60" : "border-border";
+  // Fio na lateral com a cor da visibilidade, em vez de borda tracejada:
+  // a tracejada sumia no escuro e ainda disputava atenção com o conteúdo.
+  // Convenção do projeto: vermelho = só o mestre vê, verde = a mesa toda.
+  const corFio = !ehMestre ? "bg-border" : entidade.oculta ? "bg-erro/70" : "bg-sucesso/60";
   // Jogador mexe só no que é dele; o mestre mexe em tudo.
   const minha = entidade.criado_por === usuarioId;
   const podeEditar = ehMestre || minha;
 
   return (
-    <div className={`rounded-2xl border bg-card/60 ${borda}`}>
-      <div className="flex flex-wrap items-center gap-2 p-4">
+    <div className="relative overflow-hidden rounded-2xl painel">
+      <span aria-hidden className={`absolute inset-y-0 left-0 w-1 ${corFio}`} />
+
+      {/*
+       * Três blocos, não uma linha só: identidade à esquerda (nome e quem
+       * criou), ações à direita. Antes nome, autoria, selo de visibilidade e
+       * três botões dividiam o mesmo `flex-wrap` e embaralhavam no celular.
+       */}
+      <div className="flex flex-wrap items-start gap-3 py-4 pl-5 pr-4">
         <button
           type="button"
           onClick={() => setAberta((v) => !v)}
           aria-expanded={aberta}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          className="flex min-w-0 flex-1 items-start gap-2 text-left"
         >
-          <ChevronDown className={`size-4 shrink-0 transition-transform ${aberta ? "rotate-180" : ""}`} aria-hidden />
-          <span className="truncate font-heading font-bold">{entidade.nome}</span>
+          <ChevronDown
+            className={`mt-1 size-4 shrink-0 text-muted-foreground transition-transform ${aberta ? "rotate-180" : ""}`}
+            aria-hidden
+          />
+          <span className="min-w-0">
+            <span className="block truncate font-heading font-bold">{entidade.nome}</span>
+            {/* Quem criou é metadado, não ação: some do meio dos botões e
+                vira uma linha discreta embaixo do nome. */}
+            {entidade.criado_por && (
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                {minha ? t("criadoPorVoce") : t("criadoPor", { nome: entidade.profiles?.nome_exibicao ?? "?" })}
+              </span>
+            )}
+          </span>
         </button>
 
-        {entidade.criado_por && (
-          <Selo tom="neutro">
-            {minha ? t("criadoPorVoce") : t("criadoPor", { nome: entidade.profiles?.nome_exibicao ?? "?" })}
-          </Selo>
-        )}
+        {/* Tudo que age sobre a ficha fica num agrupamento só, à direita. */}
+        <div className="flex w-full shrink-0 items-center justify-end gap-1.5 sm:w-auto">
+          {ehMestre && (
+            <>
+              <Selo tom={entidade.oculta ? "erro" : "sucesso"}>
+                {entidade.oculta ? t("seloOculto") : t("seloMesa")}
+              </Selo>
+              <Button variant="outline" size="sm" onClick={alternar} disabled={pendente} className="rounded-full">
+                {entidade.oculta ? <Eye className="size-4" aria-hidden /> : <EyeOff className="size-4" aria-hidden />}
+                {entidade.oculta ? t("revelar") : t("ocultar")}
+              </Button>
+            </>
+          )}
 
-        {!ehMestre &&
-          minha &&
-          (confirmando ? (
-            <Button variant="destructive" size="sm" onClick={apagar} disabled={pendente} className="rounded-full">
-              {pendente ? <Loader2 className="size-4 animate-spin" /> : t("confirmarExcluir")}
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t("excluir")}
-              onClick={() => setConfirmando(true)}
-              disabled={pendente}
-            >
-              <Trash2 className="size-4" aria-hidden />
-            </Button>
-          ))}
-
-        {ehMestre && (
-          <>
-            <Selo tom={entidade.oculta ? "erro" : "sucesso"} className={CLASSE_VISIBILIDADE[entidade.oculta ? "oculto" : "mesa"]}>
-              {entidade.oculta ? t("seloOculto") : t("seloMesa")}
-            </Selo>
-            <Button variant="outline" size="sm" onClick={alternar} disabled={pendente} className="rounded-full">
-              {entidade.oculta ? <Eye className="size-4" aria-hidden /> : <EyeOff className="size-4" aria-hidden />}
-              {entidade.oculta ? t("revelar") : t("ocultar")}
-            </Button>
-            {confirmando ? (
+          {podeEditar &&
+            (confirmando ? (
               <Button variant="destructive" size="sm" onClick={apagar} disabled={pendente} className="rounded-full">
                 {pendente ? <Loader2 className="size-4 animate-spin" /> : t("confirmarExcluir")}
               </Button>
@@ -253,9 +261,8 @@ function FichaEntidade({
               >
                 <Trash2 className="size-4" aria-hidden />
               </Button>
-            )}
-          </>
-        )}
+            ))}
+        </div>
       </div>
 
       {aberta && (

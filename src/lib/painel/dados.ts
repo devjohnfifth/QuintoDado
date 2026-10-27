@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Entidade } from "@/lib/painel/tipos";
 
@@ -8,7 +9,7 @@ import type { Entidade } from "@/lib/painel/tipos";
  * vazado — por isso o teste do lote é `curl` com token de jogador, não a tela.
  */
 
-export async function listarEntidades(mesaId: string): Promise<Entidade[]> {
+export const listarEntidades = cache(async (mesaId: string): Promise<Entidade[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("painel_entidades")
@@ -28,7 +29,7 @@ export async function listarEntidades(mesaId: string): Promise<Entidade[]> {
     ...e,
     painel_campos: [...(e.painel_campos ?? [])].sort((a, b) => a.ordem - b.ordem),
   })) as unknown as Entidade[];
-}
+});
 
 export type Sessao = {
   id: string;
@@ -40,7 +41,7 @@ export type Sessao = {
   profiles: { nome_exibicao: string } | null;
 };
 
-export async function listarSessoes(mesaId: string): Promise<Sessao[]> {
+export const listarSessoes = cache(async (mesaId: string): Promise<Sessao[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("painel_sessoes")
@@ -53,4 +54,4 @@ export async function listarSessoes(mesaId: string): Promise<Sessao[]> {
     return [];
   }
   return (data ?? []) as unknown as Sessao[];
-}
+});
