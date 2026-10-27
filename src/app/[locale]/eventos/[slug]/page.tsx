@@ -248,10 +248,33 @@ export default async function EventoDetalhePage({
         <p className="mt-6 max-w-3xl whitespace-pre-line text-muted-foreground">{evento.descricao}</p>
 
         <section id="ingressos" className="mt-12 scroll-mt-24">
-          <h2 className="flex items-center gap-2 font-heading text-2xl font-bold">
-            <Ticket className="size-5 text-primary" aria-hidden />
+          <h2 className="titulo-display titulo-secao flex items-center gap-2.5">
+            <Ticket className="size-6 shrink-0 text-acento" aria-hidden />
             {t("ingressos")}
           </h2>
+
+          {/* Lotação do evento: o número existia no banco e não aparecia em
+              lugar nenhum pra quem decide comprar. */}
+          {evento.capacidade_maxima ? (
+            <div className="mt-5 rounded-2xl painel p-4">
+              <div className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="text-muted-foreground">
+                  {t("lotacao", { vendidos: evento.ingressos_vendidos, total: evento.capacidade_maxima })}
+                </span>
+                <span className="tabular-nums text-acento">
+                  {Math.round((evento.ingressos_vendidos / evento.capacidade_maxima) * 100)}%
+                </span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-foreground/10">
+                <div
+                  className="h-full rounded-full bg-marca"
+                  style={{
+                    width: `${Math.min(100, Math.round((evento.ingressos_vendidos / evento.capacidade_maxima) * 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
 
           {ingressoExistente ? (
             <div className="mt-4 rounded-2xl border border-border bg-card/60 p-5 text-sm">
@@ -276,14 +299,34 @@ export default async function EventoDetalhePage({
                 const tipoEsgotado = Boolean(
                   tipo.quantidade_maxima && tipo.ingressos_vendidos_tipo >= tipo.quantidade_maxima,
                 );
+                // Quantos ainda cabem neste tipo. Só vira aviso quando está
+                // acabando — "restam 40" não apressa ninguém.
+                const restamTipo =
+                  tipo.quantidade_maxima !== null && tipo.quantidade_maxima !== undefined
+                    ? tipo.quantidade_maxima - tipo.ingressos_vendidos_tipo
+                    : null;
+                const acabando = restamTipo !== null && restamTipo > 0 && restamTipo <= 10;
                 return (
-                  <div key={tipo.id} className="flex flex-col rounded-2xl border border-border bg-card/60 p-5">
-                    <p className="font-heading text-lg font-bold">{tipo.nome}</p>
+                  <div key={tipo.id} className="relative flex flex-col rounded-2xl painel-alto p-5">
+                    {/* Picote de ingresso, igual ao card de mesa: duas
+                        mordidas e a linha tracejada separando o talão. */}
+                    <span aria-hidden className="absolute -left-3 top-24 size-6 rounded-full bg-background" />
+                    <span aria-hidden className="absolute -right-3 top-24 size-6 rounded-full bg-background" />
+
+                    <p className="titulo-display titulo-bloco">{tipo.nome}</p>
                     {tipo.descricao && <p className="mt-1 text-sm text-muted-foreground">{tipo.descricao}</p>}
-                    <p className="mt-3 font-heading text-3xl font-bold text-primary">{formatBRL(tipo.preco_centavos)}</p>
+
+                    <span aria-hidden className="my-4 border-t-2 border-dashed border-border/70" />
+
+                    <p className="titulo-display text-4xl text-acento">{formatBRL(tipo.preco_centavos)}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {tipo.limite_mesas ? t("limiteMesas", { n: tipo.limite_mesas }) : t("qualquerMesa")}
                     </p>
+                    {acabando && (
+                      <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-acento/15 px-2.5 py-0.5 text-xs font-semibold text-acento">
+                        {t("restamIngressos", { n: restamTipo })}
+                      </p>
+                    )}
                     <div className="mt-auto pt-5">
                       {!evento.vendas_abertas ? (
                         <p className="rounded-full border border-dashed border-border px-3 py-2.5 text-center text-sm text-muted-foreground">

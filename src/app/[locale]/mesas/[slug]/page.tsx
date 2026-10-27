@@ -13,6 +13,8 @@ import {
   LogIn,
   MapPin,
   Repeat,
+  ShieldCheck,
+  Sparkles,
   Ticket,
   UserPlus,
 } from "lucide-react";
@@ -361,10 +363,11 @@ export default async function MesaDetalhePage({
       <Container className="pb-12 pt-10 sm:pb-16">
 
         {/* Resumo: o que decide a candidatura, com a ação principal ao lado. */}
-        <section className="painel-alto rounded-2xl p-5 sm:p-6">
+        <section className="relative overflow-hidden rounded-2xl painel-alto p-5 ring-1 ring-primary/20 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1">
-              <p className="font-heading text-3xl font-bold text-primary">{preco}</p>
+              <p className="rotulo-caps text-muted-foreground">{t("preco")}</p>
+              <p className="titulo-display mt-1 text-4xl text-acento sm:text-5xl">{preco}</p>
               <ul className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                 <li className="flex items-center gap-2">
                   <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
@@ -437,27 +440,32 @@ export default async function MesaDetalhePage({
           <SinopseExpansivel texto={mesa.sinopse} />
         </div>
 
-        <section className="mt-8">
-          <h2 className="font-heading text-xl font-bold">{t("detalhes")}</h2>
-          <dl className="mt-3 grid grid-cols-2 gap-4 rounded-2xl border border-border bg-card/60 p-5 text-sm sm:grid-cols-3">
-            <div>
-              <dt className="text-muted-foreground">{t("encerramento")}</dt>
-              <dd className="font-medium">
-                {mesa.tipo === "campanha"
-                  ? t("campanhaAberta")
-                  : fimPrevisto
-                    ? t("porVoltaDe", { data: new Date(`${fimPrevisto}T00:00:00`).toLocaleDateString("pt-BR") })
-                    : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">{t("classificacao")}</dt>
-              <dd className="font-medium">{CLASSIFICACAO_LABEL[mesa.classificacao]}</dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">{t("nivel")}</dt>
-              <dd className="font-medium">{NIVEL_LABEL[mesa.nivel_experiencia]}</dd>
-            </div>
+        <section className="mt-10">
+          <h2 className="titulo-display titulo-secao">{t("detalhes")}</h2>
+          {/* Três fichas em vez de uma caixa cinza com texto miúdo: era o
+              bloco mais apagado da página e carrega o que define se a mesa
+              serve pra quem está lendo. */}
+          <dl className="mt-5 grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                rotulo: t("encerramento"),
+                Icone: CalendarDays,
+                valor:
+                  mesa.tipo === "campanha"
+                    ? t("campanhaAberta")
+                    : fimPrevisto
+                      ? t("porVoltaDe", { data: new Date(`${fimPrevisto}T00:00:00`).toLocaleDateString("pt-BR") })
+                      : "—",
+              },
+              { rotulo: t("classificacao"), Icone: ShieldCheck, valor: CLASSIFICACAO_LABEL[mesa.classificacao] },
+              { rotulo: t("nivel"), Icone: Sparkles, valor: NIVEL_LABEL[mesa.nivel_experiencia] },
+            ].map((ficha) => (
+              <div key={ficha.rotulo} className="rounded-2xl painel p-5">
+                <ficha.Icone className="size-6 text-acento" aria-hidden />
+                <dt className="rotulo-caps mt-3 text-muted-foreground">{ficha.rotulo}</dt>
+                <dd className="titulo-display titulo-bloco mt-1">{ficha.valor}</dd>
+              </div>
+            ))}
           </dl>
         </section>
 
@@ -467,7 +475,7 @@ export default async function MesaDetalhePage({
 
         {!mesa.link_externo && !ehMestre && logado && (
           <section id="candidatura" className="mt-10 scroll-mt-24">
-            <h2 className="font-heading text-2xl font-bold">{t("candidatar")}</h2>
+            <h2 className="titulo-display titulo-secao">{t("candidatar")}</h2>
 
             {inscricao?.status === "aprovado" ? (
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card/60 p-5 text-sm">

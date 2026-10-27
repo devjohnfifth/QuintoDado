@@ -10,6 +10,7 @@ import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Carrossel } from "@/components/site/carrossel";
 import { NumeroAnimado } from "@/components/site/numero-animado";
+import { D20MarcaDagua } from "@/components/site/d20-marca-dagua";
 import { EventoCard, type EventoCardData } from "@/components/site/evento-card";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -370,9 +371,11 @@ export default async function HomePage({
       {/* Comunidade */}
       <Reveal className="relative border-t border-border/60 py-20">
         <Container>
-          <div className="brilho-marca textura-grao relative overflow-hidden rounded-3xl border border-primary/30 px-6 py-12 text-center sm:px-10">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-marca text-white">
-              <MessageCircle className="size-6" aria-hidden />
+          <div className="brilho-marca textura-grao relative overflow-hidden rounded-3xl border border-primary/30 px-6 py-14 text-center shadow-[0_0_60px_-20px_color-mix(in_oklch,var(--qd-secundaria)_70%,transparent)] sm:px-10">
+            <D20MarcaDagua className="pointer-events-none absolute -left-16 -top-16 size-80 text-foreground/[0.04]" />
+            <D20MarcaDagua className="pointer-events-none absolute -bottom-20 -right-16 size-72 text-foreground/[0.03]" />
+            <div className="relative mx-auto flex size-14 items-center justify-center rounded-2xl bg-marca text-white shadow-[0_10px_30px_-10px_color-mix(in_oklch,var(--qd-secundaria)_80%,transparent)]">
+              <MessageCircle className="size-7" aria-hidden />
             </div>
             <h2 className="titulo-display titulo-secao mt-5">{t("comunidade.titulo")}</h2>
             <p className="mx-auto mt-2 max-w-lg text-muted-foreground">{t("comunidade.corpo")}</p>

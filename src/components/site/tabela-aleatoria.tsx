@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { D20MarcaDagua } from "@/components/site/d20-marca-dagua";
 import { useTranslations } from "next-intl";
 import { Dices, History } from "lucide-react";
 import {
@@ -95,13 +96,13 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
                     onClick={() => setSelecionada(tabela.chave)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-200 ${
                       ativa
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-border bg-card/60 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        ? "border-acento/60 bg-acento/15 text-acento"
+                        : "border-border painel text-muted-foreground hover:border-primary/40 hover:text-foreground"
                     }`}
                   >
                     {rotulos[indice]}
                     {destaques[tabela.chave] !== undefined && (
-                      <span className="ml-1.5 tabular-nums text-xs text-primary">({destaques[tabela.chave]})</span>
+                      <span className="ml-1.5 text-xs tabular-nums text-acento">({destaques[tabela.chave]})</span>
                     )}
                   </button>
                 );
@@ -132,10 +133,15 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
             role={variasTabelas ? "tabpanel" : undefined}
             aria-labelledby={variasTabelas ? `aba-${tabela.chave}` : undefined}
             hidden={!visivel}
-            className="rounded-2xl border border-border bg-card/60"
+            className="relative isolate overflow-hidden rounded-2xl painel-alto"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-4">
-              <h3 className="font-heading text-lg font-bold">{tabela.titulo}</h3>
+            {/* Rolar é a assinatura do site: a tabela ganha superfície
+                própria e o d20 atrás, pra parecer um palco e não mais uma
+                caixa cinza na página. */}
+            <D20MarcaDagua className="pointer-events-none absolute -right-16 -top-16 -z-10 size-72 text-foreground/[0.035]" />
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-4 sm:p-5">
+              <h3 className="titulo-display titulo-bloco">{tabela.titulo}</h3>
               <div className="flex items-center gap-3">
                 {destaque !== undefined && (
                   <ResultadoDado valor={destaque} chave={`${tabela.chave}-${destaque}`} dado={tabela.dado} />
@@ -220,7 +226,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
       })}
 
       {historico.length > 0 && (
-        <section className="rounded-2xl border border-border bg-card/40 p-4">
+        <section className="rounded-2xl painel p-4">
           <div className="flex items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 font-heading text-sm font-bold">
               <History className="size-4 text-primary" aria-hidden />

@@ -96,8 +96,25 @@ Pedido do João: "as informações ficam muito misturadas".
   voltou o cartão emoldurado dentro da coluna, que é o enquadramento que o
   João prefere. A tipografia em display ficou.
 
+**Lote C entregue** (os blocos que vendem):
+
+| Item | O que foi feito |
+|---|---|
+| SD5 | O teatro do dado ganhou palco: superfície alta, d20 atrás e título em display. Rolar é a assinatura do site e acontecia numa caixa cinza igual às outras |
+| SD6 | Já estava feito — o seletor de tabela virou abas antes; agora segue a convenção âmbar |
+| MD6 | O bloco que decide a candidatura: preço em display 4–5xl em âmbar, com rótulo em caixa-alta e um fio de luz da marca em volta |
+| MD9 | "Detalhes" virou três fichas com ícone grande, rótulo em caixa-alta e valor em display — era o bloco mais apagado da página e carrega o que define se a mesa serve |
+| ED2 | Cartão de ingresso com picote (as mesmas duas mordidas do card de mesa), preço em display e "restam N" em âmbar, que só aparece quando está mesmo acabando |
+| ED3 | Barra de lotação do evento: o número existia no banco e não aparecia pra quem decide comprar |
+| M9 | O picote do card de mesa ganhou contraste — a linha tracejada sumia no escuro |
+| SO4 | "Segurança em primeiro lugar" virou o bloco mais pesado da página, com escudo grande e o verde da convenção. É o diferencial real da casa e dividia peso com todo o resto |
+| SO5 | Foto do Quintão grande, com anel em gradiente |
+| SO6 | Os sistemas viraram **logos em linha** (as mesmas do card de mesa) no lugar de nomes separados por ponto; o texto fica pra leitor de tela e pra busca |
+| H19 | Bloco de comunidade da home com brilho e d20 atrás |
+
 ### Próximos
-C (blocos que vendem) e D (identidade e refinamento).
+D (identidade e refinamento): cor por sistema, moldura de ficha, hover que
+segue o cursor, linha do tempo de sessões, menu móvel em tela cheia e 404.
 
 ---
 

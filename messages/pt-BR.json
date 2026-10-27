@@ -354,7 +354,9 @@
     "breadcrumbInicio": "Início",
     "vazioCta": "Entrar no grupo e ser avisado",
     "vazioSecundario": "Ver mesas abertas",
-    "vazioEnquantoIsso": "Enquanto isso"
+    "vazioEnquantoIsso": "Enquanto isso",
+    "restamIngressos": "{n, plural, one {Resta # ingresso} other {Restam # ingressos}}",
+    "lotacao": "{vendidos} de {total} lugares"
   },
   "PresencialBh": {
     "titulo": "RPG de mesa presencial em BH",

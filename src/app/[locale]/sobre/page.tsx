@@ -10,6 +10,18 @@ import { Reveal } from "@/components/site/reveal";
 import { Container } from "@/components/site/container";
 import { buttonVariants } from "@/components/ui/button";
 import { SITE_LINKS } from "@/lib/site-links";
+import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
+import { D20MarcaDagua } from "@/components/site/d20-marca-dagua";
+
+/** Os sistemas que o Quintão mestra, na ordem em que aparecem no texto. */
+const SISTEMAS_MESTRADOS = [
+  "ordem-paranormal-2",
+  "tormenta-20",
+  "vaesen",
+  "fabula-ultima",
+  "daggerheart",
+  "sacramento-rpg",
+] as const;
 
 export async function generateMetadata({
   params,
@@ -105,38 +117,66 @@ export default async function SobrePage({
           </div>
         </Reveal>
 
-        <Reveal className="mt-8">
-          <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card/60 to-transparent p-6 sm:p-8">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-              <ShieldCheck className="size-5" aria-hidden />
+        <Reveal className="mt-10">
+          {/* Segurança é o diferencial real da casa e dividia o mesmo peso
+              visual de todo o resto. Painel alto, escudo grande e o verde do
+              "a mesa toda vê" pra marcar que aqui é combinado. */}
+          <div className="relative overflow-hidden rounded-3xl painel-alto p-6 ring-1 ring-sucesso/25 sm:p-9">
+            <D20MarcaDagua className="pointer-events-none absolute -right-12 -top-12 size-64 text-sucesso/[0.06]" />
+            <div className="relative">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-sucesso/15 text-sucesso">
+                <ShieldCheck className="size-7" aria-hidden />
+              </div>
+              <h2 className="titulo-display titulo-secao mt-5">{t("segurancaTitulo")}</h2>
+              <p className="mt-3 max-w-[65ch] text-lg leading-relaxed text-foreground/85">{t("segurancaCorpo")}</p>
             </div>
-            <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight">{t("segurancaTitulo")}</h2>
-            <p className="mt-2 max-w-3xl text-muted-foreground">{t("segurancaCorpo")}</p>
           </div>
         </Reveal>
 
         <Reveal className="mt-14">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-            <div className="relative mx-auto size-32 shrink-0 sm:mx-0">
+            <div className="relative mx-auto w-fit shrink-0 sm:mx-0">
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-xl"
+                className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-gradient-to-br from-primary/40 to-secondary/40 blur-2xl"
               />
-              <Image src={mestreQuintao} alt="Mestre Quintão" className="size-32 rounded-full object-cover object-top" />
+              <div className="rounded-full bg-marca p-[3px]">
+                <Image
+                  src={mestreQuintao}
+                  alt="Mestre Quintão"
+                  className="size-40 rounded-full object-cover object-top ring-4 ring-background sm:size-48"
+                />
+              </div>
             </div>
 
-            <div className="max-w-3xl">
-              <h2 className="font-heading text-2xl font-bold tracking-tight">{t("mestreTitulo")}</h2>
+            <div className="max-w-[65ch]">
+              <h2 className="titulo-display titulo-secao">{t("mestreTitulo")}</h2>
               {t("mestreCorpo")
                 .split("\n\n")
                 .map((paragrafo, i) => (
-                  <p key={i} className="mt-3 text-muted-foreground">
+                  <p key={i} className="mt-3 leading-relaxed text-foreground/85">
                     {paragrafo}
                   </p>
                 ))}
-              <p className="mt-4 text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">{t("sistemasTitulo")}:</span> {t("sistemas")}
-              </p>
+              <div className="mt-6">
+                <p className="rotulo-caps text-muted-foreground">{t("sistemasTitulo")}</p>
+                {/* As logos já existem no projeto (LOGO_SISTEMA, as mesmas do
+                    card de mesa). A linha de nomes separados por ponto dizia
+                    o mesmo sem peso nenhum — fica como texto pra leitor de
+                    tela e pra busca. */}
+                <p className="sr-only">{t("sistemas")}</p>
+                <ul aria-hidden className="mt-3 flex flex-wrap items-center gap-2">
+                  {SISTEMAS_MESTRADOS.map((slug) => {
+                    const logo = LOGO_SISTEMA[slug];
+                    if (!logo) return null;
+                    return (
+                      <li key={slug} className="relative h-9 w-24 overflow-hidden rounded-md bg-white">
+                        <Image src={logo} alt="" fill className="object-cover" sizes="96px" />
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           </div>
         </Reveal>

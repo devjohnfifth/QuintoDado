@@ -126,7 +126,7 @@ export function MesaCard({
           className={`absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background ${destaque ? "sm:-bottom-3 sm:right-[-12px] sm:top-auto" : ""}`}
         />
         <span
-          className={`absolute inset-x-4 top-0 border-t-2 border-dashed border-border/70 ${
+          className={`absolute inset-x-4 top-0 border-t-2 border-dashed border-foreground/25 ${
             destaque ? "sm:bottom-4 sm:left-0 sm:right-auto sm:top-4 sm:border-l-2 sm:border-t-0" : ""
           }`}
         />
@@ -134,7 +134,7 @@ export function MesaCard({
 
       {/* Talão: as informações. */}
       <div
-        className={`flex flex-1 flex-col rounded-b-2xl border-x border-b border-border bg-card/60 p-4 transition-colors duration-300 group-hover:border-primary/40 ${
+        className={`flex flex-1 flex-col rounded-b-2xl border-x border-b border-border bg-superficie p-4 transition-colors duration-300 group-hover:border-primary/40 ${
           destaque ? "sm:rounded-r-2xl sm:rounded-bl-none sm:border-y sm:border-l-0 sm:border-r sm:p-6" : ""
         }`}
       >
