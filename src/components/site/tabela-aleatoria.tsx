@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Dices, History } from "lucide-react";
 import {
@@ -56,7 +56,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
     setDestaques((d) => ({ ...d, ...novos }));
     setHistorico((h) => [rolagens, ...h].slice(0, MAX_HISTORICO));
     setAnimando(origem);
-    window.setTimeout(() => setAnimando(null), 400);
+    window.setTimeout(() => setAnimando(null), 500);
 
     const primeira = rolagens[0];
     if (primeira?.item) {
@@ -114,7 +114,7 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
               onClick={() => aplicar(rolarTudo(tabelas), "tudo")}
               className="inline-flex items-center gap-2 rounded-full bg-marca px-4 py-1.5 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02] sm:ml-auto"
             >
-              <Dices className={`size-4 ${animando === "tudo" ? "animate-spin" : ""}`} aria-hidden />
+              <Dices className={`size-4 ${animando === "tudo" ? "dado-rolando" : ""}`} aria-hidden />
               {t("rolarTudo")}
             </button>
           )}
@@ -136,14 +136,19 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-4">
               <h3 className="font-heading text-lg font-bold">{tabela.titulo}</h3>
-              <button
-                type="button"
-                onClick={() => rolar(tabela.chave)}
-                className="inline-flex items-center gap-2 rounded-full bg-marca px-4 py-2 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
-              >
-                <Dices className={`size-4 ${animando === tabela.chave ? "animate-spin" : ""}`} aria-hidden />
-                {t("rolar", { dado: tabela.dado })}
-              </button>
+              <div className="flex items-center gap-3">
+                {destaque !== undefined && (
+                  <ResultadoDado valor={destaque} chave={`${tabela.chave}-${destaque}`} dado={tabela.dado} />
+                )}
+                <button
+                  type="button"
+                  onClick={() => rolar(tabela.chave)}
+                  className="inline-flex items-center gap-2 rounded-full bg-marca px-4 py-2 text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.03] active:scale-95"
+                >
+                  <Dices className={`size-4 ${animando === tabela.chave ? "dado-rolando" : ""}`} aria-hidden />
+                  {t("rolar", { dado: tabela.dado })}
+                </button>
+              </div>
             </div>
 
             <div aria-live="polite" className="sr-only">
@@ -171,14 +176,21 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
                       <tr
                         key={item.faixaMin}
                         id={`linha-${tabela.chave}-${item.faixaMin}`}
-                        className={`scroll-mt-24 border-t border-border/40 align-top transition-colors duration-300 ${
-                          ativo ? "bg-primary/15" : ""
+                        className={`scroll-mt-24 border-t border-border/40 align-top transition-colors duration-300 odd:bg-foreground/[0.02] ${
+                          ativo ? "linha-sorteada" : ""
                         }`}
                       >
-                        <td
-                          className={`px-4 py-3 font-heading font-bold tabular-nums ${ativo ? "text-primary" : "text-muted-foreground"}`}
-                        >
-                          {formatarFaixa(item)}
+                        <td className="px-4 py-3">
+                          {/* O número vira "face de dado": quadrado com borda, e âmbar quando sai. */}
+                          <span
+                            className={`inline-flex min-w-9 items-center justify-center rounded-lg border px-2 py-1 font-heading text-sm font-bold tabular-nums transition-colors duration-300 ${
+                              ativo
+                                ? "border-acento/60 bg-acento/15 text-acento"
+                                : "border-border/60 text-muted-foreground"
+                            }`}
+                          >
+                            {formatarFaixa(item)}
+                          </span>
                         </td>
                         {tabela.colunas.map((_, i) => (
                           <td
@@ -237,13 +249,57 @@ export function TabelasAleatorias({ tabelas }: { tabelas: Tabela[] }) {
   );
 }
 
+/**
+ * O número que acabou de sair, grande e em âmbar. Conta rapidinho até o
+ * valor — dá a sensação de rolagem sem precisar simular física de dado.
+ */
+function ResultadoDado({ valor, chave, dado }: { valor: number; chave: string; dado: string }) {
+  const [mostrado, setMostrado] = useState(valor);
+  const anterior = useRef(chave);
+
+  useEffect(() => {
+    if (anterior.current === chave) return;
+    anterior.current = chave;
+
+    const reduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduzido) {
+      setMostrado(valor);
+      return;
+    }
+
+    // Seis quadros de número aleatório antes de parar no valor real.
+    let passo = 0;
+    const timer = window.setInterval(() => {
+      passo++;
+      if (passo >= 6) {
+        window.clearInterval(timer);
+        setMostrado(valor);
+        return;
+      }
+      const max = dado === "d66" ? 66 : Number(dado.slice(1)) || 20;
+      setMostrado(Math.max(1, Math.floor(Math.random() * max) + 1));
+    }, 55);
+
+    return () => window.clearInterval(timer);
+  }, [chave, valor, dado]);
+
+  return (
+    <span
+      key={chave}
+      className="resultado-entra flex size-11 shrink-0 items-center justify-center rounded-xl border border-acento/50 bg-acento/10 font-heading text-xl font-bold tabular-nums text-acento shadow-[0_0_24px_-6px_color-mix(in_oklch,var(--qd-acento)_60%,transparent)]"
+    >
+      {mostrado}
+    </span>
+  );
+}
+
 function LinhaHistorico({ rolagem, nivel = 0 }: { rolagem: Rolagem; nivel?: number }) {
   return (
     <>
       <p style={{ paddingLeft: `${nivel}rem` }}>
         {nivel > 0 && "↳ "}
         <span className="font-medium">{rolagem.tabelaTitulo}</span>{" "}
-        <span className="tabular-nums text-primary">({rolagem.valor})</span>: {rolagem.item?.valores.join(" — ") ?? "—"}
+        <span className="tabular-nums text-acento">({rolagem.valor})</span>: {rolagem.item?.valores.join(" — ") ?? "—"}
       </p>
       {rolagem.aninhadas.map((a, i) => (
         <LinhaHistorico key={i} rolagem={a} nivel={nivel + 1} />

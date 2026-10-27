@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Bot, Download, FileText, LogIn } from "lucide-react";
+import { Bot, Dices, Download, FileText, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DescricaoMarkdown } from "@/components/site/descricao-markdown";
 import { TabelasAleatorias } from "@/components/site/tabela-aleatoria";
+import { FundoSemImagem } from "@/components/site/card-midia";
 import { buscarSuplemento, listarSuplementos } from "@/lib/suplementos/publico";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
@@ -109,8 +110,11 @@ export default async function SuplementoPage({
         <span className="truncate text-foreground/80">{s.titulo}</span>
       </nav>
 
-      {s.capa_url && (
-        <div className="relative mb-6 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border">
+      {/* A capa existe sempre: sem imagem, entra o fundo gerado por slug, que
+          muda de peça pra peça. Trocar pelo arquivo real depois não mexe no
+          layout. */}
+      <div className="relative mb-7 aspect-[21/9] w-full overflow-hidden rounded-2xl painel-alto">
+        {s.capa_url ? (
           <Image
             src={s.capa_url}
             alt=""
@@ -119,8 +123,11 @@ export default async function SuplementoPage({
             className="object-cover"
             sizes="(min-width: 1024px) 800px, 100vw"
           />
-        </div>
-      )}
+        ) : (
+          <FundoSemImagem icone={Dices} chave={s.slug} />
+        )}
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
+      </div>
 
       <div className="flex flex-wrap gap-1.5">
         <Selo tom="solido">{tipo}</Selo>
@@ -129,8 +136,8 @@ export default async function SuplementoPage({
         {s.classificacao !== "livre" && <Selo tom="neutro">{CLASSIFICACAO_LABEL[s.classificacao] ?? s.classificacao}</Selo>}
       </div>
 
-      <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{s.titulo}</h1>
-      <p className="mt-2 text-lg text-muted-foreground">{s.resumo}</p>
+      <h1 className="titulo-display mt-4 text-4xl sm:text-5xl">{s.titulo}</h1>
+      <p className="mt-3 max-w-3xl text-lg text-foreground/80">{s.resumo}</p>
 
       {s.descricao_md && (
         <div className="mt-6">
@@ -147,7 +154,7 @@ export default async function SuplementoPage({
 
       {tabelas.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-heading text-2xl font-bold">{t("tabelasTitulo")}</h2>
+          <h2 className="titulo-display text-3xl">{t("tabelasTitulo")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{t("tabelasSubtitulo")}</p>
           <div className="mt-5">
             <TabelasAleatorias tabelas={tabelas} />
@@ -157,7 +164,7 @@ export default async function SuplementoPage({
 
       {arquivos.length > 0 && (
         <section className="mt-10">
-          <h2 className="font-heading text-2xl font-bold">{t("arquivosTitulo")}</h2>
+          <h2 className="titulo-display text-3xl">{t("arquivosTitulo")}</h2>
           <ul className="mt-4 divide-y divide-border/60 rounded-2xl border border-border bg-card/60">
             {arquivos.map((a) => (
               <li key={a.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
@@ -208,7 +215,7 @@ export default async function SuplementoPage({
 
       {relacionados.length > 0 && (
         <section className="mt-14 border-t border-border/60 pt-10">
-          <h2 className="font-heading text-2xl font-bold tracking-tight">{t("maisSuplementos")}</h2>
+          <h2 className="titulo-display text-3xl">{t("maisSuplementos")}</h2>
           <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {relacionados.map((r) => (
               <li key={r.slug}>

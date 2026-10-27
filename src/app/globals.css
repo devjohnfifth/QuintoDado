@@ -328,3 +328,33 @@ select:focus-visible,
     transparent
   );
 }
+
+/* =====================================================================
+ * Teatro do dado: rolar é a assinatura do site e acontecia sem graça.
+ * O dado sacode, o resultado entra com peso e a linha sorteada acende
+ * em âmbar antes de assentar.
+ * ===================================================================== */
+
+@keyframes dado-sacode {
+  0% { transform: rotate(0) scale(1); }
+  25% { transform: rotate(-18deg) scale(1.12); }
+  50% { transform: rotate(14deg) scale(1.08); }
+  75% { transform: rotate(-8deg) scale(1.04); }
+  100% { transform: rotate(0) scale(1); }
+}
+
+@keyframes resultado-entra {
+  from { opacity: 0; transform: translateY(6px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes linha-acende {
+  0% { background-color: color-mix(in oklch, var(--qd-acento) 38%, transparent); }
+  100% { background-color: color-mix(in oklch, var(--qd-primaria) 15%, transparent); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dado-rolando { animation: dado-sacode 450ms cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+  .resultado-entra { animation: resultado-entra 320ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .linha-sorteada { animation: linha-acende 900ms ease-out forwards; }
+}

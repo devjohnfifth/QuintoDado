@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
 import { Container } from "@/components/site/container";
+import { Filete } from "@/components/site/filete";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { SuplementoCard } from "@/components/site/suplemento-card";
@@ -123,7 +124,8 @@ function SecaoHome({
   return (
     // `fundo` alterna entre o preto do site e um painel um degrau acima:
     // é o que dá ritmo à rolagem, em vez de tudo chapado igual.
-    <Reveal className={`relative border-t border-border/60 py-20 ${fundo ? "textura-grao bg-superficie" : ""}`}>
+    <Reveal className={`relative py-20 ${fundo ? "textura-grao bg-superficie" : ""}`}>
+      <Filete className="absolute inset-x-0 top-0" />
       <Container className="relative">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -288,7 +290,8 @@ export default async function HomePage({
       )}
 
       {/* FAQ — também vira dado estruturado FAQPage logo abaixo */}
-      <Reveal className="border-t border-border/60 py-16">
+      <Reveal className="relative py-20">
+        <Filete className="absolute inset-x-0 top-0" />
         <Container>
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
             <h2 className="titulo-display text-3xl sm:text-4xl">{t("faq.titulo")}</h2>
@@ -325,7 +328,8 @@ export default async function HomePage({
       />
 
       {/* Comunidade */}
-      <Reveal className="border-t border-border/60 py-16">
+      <Reveal className="relative py-20">
+        <Filete className="absolute inset-x-0 top-0" />
         <Container>
           <div className="brilho-marca textura-grao relative overflow-hidden rounded-3xl border border-primary/30 px-6 py-12 text-center sm:px-10">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-marca text-white">
