@@ -36,8 +36,12 @@ const PAPEL_COR: Record<UsuarioLinha["papel"], string> = {
   admin: "border-alerta/40 text-alerta",
 };
 
+/** Quantas pessoas por página na tabela. */
+const POR_PAGINA = 25;
+
 export function UsuariosTable({ usuarios }: { usuarios: UsuarioLinha[] }) {
   const [busca, setBusca] = useState("");
+  const [pagina, setPagina] = useState(1);
   const [excluindo, setExcluindo] = useState<UsuarioLinha | null>(null);
 
   const filtrados = useMemo(() => {
@@ -48,13 +52,23 @@ export function UsuariosTable({ usuarios }: { usuarios: UsuarioLinha[] }) {
     );
   }, [usuarios, busca]);
 
+  // A paginação é no cliente de propósito: a busca varre todo mundo, não só a
+  // página aberta. Se a base crescer a ponto de pesar, a busca é que precisa
+  // ir pro servidor primeiro — aí a paginação vai junto.
+  const totalPaginas = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+  const paginaAtual = Math.min(pagina, totalPaginas);
+  const visiveis = filtrados.slice((paginaAtual - 1) * POR_PAGINA, paginaAtual * POR_PAGINA);
+
   return (
     <div>
       <div className="relative mt-6 max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
         <Input
           value={busca}
-          onChange={(e) => setBusca(e.target.value)}
+          onChange={(e) => {
+            setBusca(e.target.value);
+            setPagina(1);
+          }}
           placeholder="Buscar por nome ou usuário..."
           className="pl-9"
         />
@@ -77,11 +91,36 @@ export function UsuariosTable({ usuarios }: { usuarios: UsuarioLinha[] }) {
               </tr>
             </thead>
             <tbody>
-              {filtrados.map((u) => (
+              {visiveis.map((u) => (
                 <LinhaUsuario key={u.id} usuario={u} onPedirExclusao={() => setExcluindo(u)} />
               ))}
             </tbody>
           </table>
+
+          {totalPaginas > 1 && (
+            <div className="mt-4 flex items-center justify-between gap-3 text-sm">
+              <button
+                type="button"
+                onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                disabled={paginaAtual === 1}
+                className="rounded-full border border-border px-4 py-2 transition-colors hover:border-primary/40 hover:bg-primary/10 disabled:opacity-35 disabled:hover:border-border disabled:hover:bg-transparent"
+              >
+                Anterior
+              </button>
+              <span className="text-muted-foreground">
+                Página {paginaAtual} de {totalPaginas} · {filtrados.length}{" "}
+                {filtrados.length === 1 ? "pessoa" : "pessoas"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                disabled={paginaAtual === totalPaginas}
+                className="rounded-full border border-border px-4 py-2 transition-colors hover:border-primary/40 hover:bg-primary/10 disabled:opacity-35 disabled:hover:border-border disabled:hover:bg-transparent"
+              >
+                Próxima
+              </button>
+            </div>
+          )}
         </div>
       )}
 

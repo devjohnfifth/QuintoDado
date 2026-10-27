@@ -9,6 +9,7 @@ import { IngressoActions } from "./ingresso-actions";
 import { EventoStatusActions } from "./evento-status-actions";
 import { VendasToggle } from "./vendas-toggle";
 import { ExportarIngressos } from "./exportar-ingressos";
+import { Paginacao, intervalo } from "@/components/site/paginacao";
 
 const STATUS_EVENTO_LABEL: Record<string, string> = {
   rascunho: "Rascunho",
@@ -27,12 +28,18 @@ const STATUS_MESA_LABEL: Record<string, string> = {
   cancelada: "Cancelada",
 };
 
+/** Quantos pedidos de ingresso por página. */
+const POR_PAGINA = 25;
+
 export default async function AdminEventoDetalhePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ pagina?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
   const supabase = await createClient();
 
   const { data: evento } = await supabase
@@ -43,20 +50,30 @@ export default async function AdminEventoDetalhePage({
 
   if (!evento) notFound();
 
-  const [{ data: ingressos }, { data: mesas }] = await Promise.all([
+  // A lista de pedidos é a que cresce de verdade aqui (um evento já passou de
+  // trinta), então ela pagina no banco. O botão de exportar continua puxando
+  // tudo — ver exportarIngressosAction.
+  const { pagina, inicio, fim } = intervalo(sp.pagina, POR_PAGINA);
+
+  const [{ data: ingressos, count: totalIngressos }, { data: mesas }] = await Promise.all([
     supabase
       .from("evento_ingressos")
       .select(
         "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url, telefone), evento_ingresso_tipos(nome, preco_centavos)",
+        { count: "exact" },
       )
       .eq("evento_id", id)
-      .order("criado_em", { ascending: true }),
+      .order("criado_em", { ascending: true })
+      .range(inicio, fim),
     supabase
       .from("mesas")
       .select("id, titulo, status")
       .eq("evento_id", id)
       .order("criado_em", { ascending: true }),
   ]);
+
+  const total = totalIngressos ?? 0;
+  const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
   return (
     <div>
@@ -134,7 +151,8 @@ export default async function AdminEventoDetalhePage({
       )}
 
       <div className="mt-10 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-heading text-lg font-bold">Pedidos de ingresso ({ingressos?.length ?? 0})</h2>
+        {/* O número é o total do evento, não o da página aberta. */}
+        <h2 className="font-heading text-lg font-bold">Pedidos de ingresso ({total})</h2>
         {ingressos && ingressos.length > 0 && <ExportarIngressos eventoId={id} />}
       </div>
 
@@ -214,6 +232,8 @@ export default async function AdminEventoDetalhePage({
           })}
         </ul>
       )}
+
+      <Paginacao caminho={`/admin/eventos/${id}`} pagina={pagina} totalPaginas={totalPaginas} />
     </div>
   );
 }
