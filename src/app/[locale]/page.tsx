@@ -104,11 +104,14 @@ function SecaoHome({
   titulo,
   subtitulo,
   verTodos,
+  fundo = false,
   children,
 }: {
   titulo: string;
   subtitulo: string;
   verTodos: { href: string; texto: string };
+  /** true = seção sobre painel, pra alternar com as de fundo preto. */
+  fundo?: boolean;
   children: React.ReactNode;
 }) {
   const link = (classe: string) => (
@@ -118,16 +121,18 @@ function SecaoHome({
     </Link>
   );
   return (
-    <Reveal className="border-t border-border/60 py-16">
-      <Container>
+    // `fundo` alterna entre o preto do site e um painel um degrau acima:
+    // é o que dá ritmo à rolagem, em vez de tudo chapado igual.
+    <Reveal className={`relative border-t border-border/60 py-20 ${fundo ? "textura-grao bg-superficie" : ""}`}>
+      <Container className="relative">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{titulo}</h2>
-            <p className="mt-1 text-muted-foreground">{subtitulo}</p>
+            <h2 className="titulo-display text-3xl sm:text-4xl">{titulo}</h2>
+            <p className="mt-2 max-w-xl text-muted-foreground">{subtitulo}</p>
           </div>
           {link("hidden shrink-0 sm:inline-flex")}
         </div>
-        <div className="mt-6">{children}</div>
+        <div className="mt-8">{children}</div>
         {link("mt-6 flex justify-center sm:hidden")}
       </Container>
     </Reveal>
@@ -182,34 +187,43 @@ export default async function HomePage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }} />
 
       {/* Herói — baixo de propósito (pedido do João): a foto dá clima sem aumentar a altura. */}
-      <section className="relative isolate overflow-hidden">
+      <section className="textura-grao relative isolate overflow-hidden">
+        {/* A foto agora aparece de verdade (era 25% sobre preto, sumia) e o
+            degradê só protege a leitura do texto, em vez de apagar a imagem. */}
         <Image
           src={grupoJogandoRpg}
           alt=""
           fill
           priority
           placeholder="blur"
-          className="-z-20 object-cover opacity-25"
+          className="-z-20 object-cover opacity-60"
           sizes="100vw"
         />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[radial-gradient(75%_60%_at_50%_35%,transparent,var(--qd-fundo)_78%)]"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-background to-transparent"
+        />
 
-        <Container className="py-10 text-center sm:py-14">
+        <Container className="py-16 text-center sm:py-24">
           <p className="flex flex-wrap items-center justify-center gap-2 text-sm">
-            <Link href="/mesas" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground">
+            <Link href="/mesas" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 font-medium text-foreground/80 backdrop-blur-md transition-colors hover:text-foreground">
               <Dices className="size-3.5 text-primary" aria-hidden />
               {t("hero.statMesas", { n: contagem.mesas })}
             </Link>
-            <Link href="/suplementos" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/70 px-3 py-1 font-medium text-muted-foreground backdrop-blur transition-colors hover:text-foreground">
+            <Link href="/suplementos" className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-3 py-1 font-medium text-foreground/80 backdrop-blur-md transition-colors hover:text-foreground">
               <BookOpen className="size-3.5 text-primary" aria-hidden />
               {t("hero.statSuplementos", { n: contagem.suplementos })}
             </Link>
           </p>
 
-          <h1 className="mt-4 font-heading text-5xl font-bold tracking-tight sm:text-6xl">
-            <span className="text-marca">{t("hero.titulo")}</span>
+          <h1 className="titulo-display mt-5 text-6xl sm:text-8xl">
+            <span className="text-marca drop-shadow-[0_4px_24px_rgba(79,125,243,0.35)]">{t("hero.titulo")}</span>
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-muted-foreground">{t("hero.subtitulo")}</p>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-foreground/80 sm:text-xl">{t("hero.subtitulo")}</p>
           <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a
               href={SITE_LINKS.whatsappComunidade}
@@ -249,6 +263,7 @@ export default async function HomePage({
           titulo={t("suplementosRecentes.titulo")}
           subtitulo={t("suplementosRecentes.subtitulo")}
           verTodos={{ href: "/suplementos", texto: t("suplementosRecentes.verTodos") }}
+          fundo
         >
           <GradeAdaptavel
             itens={suplementos}
@@ -276,8 +291,8 @@ export default async function HomePage({
       <Reveal className="border-t border-border/60 py-16">
         <Container>
           <div className="grid gap-8 lg:grid-cols-[1fr_2fr]">
-            <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t("faq.titulo")}</h2>
-            <div className="divide-y divide-border/60 rounded-2xl border border-border bg-card/40">
+            <h2 className="titulo-display text-3xl sm:text-4xl">{t("faq.titulo")}</h2>
+            <div className="divide-y divide-border/60 rounded-2xl painel">
               {perguntasFaq.map((item) => (
                 <details key={item.pergunta} className="group px-5 py-4">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium marker:content-none">
@@ -312,11 +327,11 @@ export default async function HomePage({
       {/* Comunidade */}
       <Reveal className="border-t border-border/60 py-16">
         <Container>
-          <div className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card/60 to-secondary/15 px-6 py-10 text-center sm:px-10">
+          <div className="brilho-marca textura-grao relative overflow-hidden rounded-3xl border border-primary/30 px-6 py-12 text-center sm:px-10">
             <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-marca text-white">
               <MessageCircle className="size-6" aria-hidden />
             </div>
-            <h2 className="mt-4 font-heading text-2xl font-bold tracking-tight sm:text-3xl">{t("comunidade.titulo")}</h2>
+            <h2 className="titulo-display mt-5 text-3xl sm:text-4xl">{t("comunidade.titulo")}</h2>
             <p className="mx-auto mt-2 max-w-lg text-muted-foreground">{t("comunidade.corpo")}</p>
             <a
               href={SITE_LINKS.whatsappComunidade}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Bricolage_Grotesque, Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,6 +17,16 @@ const inter = Inter({
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-heading",
+  subsets: ["latin"],
+});
+
+/**
+ * Fonte de display: só nos títulos grandes (topo das páginas e das seções).
+ * É o que dá personalidade sem comprometer a leitura do corpo, que segue na
+ * Inter. Space Grotesk continua nos títulos menores e nos selos.
+ */
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -75,7 +85,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="dark">
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${bricolage.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <a

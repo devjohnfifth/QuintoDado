@@ -81,7 +81,7 @@ export function MesaCard({
             sizes={destaque ? "(min-width: 640px) 50vw, 100vw" : "(min-width: 1024px) 330px, (min-width: 640px) 45vw, 100vw"}
           />
         ) : (
-          <FundoSemImagem icone={Dices} />
+          <FundoSemImagem icone={Dices} chave={mesa.slug} />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
 

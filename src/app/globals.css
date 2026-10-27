@@ -9,6 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -38,6 +39,11 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  /* Superfícies: três níveis pra existir profundidade de verdade. */
+  --color-superficie: var(--qd-superficie-1);
+  --color-superficie-alta: var(--qd-superficie-2);
+  --color-acento: var(--qd-acento);
+  --color-acento-suave: var(--qd-acento-suave);
   --color-sucesso: var(--qd-sucesso);
   --color-alerta: var(--qd-alerta);
   --color-erro: var(--qd-erro);
@@ -57,6 +63,16 @@
   --qd-primaria: #4f7df3;
   --qd-secundaria: #9b5cf6;
   --qd-gradiente: linear-gradient(135deg, #4f7df3, #a855f7);
+  /*
+   * Acento quente: o azul/roxo vira ambiente e este âmbar carrega o que
+   * precisa de atenção — número de dado, selo de novidade, detalhe de
+   * ornamento. Sem ele, tudo no site competia na mesma faixa de cor.
+   */
+  --qd-acento: #f2a93b;
+  --qd-acento-suave: #f8d08a;
+  /* Superfícies empilhadas: fundo < painel < destaque. */
+  --qd-superficie-1: #12121f;
+  --qd-superficie-2: #1a1a2e;
   --qd-texto: #f5f5fa;
   --qd-texto-suave: #a0a0b8;
   --qd-sucesso: #34d399;
@@ -217,3 +233,98 @@ select:focus-visible,
   }
 }
 
+/* =====================================================================
+ * Linguagem visual: textura, profundidade e ornamento.
+ *
+ * O site era uma sequência de cartões iguais sobre fundo chapado — nada
+ * puxava o olho. Estas utilidades existem pra dar ritmo sem depender de
+ * imagem: grão, padrão de d20, superfícies empilhadas e brilho de marca.
+ * ===================================================================== */
+
+/**
+ * Grão fino por cima de qualquer fundo — tira o aspecto "chapado" do escuro.
+ * Classe comum (não `@utility`) porque o efeito mora no ::after.
+ */
+.textura-grao {
+  position: relative;
+}
+.textura-grao::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23r)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/** Textura hexagonal do d20, bem discreta, pra fundo de seção. */
+@utility textura-hex {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='92' viewBox='0 0 80 92'%3E%3Cpath d='M40 0 L80 23 V69 L40 92 L0 69 V23 Z' fill='none' stroke='%23F5F5FA' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 80px 92px;
+}
+
+/** Painel: um degrau acima do fundo, com borda que pega luz em cima. */
+@utility painel {
+  background-color: var(--qd-superficie-1);
+  border: 1px solid color-mix(in oklch, var(--qd-texto) 8%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, var(--qd-texto) 6%, transparent),
+    0 1px 2px 0 rgb(0 0 0 / 40%);
+}
+
+/** Painel de destaque: mais claro ainda, pro conteúdo nobre da tela. */
+@utility painel-alto {
+  background-color: var(--qd-superficie-2);
+  border: 1px solid color-mix(in oklch, var(--qd-texto) 12%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklch, var(--qd-texto) 10%, transparent),
+    0 12px 32px -12px rgb(0 0 0 / 70%);
+}
+
+/** Elevação no hover: sobe, ganha sombra e um fio de luz da marca. */
+@utility elevar {
+  transition:
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 300ms ease;
+}
+@utility elevar-hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 40px -16px rgb(0 0 0 / 80%),
+    0 0 0 1px color-mix(in oklch, var(--qd-primaria) 35%, transparent),
+    0 0 28px -8px color-mix(in oklch, var(--qd-secundaria) 45%, transparent);
+}
+
+/** Brilho de marca atrás de um elemento (topo de página, bloco de destaque). */
+@utility brilho-marca {
+  background-image:
+    radial-gradient(60% 60% at 20% 0%, color-mix(in oklch, var(--qd-primaria) 22%, transparent), transparent 70%),
+    radial-gradient(50% 50% at 85% 10%, color-mix(in oklch, var(--qd-secundaria) 20%, transparent), transparent 70%);
+}
+
+/** Acento quente em texto — número de dado, destaque de título. */
+@utility text-acento {
+  color: var(--qd-acento);
+}
+
+/** Título de display: fonte própria, escala fluida e aperto de entrelinha. */
+@utility titulo-display {
+  font-family: var(--font-display), var(--font-heading), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+/** Filete ornamental: linha fina com um losango no meio, entre seções. */
+@utility filete {
+  position: relative;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklch, var(--qd-texto) 14%, transparent),
+    transparent
+  );
+}
