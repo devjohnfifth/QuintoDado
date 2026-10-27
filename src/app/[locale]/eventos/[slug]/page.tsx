@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { Container } from "@/components/site/container";
+import { FundoSemImagem } from "@/components/site/card-midia";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
 import { buttonVariants } from "@/components/ui/button";
@@ -155,12 +156,18 @@ export default async function EventoDetalhePage({
     telefoneAtual,
   } = resultado;
 
-  const dataFormatada = new Date(`${evento.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
+  const dataObj = new Date(`${evento.data_inicio}T00:00:00`);
+  const dataFormatada = dataObj.toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "2-digit",
     month: "long",
     year: "numeric",
   });
+  // Pedaços soltos pro bloco de calendário desenhado na capa.
+  const semPonto = (txt: string) => txt.replace(".", "");
+  const diaNumero = dataObj.toLocaleDateString("pt-BR", { day: "2-digit" });
+  const mesCurto = semPonto(dataObj.toLocaleDateString("pt-BR", { month: "short" }));
+  const diaSemanaCurto = semPonto(dataObj.toLocaleDateString("pt-BR", { weekday: "short" }));
   const horario = evento.horario_inicio
     ? `${evento.horario_inicio.slice(0, 5)}${evento.horario_fim ? `–${evento.horario_fim.slice(0, 5)}` : ""}`
     : null;
@@ -177,34 +184,50 @@ export default async function EventoDetalhePage({
 
   return (
     <article className={vendaAtiva ? "pb-24 sm:pb-0" : undefined}>
-      <Container className="py-10 sm:py-16">
-        {evento.banner_url && (
-          <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
-            <Image
-              src={evento.banner_url}
-              alt={evento.titulo}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 768px, 100vw"
-              priority
-            />
-          </div>
-        )}
-
-        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
-          <div className="min-w-0">
-            <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">{evento.titulo}</h1>
-            {evento.subtitulo && <p className="mt-1 text-lg text-muted-foreground">{evento.subtitulo}</p>}
-          </div>
-          {vendaAtiva && (
-            <a href="#ingressos" className={buttonVariants({ variant: "marca", size: "lg", className: "hidden sm:inline-flex" })}>
-              <Ticket className="size-4" aria-hidden />
-              {t("verIngressos")}
-            </a>
+      {/* Capa sangrada, com a data em bloco de calendário ao lado do título:
+          num evento, a data é a informação que decide, e ela estava perdida
+          no meio de uma fileira de pílulas cinzas. */}
+      <section className="textura-grao relative isolate flex min-h-[22rem] items-end overflow-hidden sm:min-h-[28rem]">
+        <div aria-hidden className="absolute inset-0 -z-20">
+          {evento.banner_url ? (
+            <Image src={evento.banner_url} alt="" fill className="object-cover" sizes="100vw" priority />
+          ) : (
+            <FundoSemImagem chave={slug} />
           )}
         </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/75 to-background/25"
+        />
 
-        <ul className="mt-5 flex flex-wrap gap-2 text-sm">
+        <Container className="pb-10 pt-20 sm:pb-14">
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <div className="flex min-w-0 items-end gap-5">
+              <div className="painel-alto flex size-20 shrink-0 flex-col items-center justify-center rounded-2xl sm:size-24">
+                <span className="rotulo-caps text-muted-foreground">{diaSemanaCurto}</span>
+                <span className="titulo-display text-3xl text-acento sm:text-4xl">{diaNumero}</span>
+                <span className="rotulo-caps text-muted-foreground">{mesCurto}</span>
+              </div>
+              <div className="min-w-0">
+                <h1 className="titulo-display titulo-pagina">{evento.titulo}</h1>
+                {evento.subtitulo && <p className="mt-2 text-lg text-foreground/80">{evento.subtitulo}</p>}
+              </div>
+            </div>
+            {vendaAtiva && (
+              <a
+                href="#ingressos"
+                className={buttonVariants({ variant: "marca", size: "lg", className: "hidden sm:inline-flex" })}
+              >
+                <Ticket className="size-4" aria-hidden />
+                {t("verIngressos")}
+              </a>
+            )}
+          </div>
+        </Container>
+      </section>
+
+      <Container className="pb-12 pt-10 sm:pb-16">
+        <ul className="flex flex-wrap gap-2 text-sm">
           <li className="flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1.5">
             <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
             <span className="first-letter:uppercase">{dataFormatada}</span>

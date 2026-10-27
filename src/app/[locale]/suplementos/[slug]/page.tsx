@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Bot, Dices, Download, FileText, LogIn } from "lucide-react";
+import { Bot, Download, FileText, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { DescricaoMarkdown } from "@/components/site/descricao-markdown";
 import { TabelasAleatorias } from "@/components/site/tabela-aleatoria";
@@ -87,57 +87,63 @@ export default async function SuplementoPage({
   };
 
   return (
-    <Container as="article" className="py-10 sm:py-16">
+    <article>
       {s.publicado && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
       )}
 
+      {/* A capa sangra de borda a borda e o título vive em cima dela: antes
+          era uma faixa dentro da coluna, com o título solto embaixo, e a peça
+          não tinha presença nenhuma. Sem arquivo de capa entra o fundo gerado
+          por slug — trocar pela arte real depois não mexe no layout. */}
+      <section className="textura-grao relative isolate flex min-h-[22rem] items-end overflow-hidden sm:min-h-[26rem]">
+        <div aria-hidden className="absolute inset-0 -z-20">
+          {s.capa_url ? (
+            <Image src={s.capa_url} alt="" fill priority className="object-cover" sizes="100vw" />
+          ) : (
+            /* Sem o ícone: numa capa dessa altura ele flutua no meio do
+               nada, atrás do título. A trama já dá o recado. */
+            <FundoSemImagem chave={s.slug} />
+          )}
+        </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/75 to-background/25"
+        />
+
+        <Container className="pb-10 pt-20 sm:pb-14">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground hover:underline">
+              {t("breadcrumbInicio")}
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/suplementos" className="hover:text-foreground hover:underline">
+              {t("titulo")}
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate text-foreground/80">{s.titulo}</span>
+          </nav>
+
+          <div className="flex flex-wrap gap-1.5">
+            <Selo tom="solido">{tipo}</Selo>
+            <Selo>{s.sistemas?.nome ?? t("generico")}</Selo>
+            <Selo tom="sucesso">{t("gratuito")}</Selo>
+            {s.classificacao !== "livre" && (
+              <Selo tom="neutro">{CLASSIFICACAO_LABEL[s.classificacao] ?? s.classificacao}</Selo>
+            )}
+          </div>
+
+          <h1 className="titulo-display titulo-pagina mt-4">{s.titulo}</h1>
+          <p className="mt-4 max-w-3xl text-lg text-foreground/80">{s.resumo}</p>
+        </Container>
+      </section>
+
+      <Container className="py-12 sm:py-16">
       {!s.publicado && (
         <p className="mb-6 rounded-lg border border-alerta/40 bg-alerta/10 px-4 py-2 text-sm text-alerta">
           {t("rascunhoAviso")}
         </p>
       )}
-
-      <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link href="/" className="hover:text-foreground hover:underline">
-          {t("breadcrumbInicio")}
-        </Link>
-        <span aria-hidden>/</span>
-        <Link href="/suplementos" className="hover:text-foreground hover:underline">
-          {t("titulo")}
-        </Link>
-        <span aria-hidden>/</span>
-        <span className="truncate text-foreground/80">{s.titulo}</span>
-      </nav>
-
-      {/* A capa existe sempre: sem imagem, entra o fundo gerado por slug, que
-          muda de peça pra peça. Trocar pelo arquivo real depois não mexe no
-          layout. */}
-      <div className="relative mb-7 aspect-[21/9] w-full overflow-hidden rounded-2xl painel-alto">
-        {s.capa_url ? (
-          <Image
-            src={s.capa_url}
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            sizes="(min-width: 1024px) 800px, 100vw"
-          />
-        ) : (
-          <FundoSemImagem icone={Dices} chave={s.slug} />
-        )}
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/30 to-transparent" />
-      </div>
-
-      <div className="flex flex-wrap gap-1.5">
-        <Selo tom="solido">{tipo}</Selo>
-        <Selo>{s.sistemas?.nome ?? t("generico")}</Selo>
-        <Selo tom="sucesso">{t("gratuito")}</Selo>
-        {s.classificacao !== "livre" && <Selo tom="neutro">{CLASSIFICACAO_LABEL[s.classificacao] ?? s.classificacao}</Selo>}
-      </div>
-
-      <h1 className="titulo-display mt-4 text-4xl sm:text-5xl">{s.titulo}</h1>
-      <p className="mt-3 max-w-3xl text-lg text-foreground/80">{s.resumo}</p>
 
       {s.descricao_md && (
         <div className="mt-6">
@@ -225,6 +231,7 @@ export default async function SuplementoPage({
           </ul>
         </section>
       )}
-    </Container>
+      </Container>
+    </article>
   );
 }

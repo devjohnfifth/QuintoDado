@@ -7,9 +7,12 @@ import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { Reveal } from "@/components/site/reveal";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { Container } from "@/components/site/container";
-import { PageHeader } from "@/components/site/page-header";
+import { CapaPagina } from "@/components/site/capa-pagina";
 import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { BlocoFechamento } from "@/components/site/bloco-fechamento";
+import { Paginacao, fatiar } from "@/components/site/paginacao";
+import mesaEscudo from "@/assets/eventos/uaiventura-mesa-escudo.webp";
 import { buttonVariants } from "@/components/ui/button";
 
 export async function generateMetadata({
@@ -29,7 +32,10 @@ export async function generateMetadata({
   };
 }
 
-type Filtros = { sistema?: string; modalidade?: string; preco?: string };
+type Filtros = { sistema?: string; modalidade?: string; preco?: string; pagina?: string };
+
+/** Quantas mesas por página — 12 fecha quatro fileiras de três. */
+const POR_PAGINA = 12;
 
 async function buscarSistemasFavoritos(): Promise<Set<string>> {
   if (!isSupabaseConfigured()) return new Set();
@@ -141,30 +147,35 @@ export default async function MesasPage({
   setRequestLocale(locale);
   const filtros = await searchParams;
   const t = await getTranslations("Mesas");
+  const tPag = await getTranslations("Paginacao");
   const sistemasFavoritos = await buscarSistemasFavoritos();
-  const [mesas, admin, sistemas] = await Promise.all([
+  const [todasMesas, admin, sistemas] = await Promise.all([
     buscarMesas(filtros, sistemasFavoritos),
     ehAdmin(),
     buscarSistemasComMesaAberta(),
   ]);
   const temFiltroAtivo = Boolean(filtros.sistema || filtros.modalidade || filtros.preco);
+  // Paginação em memória: a ordenação por sistema favorito depende do
+  // conjunto todo (ver buscarMesas), então a fatia sai depois dela.
+  const { pagina, totalPaginas, fatia: mesas, total } = fatiar(todasMesas, filtros.pagina, POR_PAGINA);
 
   return (
-    <Container className="py-16">
-      <PageHeader
-        icone={Dices}
-        titulo={t("titulo")}
-        subtitulo={t("subtitulo")}
-        acoes={
-          admin && (
-            <Link href="/admin/mesas/nova" className={buttonVariants({ variant: "marca" })}>
-              {t("novaMesa")}
-            </Link>
-          )
-        }
-      />
-
-      <Reveal className="mt-8">
+    <>
+    <CapaPagina
+      icone={Dices}
+      titulo={t("titulo")}
+      subtitulo={t("subtitulo")}
+      imagem={mesaEscudo}
+      acoes={
+        admin && (
+          <Link href="/admin/mesas/nova" className={buttonVariants({ variant: "marca" })}>
+            {t("novaMesa")}
+          </Link>
+        )
+      }
+    />
+    <Container className="py-12">
+      <Reveal>
         <form className="flex flex-wrap gap-3" aria-label={t("filtros.label")}>
           <select
             name="sistema"
@@ -215,19 +226,33 @@ export default async function MesasPage({
             corpo={temFiltroAtivo ? t("filtros.semResultadoCorpo") : t("vazioCorpo")}
           />
         ) : (
-          <GradeAdaptavel
-            itens={mesas}
-            chave={(m) => m.slug}
-            render={(mesa, destaque) => (
-              <MesaCard
-                mesa={mesa}
-                destaque={destaque}
-                favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
-              />
-            )}
-          />
+          <>
+            <p className="mb-4 text-sm text-muted-foreground">{tPag("contagem", { total })}</p>
+            <GradeAdaptavel
+              itens={mesas}
+              chave={(m) => m.slug}
+              render={(mesa, destaque) => (
+                <MesaCard
+                  mesa={mesa}
+                  destaque={destaque}
+                  favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
+                />
+              )}
+            />
+            <Paginacao
+              caminho="/mesas"
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              filtros={{ sistema: filtros.sistema, modalidade: filtros.modalidade, preco: filtros.preco }}
+            />
+          </>
         )}
       </Reveal>
     </Container>
+
+    {/* Quem não achou mesa aqui tem pra onde ir — antes a página acabava na
+        grade e sobrava meia tela preta até o rodapé. */}
+    <BlocoFechamento caminhos={["mesaquest", "presencial", "suplementos"]} />
+    </>
   );
 }

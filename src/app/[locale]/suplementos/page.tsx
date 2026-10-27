@@ -7,9 +7,11 @@ import { SITE_LINKS } from "@/lib/site-links";
 import { Reveal } from "@/components/site/reveal";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Container } from "@/components/site/container";
-import { PageHeader } from "@/components/site/page-header";
+import { CapaPagina } from "@/components/site/capa-pagina";
 import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
+import { BlocoFechamento } from "@/components/site/bloco-fechamento";
+import { Paginacao, fatiar } from "@/components/site/paginacao";
 import { buttonVariants } from "@/components/ui/button";
 import { listarSuplementos } from "@/lib/suplementos/publico";
 import { TIPO_SUPLEMENTO, TIPOS_SUPLEMENTO, type TipoSuplemento } from "@/lib/suplementos/labels";
@@ -28,7 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-type Filtros = { sistema?: string; tipo?: string };
+type Filtros = { sistema?: string; tipo?: string; pagina?: string };
+
+/** Quantos suplementos por página — 12 fecha quatro fileiras de três. */
+const POR_PAGINA = 12;
 
 export default async function SuplementosPage({
   params,
@@ -40,6 +45,7 @@ export default async function SuplementosPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Suplementos");
+  const tPag = await getTranslations("Paginacao");
   const sp = await searchParams;
   const filtros: Filtros = {
     sistema: sp.sistema || undefined,
@@ -47,11 +53,15 @@ export default async function SuplementosPage({
   };
 
   // O catálogo é pequeno: busca tudo uma vez e filtra em memória, assim os
-  // selects só oferecem sistema e tipo que têm material de verdade.
+  // selects só oferecem sistema e tipo que têm material de verdade — eles
+  // precisam do conjunto inteiro pra saber o que existe. Por isso a paginação
+  // também é em memória; quando o acervo crescer a ponto de pesar, troca por
+  // `.range()` na consulta e uma busca separada pros filtros.
   const todos = await listarSuplementos();
-  const suplementos = todos.filter(
+  const filtrados = todos.filter(
     (s) => (!filtros.tipo || s.tipo === filtros.tipo) && (!filtros.sistema || s.sistemas?.slug === filtros.sistema),
   );
+  const { pagina, totalPaginas, fatia: suplementos, total } = fatiar(filtrados, sp.pagina, POR_PAGINA);
   const sistemas = [...new Map(todos.flatMap((s) => (s.sistemas ? [[s.sistemas.slug, s.sistemas]] : []))).values()].sort(
     (a, b) => a.nome.localeCompare(b.nome, "pt-BR"),
   );
@@ -59,8 +69,11 @@ export default async function SuplementosPage({
   const temFiltroAtivo = Boolean(filtros.sistema || filtros.tipo);
 
   return (
-    <Container className="py-16">
-      <PageHeader icone={BookOpen} titulo={t("titulo")} subtitulo={t("subtitulo")} />
+    <>
+    {/* Sem foto de propósito: a biblioteca é sobre material, então a capa se
+        apoia na trama de d20 e na silhueta do dado. */}
+    <CapaPagina icone={BookOpen} titulo={t("titulo")} subtitulo={t("subtitulo")} />
+    <Container className="py-12">
 
       {todos.length > 0 && (
         <Reveal className="mt-8">
@@ -125,13 +138,25 @@ export default async function SuplementosPage({
             }
           />
         ) : (
-          <GradeAdaptavel
-            itens={suplementos}
-            chave={(s) => s.slug}
-            render={(s, destaque) => <SuplementoCard suplemento={s} destaque={destaque} />}
-          />
+          <>
+            <p className="mb-4 text-sm text-muted-foreground">{tPag("contagem", { total })}</p>
+            <GradeAdaptavel
+              itens={suplementos}
+              chave={(s) => s.slug}
+              render={(s, destaque) => <SuplementoCard suplemento={s} destaque={destaque} />}
+            />
+            <Paginacao
+              caminho="/suplementos"
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              filtros={{ sistema: filtros.sistema, tipo: filtros.tipo }}
+            />
+          </>
         )}
       </Reveal>
     </Container>
+
+    <BlocoFechamento caminhos={["mesas", "presencial", "sobre"]} />
+    </>
   );
 }

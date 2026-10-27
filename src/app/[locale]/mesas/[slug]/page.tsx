@@ -20,6 +20,7 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
 import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
+import { FundoSemImagem } from "@/components/site/card-midia";
 import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -291,69 +292,76 @@ export default async function MesaDetalhePage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
 
-      <Container className="py-10 sm:py-16">
-        <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <Link href="/" className="hover:text-foreground hover:underline">
-            {t("breadcrumbInicio")}
-          </Link>
-          <span aria-hidden>/</span>
-          <Link href="/mesas" className="hover:text-foreground hover:underline">
-            {t("breadcrumbMesas")}
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="truncate text-foreground/80">{mesa.titulo}</span>
-        </nav>
-
-        {mesa.banner_url && (
-          <div className="relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-border">
-            <Image
-              src={mesa.banner_url}
-              alt={mesa.titulo}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 768px, 100vw"
-              priority
-            />
-          </div>
-        )}
-
-        <div className="mt-6 flex items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <Selo>{mesa.sistema_outro || mesa.sistemas?.nome || "—"}</Selo>
-            <Selo tom="neutro">{TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}</Selo>
-            {mesa.eventos && (
-              <Link href={`/eventos/${mesa.eventos.slug}`} className="hover:underline">
-                <Selo tom="solido" icone={CalendarDays}>
-                  {t("mesaDoEvento", { evento: mesa.eventos.titulo })}
-                </Selo>
-              </Link>
-            )}
-          </div>
-          <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
+      {/* A capa sangra de borda a borda e o título fica em cima dela. Sem
+          banner entra o fundo gerado por slug, então toda mesa tem capa —
+          antes, mesa sem arte abria com o título solto no escuro. */}
+      <section className="textura-grao relative isolate flex min-h-[22rem] items-end overflow-hidden sm:min-h-[27rem]">
+        <div aria-hidden className="absolute inset-0 -z-20">
+          {mesa.banner_url ? (
+            <Image src={mesa.banner_url} alt="" fill className="object-cover" sizes="100vw" priority />
+          ) : (
+            <FundoSemImagem chave={slug} />
+          )}
         </div>
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-t from-background via-background/75 to-background/25"
+        />
 
-        <h1 className="mt-3 font-heading text-3xl font-bold tracking-tight sm:text-4xl">{mesa.titulo}</h1>
-        {mesa.profiles?.nome_exibicao && (
-          <p className="mt-2 flex items-center gap-2 text-muted-foreground">
-            {mesa.profiles.avatar_url ? (
-              <Image
-                src={mesa.profiles.avatar_url}
-                alt=""
-                width={28}
-                height={28}
-                className="size-7 rounded-full object-cover"
-              />
-            ) : (
-              <span className="flex size-7 items-center justify-center rounded-full bg-marca text-xs font-bold text-white">
-                {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
-              </span>
-            )}
-            {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
-          </p>
-        )}
+        <Container className="pb-10 pt-20 sm:pb-12">
+          <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground hover:underline">
+              {t("breadcrumbInicio")}
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/mesas" className="hover:text-foreground hover:underline">
+              {t("breadcrumbMesas")}
+            </Link>
+            <span aria-hidden>/</span>
+            <span className="truncate text-foreground/80">{mesa.titulo}</span>
+          </nav>
+
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <Selo>{mesa.sistema_outro || mesa.sistemas?.nome || "—"}</Selo>
+              <Selo tom="neutro">{TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}</Selo>
+              {mesa.eventos && (
+                <Link href={`/eventos/${mesa.eventos.slug}`} className="hover:underline">
+                  <Selo tom="solido" icone={CalendarDays}>
+                    {t("mesaDoEvento", { evento: mesa.eventos.titulo })}
+                  </Selo>
+                </Link>
+              )}
+            </div>
+            <ShareButton titulo={mesa.titulo} url={`${site}/mesas/${slug}`} />
+          </div>
+
+          <h1 className="titulo-display titulo-pagina mt-4">{mesa.titulo}</h1>
+          {mesa.profiles?.nome_exibicao && (
+            <p className="mt-4 flex items-center gap-2.5 text-muted-foreground">
+              {mesa.profiles.avatar_url ? (
+                <Image
+                  src={mesa.profiles.avatar_url}
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="size-9 rounded-full object-cover ring-1 ring-border"
+                />
+              ) : (
+                <span className="flex size-9 items-center justify-center rounded-full bg-marca text-sm font-bold text-white">
+                  {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+                </span>
+              )}
+              {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
+            </p>
+          )}
+        </Container>
+      </section>
+
+      <Container className="pb-12 pt-10 sm:pb-16">
 
         {/* Resumo: o que decide a candidatura, com a ação principal ao lado. */}
-        <section className="mt-6 rounded-2xl border border-border bg-card/60 p-5 sm:p-6">
+        <section className="painel-alto rounded-2xl p-5 sm:p-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0 flex-1">
               <p className="font-heading text-3xl font-bold text-primary">{preco}</p>

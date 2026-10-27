@@ -53,7 +53,9 @@ export default async function SobrePage({
   return (
     <article className="pb-16">
       <Container className="pt-6 sm:pt-10">
-        {/* Capa com o título dentro — um H1 só, sem repetir "Quinto Dado" logo abaixo. */}
+        {/* Cartão de capa com o título dentro — um H1 só, sem repetir
+            "Quinto Dado" logo abaixo. O João prefere este enquadramento ao
+            herói sangrado, então ele fica. */}
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-border sm:aspect-[3/1]">
           <Image
             src={grupoJogandoRpg}
@@ -64,17 +66,20 @@ export default async function SobrePage({
             className="object-cover"
             sizes="(min-width: 1024px) 768px, 100vw"
           />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-br from-primary/70 via-background/50 to-secondary/60 mix-blend-multiply" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-br from-primary/70 via-background/50 to-secondary/60 mix-blend-multiply"
+          />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8">
-            <p className="font-heading text-sm font-bold uppercase tracking-widest text-white/80">Quinto Dado</p>
-            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)] sm:text-5xl">
+            <p className="rotulo-caps text-white/80">Quinto Dado</p>
+            <h1 className="titulo-display titulo-secao mt-1 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
               {t("titulo")}
             </h1>
           </div>
         </div>
 
-        <div className="mt-8 max-w-3xl space-y-4 border-l-2 border-primary/40 pl-6 text-lg text-muted-foreground">
+        <div className="mt-10 max-w-[65ch] space-y-5 border-l-2 border-acento/50 pl-6 text-lg leading-relaxed text-foreground/85">
           {t("intro")
             .split("\n\n")
             .map((paragrafo, i) => (
@@ -83,17 +88,17 @@ export default async function SobrePage({
         </div>
 
         <Reveal className="mt-14">
-          <h2 className="font-heading text-2xl font-bold tracking-tight">{t("pilaresTitulo")}</h2>
+          <h2 className="titulo-display titulo-secao">{t("pilaresTitulo")}</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             {pilares.map((pilar) => (
               <div
                 key={pilar.titulo}
-                className="rounded-2xl border border-border bg-card/60 p-5 transition-colors duration-300 hover:border-primary/40"
+                className="elevar hover:elevar-hover rounded-2xl painel p-6"
               >
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                  <pilar.Icon className="size-5" aria-hidden />
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-acento/15 text-acento">
+                  <pilar.Icon className="size-6" aria-hidden />
                 </div>
-                <h3 className="mt-3 font-heading text-lg font-bold">{pilar.titulo}</h3>
+                <h3 className="titulo-display titulo-bloco mt-4">{pilar.titulo}</h3>
                 <p className="mt-1.5 text-sm text-muted-foreground">{pilar.corpo}</p>
               </div>
             ))}
