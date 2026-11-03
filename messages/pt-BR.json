@@ -395,7 +395,15 @@
     "passo2Corpo": "O valor mostrado é só informativo. Quando existir, é combinado direto entre jogador e mestre — o site não processa esse pagamento.",
     "passo3Titulo": "Joguem",
     "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado.",
-    "cidadesAtendidas": "Cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba."
+    "cidadesAtendidas": "Cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba.",
+    "filtroLabel": "Filtrar por cidade",
+    "todasCidades": "Todas",
+    "resumo": "{mesas, plural, one {# mesa aberta} other {# mesas abertas}} em {cidades, plural, one {# cidade} other {# cidades}}",
+    "resumoCidade": "{mesas, plural, one {# mesa aberta} other {# mesas abertas}} em {cidade}",
+    "vazioCidadeTitulo": "Nenhuma mesa em {cidade} ainda",
+    "vazioCidadeCorpo": "Ainda não tem mesa presencial publicada em {cidade}. Veja as outras cidades ou entre no grupo pra saber assim que abrir uma.",
+    "verTodasCidades": "Ver todas as cidades",
+    "comoFuncionaTitulo": "É mestre? Publique a sua"
   },
   "PresencialBhNova": {
     "titulo": "Criar mesa presencial",

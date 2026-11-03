@@ -23,3 +23,19 @@ export type CidadePresencial = (typeof CIDADES_PRESENCIAIS)[number];
 export function ehCidadePresencial(valor: string): valor is CidadePresencial {
   return (CIDADES_PRESENCIAIS as readonly string[]).includes(valor);
 }
+
+/** Slug de cada cidade, pro filtro viver na URL sem acento nem espaço. */
+export const SLUG_CIDADE: Record<CidadePresencial, string> = {
+  "Belo Horizonte": "belo-horizonte",
+  "São Paulo": "sao-paulo",
+  "Rio de Janeiro": "rio-de-janeiro",
+  Fortaleza: "fortaleza",
+  Curitiba: "curitiba",
+};
+
+/** Caminho de volta: slug da URL para o nome gravado no banco. */
+export function cidadeDoSlug(slug: string | undefined): CidadePresencial | null {
+  if (!slug) return null;
+  const achada = CIDADES_PRESENCIAIS.find((c) => SLUG_CIDADE[c] === slug);
+  return achada ?? null;
+}
