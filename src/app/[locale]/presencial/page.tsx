@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { SITE_LINKS } from "@/lib/site-links";
 import pracaSete from "@/assets/presencial/praca-sete.webp";
-import capivaraAventureiro from "@/assets/brand/capivara-aventureiro.webp";
 import { Container } from "@/components/site/container";
 import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
@@ -108,32 +107,17 @@ export default async function PresencialPage({
           <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
         </div>
 
-        <Container className="py-14 sm:py-20">
-          {/* O aventureiro com a capivara, o pão de queijo e o café é o que
-              dá rosto à página. */}
-          <div className="grid items-center gap-10 md:grid-cols-[1.15fr_1fr]">
-            <div className="text-center md:text-left">
-              <h1 className="titulo-display titulo-pagina">{t("titulo")}</h1>
-              <p className="mx-auto mt-4 max-w-xl text-lg text-foreground/80 md:mx-0">{t("subtitulo")}</p>
-              <Link
-                href="/presencial/nova"
-                className={buttonVariants({ variant: "outline", size: "lg", className: "mt-7 rounded-full" })}
-              >
-                {t("criarMesa")}
-              </Link>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-xs md:max-w-sm">
-              <div aria-hidden className="absolute -inset-6 -z-10 rounded-full bg-primary/20 blur-3xl" />
-              <Image
-                src={capivaraAventureiro}
-                alt={t("ilustracaoAlt")}
-                priority
-                className="w-full rounded-3xl border border-border/60 shadow-[0_24px_60px_-20px_rgb(0_0_0/0.8)]"
-                sizes="(min-width: 768px) 384px, 320px"
-              />
-            </div>
-          </div>
+        {/* Herói enxuto de propósito: o que a pessoa veio fazer aqui é achar
+            mesa, e tudo que fica acima da lista atrasa isso. */}
+        <Container className="py-12 sm:py-16">
+          <h1 className="titulo-display titulo-pagina max-w-3xl">{t("titulo")}</h1>
+          <p className="mt-4 max-w-2xl text-lg text-foreground/80">{t("subtitulo")}</p>
+          <Link
+            href="/presencial/nova"
+            className={buttonVariants({ variant: "outline", size: "lg", className: "mt-6 rounded-full" })}
+          >
+            {t("criarMesa")}
+          </Link>
         </Container>
       </section>
 
