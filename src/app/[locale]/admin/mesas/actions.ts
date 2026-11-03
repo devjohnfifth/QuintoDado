@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
@@ -165,6 +166,19 @@ const schema = z
     message: "Cidade é obrigatória pra mesa presencial.",
     path: ["cidadeUf"],
   })
+  // Mesa presencial solta precisa cair numa das cidades atendidas, senão não
+  // aparece em /presencial-bh. A que nasce de um evento fica com a cidade do
+  // evento, que pode estar escrita em outro formato — essa passa.
+  .refine(
+    (d) =>
+      d.modalidade !== "presencial" ||
+      Boolean(d.eventoId) ||
+      (d.cidadeUf ? ehCidadePresencial(d.cidadeUf) : false),
+    {
+      message: `Escolha uma das cidades atendidas: ${CIDADES_PRESENCIAIS.join(", ")}.`,
+      path: ["cidadeUf"],
+    },
+  )
   .refine((d) => d.dataInicio >= hojeNoBrasil(), {
     message: "A data de início não pode ser no passado.",
     path: ["dataInicio"],

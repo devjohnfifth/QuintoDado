@@ -17,6 +17,7 @@ import {
 import { BannerUpload } from "@/components/site/banner-upload";
 import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
+import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
 import { criarMesaAdmin, atualizarMesaAction } from "../actions";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -106,6 +107,15 @@ export function NovaMesaAdminForm({
   const [modalidade, setModalidade] = useState<"online" | "presencial">(
     mesaExistente?.modalidade ?? (eventoVinculado ? "presencial" : "online"),
   );
+  const [cidadeUf, setCidadeUf] = useState<string>(
+    eventoVinculado?.cidadeUf ?? mesaExistente?.cidadeUf ?? CIDADES_PRESENCIAIS[0],
+  );
+  // Mesa antiga pode ter cidade fora da lista atual. Em vez de trocar por
+  // baixo dos panos ao salvar, a opção antiga continua disponível — quem
+  // edita escolhe se migra pra uma das atendidas.
+  const opcoesCidade = ehCidadePresencial(cidadeUf)
+    ? [...CIDADES_PRESENCIAIS]
+    : [cidadeUf, ...CIDADES_PRESENCIAIS];
   const [frequencia, setFrequencia] = useState(mesaExistente?.frequencia ?? "unica");
   const [classificacao, setClassificacao] = useState(mesaExistente?.classificacao ?? "livre");
   const [nivelExperiencia, setNivelExperiencia] = useState(mesaExistente?.nivelExperiencia ?? "todos");
@@ -131,7 +141,7 @@ export function NovaMesaAdminForm({
       sinopse: formData.get("sinopse"),
       tipo,
       modalidade,
-      cidadeUf: formData.get("cidadeUf") || undefined,
+      cidadeUf: modalidade === "presencial" ? cidadeUf : undefined,
       plataformaVtt: formData.get("plataformaVtt") || undefined,
       linkExterno: formData.get("linkExterno") || undefined,
       plataformaVoz: formData.get("plataformaVoz") || undefined,
@@ -268,12 +278,26 @@ export function NovaMesaAdminForm({
                 <p className="text-xs text-muted-foreground">Fixo na cidade do evento.</p>
               </>
             ) : (
-              <Input
-                id="cidadeUf"
-                name="cidadeUf"
-                maxLength={80}
-                defaultValue={mesaExistente?.cidadeUf ?? ""}
-              />
+              <>
+                <Select value={cidadeUf} onValueChange={(v) => v && setCidadeUf(v)}>
+                  <SelectTrigger id="cidadeUf" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {opcoesCidade.map((cidade) => (
+                      <SelectItem key={cidade} value={cidade}>
+                        {cidade}
+                        {ehCidadePresencial(cidade) ? "" : " (fora da lista atual)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {!ehCidadePresencial(cidadeUf) && (
+                  <p className="text-xs text-alerta">
+                    Essa cidade não está entre as atendidas, então a mesa não aparece em /presencial-bh.
+                  </p>
+                )}
+              </>
             )}
           </div>
         ) : (
