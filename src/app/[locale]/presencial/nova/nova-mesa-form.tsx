@@ -95,7 +95,7 @@ export function NovaMesaForm({
         setErro(resultado.error);
         return;
       }
-      router.push("/presencial-bh");
+      router.push("/presencial");
       router.refresh();
     });
   }

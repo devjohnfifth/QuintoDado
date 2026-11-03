@@ -76,7 +76,7 @@ export default async function MinhasCandidaturasPage({
         <h1 className="font-heading text-2xl font-bold">{mesa.titulo}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <Link
-            href={`/presencial-bh/${id}/editar`}
+            href={`/presencial/${id}/editar`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             <Pencil className="size-3.5" aria-hidden />

@@ -12,6 +12,28 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "jqtkjovvrjdpzpbrqyeg.supabase.co", pathname: "/storage/v1/object/public/**" },
     ],
   },
+  /*
+   * /presencial-bh virou /presencial quando o site deixou de atender só Belo
+   * Horizonte. O endereço antigo está indexado e já circulou (link-in-bio,
+   * Instagram), então vira redirect permanente em vez de 404 — leva o SEO
+   * junto e não quebra link de ninguém.
+   *
+   * `:caminho*` cobre as rotas filhas (/nova, /[id], /[id]/editar) e a
+   * segunda regra cobre o prefixo de locale (/en/presencial-bh), que existe
+   * porque o pt-BR vai sem prefixo e o inglês está reservado.
+   */
+  async redirects() {
+    return [
+      { source: "/presencial-bh", destination: "/presencial", permanent: true },
+      { source: "/presencial-bh/:caminho*", destination: "/presencial/:caminho*", permanent: true },
+      { source: "/:locale/presencial-bh", destination: "/:locale/presencial", permanent: true },
+      {
+        source: "/:locale/presencial-bh/:caminho*",
+        destination: "/:locale/presencial/:caminho*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

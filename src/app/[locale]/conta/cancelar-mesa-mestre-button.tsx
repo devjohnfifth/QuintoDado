@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cancelarMesaMestreAction } from "../presencial-bh/[id]/actions";
+import { cancelarMesaMestreAction } from "../presencial/[id]/actions";
 
 export function CancelarMesaMestreButton({ mesaId }: { mesaId: string }) {
   const [open, setOpen] = useState(false);

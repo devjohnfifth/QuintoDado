@@ -160,7 +160,7 @@ export async function criarMesaPresencial(
 
   await notificarAdminsSobreMesaPendente(mesa.id, dados.titulo, perfil.nome_exibicao);
 
-  revalidatePath("/presencial-bh");
+  revalidatePath("/presencial");
   return { ok: true, slug };
 }
 
@@ -263,7 +263,7 @@ export async function atualizarMesaPresencialAction(
     await notificarJogadoresAprovadosSobreReagendamento(mesaId);
   }
 
-  revalidatePath("/presencial-bh");
+  revalidatePath("/presencial");
   revalidatePath(`/mesas/${mesaAtual.slug}`);
   return { ok: true, slug: mesaAtual.slug };
 }
@@ -271,7 +271,7 @@ export async function atualizarMesaPresencialAction(
 export type SolicitarMestreResult = { ok: true } | { ok: false; error: string };
 
 /**
- * CTA no gate de /presencial-bh/nova pra quem ainda não é mestre. Não
+ * CTA no gate de /presencial/nova pra quem ainda não é mestre. Não
  * promove ninguém sozinho — só avisa os admins, que promovem pelo
  * painel (/admin/usuarios) depois de conferir o perfil.
  */
@@ -304,6 +304,6 @@ export async function solicitarMestreAction(): Promise<SolicitarMestreResult> {
 
   await notificarAdminsSobreSolicitacaoMestre(perfil.nome_exibicao);
 
-  revalidatePath("/presencial-bh/nova");
+  revalidatePath("/presencial/nova");
   return { ok: true };
 }

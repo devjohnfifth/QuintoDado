@@ -36,7 +36,7 @@ export function SiteFooter() {
     { href: "/suplementos", label: nav("suplementos") },
     { href: "/mesas", label: nav("mesas") },
     { href: "/eventos", label: nav("eventos") },
-    { href: "/presencial-bh", label: nav("presencialBh") },
+    { href: "/presencial", label: nav("presencialBh") },
     { href: "/sobre", label: nav("sobre") },
   ];
   const externos: { chave: string; href: string; label: string; Icone: LucideIcon }[] = [

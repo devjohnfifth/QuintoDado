@@ -98,7 +98,7 @@ export async function aprovarMesaAction(mesaId: string) {
 
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
-  revalidatePath("/presencial-bh");
+  revalidatePath("/presencial");
   revalidatePath("/conta");
 }
 
@@ -120,7 +120,7 @@ export async function cancelarMesaAction(mesaId: string) {
 
   revalidatePath("/admin/mesas");
   revalidatePath("/mesas");
-  revalidatePath("/presencial-bh");
+  revalidatePath("/presencial");
 }
 
 const schema = z
@@ -167,7 +167,7 @@ const schema = z
     path: ["cidadeUf"],
   })
   // Mesa presencial solta precisa cair numa das cidades atendidas, senão não
-  // aparece em /presencial-bh. A que nasce de um evento fica com a cidade do
+  // aparece em /presencial. A que nasce de um evento fica com a cidade do
   // evento, que pode estar escrita em outro formato — essa passa.
   .refine(
     (d) =>

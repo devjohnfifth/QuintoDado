@@ -42,7 +42,7 @@ const linksEstaticos: {
   { chave: "instagram", href: SITE_LINKS.instagram, Icon: Camera, cor: "text-[#E1306C]" },
   { chave: "tiktok", href: SITE_LINKS.tiktok, Icon: Music2, cor: "text-[#69C9D0]" },
   { chave: "youtube", href: SITE_LINKS.youtube, Icon: PlayCircle, cor: "text-[#FF0000]" },
-  { chave: "presencialBh", href: "/presencial-bh", Icon: MapPin, cor: "text-secondary" },
+  { chave: "presencialBh", href: "/presencial", Icon: MapPin, cor: "text-secondary" },
 ];
 
 export default async function LinksPage({

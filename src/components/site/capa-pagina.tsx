@@ -8,7 +8,7 @@ import { D20MarcaDagua } from "@/components/site/d20-marca-dagua";
  * Capa de página: a faixa que abre uma listagem.
  *
  * Antes as listas abriam com um quadradinho de ícone de 40px e um título
- * solto sobre preto — e só `/sobre` e `/presencial-bh` tinham imagem, o que
+ * solto sobre preto — e só `/sobre` e `/presencial` tinham imagem, o que
  * fazia o site parecer montado por pessoas diferentes. Aqui toda página
  * ganha a mesma faixa: imagem quando existe, trama de d20 e a silhueta do
  * dado quando não, e o título em display por cima.

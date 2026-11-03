@@ -27,7 +27,7 @@ export function MobileNav({ logado }: { logado: boolean }) {
     { href: "/suplementos", label: t("suplementos"), Icon: BookOpen },
     { href: "/mesas", label: t("mesas"), Icon: Dices },
     { href: "/eventos", label: t("eventos"), Icon: CalendarDays },
-    { href: "/presencial-bh", label: t("presencialBh"), Icon: MapPin },
+    { href: "/presencial", label: t("presencialBh"), Icon: MapPin },
     { href: "/sobre", label: t("sobre"), Icon: Info },
   ] as const;
 

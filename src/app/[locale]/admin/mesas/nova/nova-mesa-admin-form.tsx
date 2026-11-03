@@ -294,7 +294,7 @@ export function NovaMesaAdminForm({
                 </Select>
                 {!ehCidadePresencial(cidadeUf) && (
                   <p className="text-xs text-alerta">
-                    Essa cidade não está entre as atendidas, então a mesa não aparece em /presencial-bh.
+                    Essa cidade não está entre as atendidas, então a mesa não aparece em /presencial.
                   </p>
                 )}
               </>

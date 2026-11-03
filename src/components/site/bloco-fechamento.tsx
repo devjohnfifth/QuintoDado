@@ -15,7 +15,7 @@ const CAMINHOS = {
   mesas: { href: "/mesas", Icone: Dices, externo: false },
   suplementos: { href: "/suplementos", Icone: BookOpen, externo: false },
   eventos: { href: "/eventos", Icone: CalendarDays, externo: false },
-  presencial: { href: "/presencial-bh", Icone: MapPin, externo: false },
+  presencial: { href: "/presencial", Icone: MapPin, externo: false },
   mesaquest: { href: SITE_LINKS.mesaquest, Icone: ArrowUpRight, externo: true },
   sobre: { href: "/sobre", Icone: Info, externo: false },
 } as const;

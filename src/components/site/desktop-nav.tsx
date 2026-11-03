@@ -15,7 +15,7 @@ export function DesktopNav() {
     { href: "/suplementos", label: t("suplementos") },
     { href: "/mesas", label: t("mesas") },
     { href: "/eventos", label: t("eventos") },
-    { href: "/presencial-bh", label: t("presencialBh") },
+    { href: "/presencial", label: t("presencialBh") },
     { href: "/sobre", label: t("sobre") },
   ] as const;
 

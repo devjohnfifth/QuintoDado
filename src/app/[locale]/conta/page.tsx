@@ -151,7 +151,7 @@ export default async function ContaPage({
           <div className="mt-10 flex items-center justify-between">
             <h2 className="font-heading text-lg font-bold">Minhas mesas</h2>
             <Link
-              href="/presencial-bh/nova"
+              href="/presencial/nova"
               className="text-sm font-medium text-primary hover:underline"
             >
               + Nova mesa
@@ -184,13 +184,13 @@ export default async function ContaPage({
                         {mesa.status !== "cancelada" && (
                           <>
                             <Link
-                              href={`/presencial-bh/${mesa.id}`}
+                              href={`/presencial/${mesa.id}`}
                               className="text-xs text-primary hover:underline"
                             >
                               Candidaturas
                             </Link>
                             <Link
-                              href={`/presencial-bh/${mesa.id}/editar`}
+                              href={`/presencial/${mesa.id}/editar`}
                               className="text-xs text-primary hover:underline"
                             >
                               Editar

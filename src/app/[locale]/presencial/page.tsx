@@ -5,7 +5,7 @@ import { MapPin } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import pracaSete from "@/assets/presencial-bh/praca-sete.webp";
+import pracaSete from "@/assets/presencial/praca-sete.webp";
 import capivaraAventureiro from "@/assets/brand/capivara-aventureiro.webp";
 import { Container } from "@/components/site/container";
 import { EstadoVazio } from "@/components/site/estado-vazio";
@@ -30,7 +30,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: "/presencial-bh" },
+    alternates: { canonical: "/presencial" },
     openGraph: {
       title,
       description,
@@ -44,7 +44,7 @@ export async function generateMetadata({
 async function buscarMesasPresenciaisBh(): Promise<MesaCardData[]> {
   if (!isSupabaseConfigured()) {
     console.warn(
-      "[/presencial-bh] Supabase não configurado — mostrando estado vazio (ver .env.example).",
+      "[/presencial] Supabase não configurado — mostrando estado vazio (ver .env.example).",
     );
     return [];
   }
@@ -61,7 +61,7 @@ async function buscarMesasPresenciaisBh(): Promise<MesaCardData[]> {
     .order("data_inicio", { ascending: true });
 
   if (error) {
-    console.error("[/presencial-bh] erro ao buscar mesas:", error.message);
+    console.error("[/presencial] erro ao buscar mesas:", error.message);
     return [];
   }
 
@@ -109,7 +109,7 @@ export default async function PresencialBhPage({
               <h1 className="titulo-display titulo-pagina">{t("titulo")}</h1>
               <p className="mx-auto mt-4 max-w-xl text-lg text-foreground/80 md:mx-0">{t("subtitulo")}</p>
               <Link
-                href="/presencial-bh/nova"
+                href="/presencial/nova"
                 className={buttonVariants({ variant: "marca", size: "lg", className: "mt-8" })}
               >
                 {t("criarMesa")}
@@ -162,7 +162,7 @@ export default async function PresencialBhPage({
                 variante="lista"
                 render={(mesa) => <MesaCard mesa={mesa} situacao={mesa.id ? situacoes.get(mesa.id) : undefined} />}
               />
-              <Paginacao caminho="/presencial-bh" pagina={pagina} totalPaginas={totalPaginas} />
+              <Paginacao caminho="/presencial" pagina={pagina} totalPaginas={totalPaginas} />
             </>
           )}
         </div>

@@ -1,7 +1,7 @@
 /**
  * Cidades onde o site aceita mesa presencial.
  *
- * Lista fechada de propósito: a página `/presencial-bh` filtra as mesas por
+ * Lista fechada de propósito: a página `/presencial` filtra as mesas por
  * ela, então cidade escrita à mão (com acento trocado, abreviação ou UF
  * grudada) sumiria da listagem sem ninguém entender por quê. O formulário
  * oferece só estas e o servidor recusa qualquer outra.
