@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { BannerUpload } from "@/components/site/banner-upload";
+import { SecaoForm } from "../secao-form";
+import { BarraSalvar } from "../barra-salvar";
 import { criarEventoAction, atualizarEventoAction } from "./actions";
 import { MestrePicker, type MestreSelecionado } from "./mestre-picker";
 
@@ -66,6 +68,7 @@ export function EventoForm({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
+  const [sujo, setSujo] = useState(false);
   const [bannerUrl, setBannerUrl] = useState<string | null>(eventoExistente?.bannerUrl ?? null);
   const [publicarAgora, setPublicarAgora] = useState(true);
   const [tipos, setTipos] = useState<TipoIngressoExistente[]>(
@@ -137,7 +140,8 @@ export function EventoForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-6">
+    <form onSubmit={onSubmit} onChange={() => setSujo(true)} className="mt-6 space-y-5">
+      <SecaoForm titulo="O evento" descricao="O que aparece no card e no topo da página.">
       <div className="space-y-2">
         <Label htmlFor="titulo">Título do evento</Label>
         <Input id="titulo" name="titulo" required maxLength={120} defaultValue={eventoExistente?.titulo} />
@@ -170,7 +174,10 @@ export function EventoForm({
         <Label>Imagem de capa</Label>
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} bucket="event-banners" />
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Onde e quando" descricao="Cidade, local, data e horário.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cidadeUf">Cidade</Label>
@@ -235,7 +242,10 @@ export function EventoForm({
           />
         </div>
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Ingressos e pagamento" descricao="Tipos de ingresso e por onde o pagamento é confirmado.">
       <div className="space-y-3 rounded-xl border border-border p-4">
         <p className="text-sm font-medium">Confirmação de pagamento</p>
         <p className="text-xs text-muted-foreground">
@@ -351,7 +361,10 @@ export function EventoForm({
           </div>
         ))}
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Conteúdo da página" descricao="Galeria, apoiadores, programação e mestres confirmados.">
       <div className="space-y-3 rounded-xl border border-border p-4">
         <p className="text-sm font-medium">Galeria de fotos</p>
         <p className="text-xs text-muted-foreground">Fotos extras pra mostrar o clima do evento.</p>
@@ -484,7 +497,10 @@ export function EventoForm({
         <p className="text-xs text-muted-foreground">Busca por nome ou usuário entre quem já tem conta no site.</p>
         <MestrePicker selecionados={mestres} onChange={setMestres} />
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Publicação" descricao="Se o evento vai ao ar agora ou fica como rascunho.">
       {!editando && (
         <div className="flex items-center gap-2">
           <Checkbox
@@ -497,12 +513,16 @@ export function EventoForm({
           </Label>
         </div>
       )}
+      </SecaoForm>
 
-      {erro && <p className="text-sm text-destructive">{erro}</p>}
 
-      <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-        {pending ? (editando ? "Salvando..." : "Criando...") : editando ? "Salvar alterações" : "Criar evento"}
-      </Button>
+      <BarraSalvar
+        pendente={pending}
+        erro={erro}
+        sujo={sujo}
+        rotulo={editando ? "Salvar alterações" : "Criar evento"}
+        rotuloPendente={editando ? "Salvando..." : "Criando..."}
+      />
     </form>
   );
 }

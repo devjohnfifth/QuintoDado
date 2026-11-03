@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,6 +16,8 @@ import {
 import { BannerUpload } from "@/components/site/banner-upload";
 import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
+import { SecaoForm } from "../../secao-form";
+import { BarraSalvar } from "../../barra-salvar";
 import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
 import { criarMesaAdmin, atualizarMesaAction } from "../actions";
 
@@ -104,6 +105,7 @@ export function NovaMesaAdminForm({
   const [sistemaId, setSistemaId] = useState(mesaExistente?.sistemaId ?? "");
   const [sistemaOutroNome, setSistemaOutroNome] = useState(mesaExistente?.sistemaOutroNome ?? "");
   const [tipo, setTipo] = useState(mesaExistente?.tipo ?? "one_shot");
+  const [sujo, setSujo] = useState(false);
   const [modalidade, setModalidade] = useState<"online" | "presencial">(
     mesaExistente?.modalidade ?? (eventoVinculado ? "presencial" : "online"),
   );
@@ -176,7 +178,8 @@ export function NovaMesaAdminForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-6 space-y-6">
+    <form onSubmit={onSubmit} onChange={() => setSujo(true)} className="mt-6 space-y-5">
+      <SecaoForm titulo="A mesa" descricao="O que aparece no card e na página dela.">
       <div className="space-y-2">
         <Label htmlFor="titulo">Título da mesa</Label>
         <Input id="titulo" name="titulo" required maxLength={120} defaultValue={mesaExistente?.titulo} />
@@ -246,7 +249,10 @@ export function NovaMesaAdminForm({
         <Label>Imagem de capa</Label>
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Onde e como" descricao="Presencial ou online, e por onde a vaga é garantida.">
       {eventoVinculado && (
         <div className="flex items-center gap-2 rounded-xl border border-primary/40 bg-primary/[0.04] p-4 text-sm">
           <CalendarDays className="size-4 shrink-0 text-primary" aria-hidden />
@@ -342,7 +348,10 @@ export function NovaMesaAdminForm({
           </p>
         </div>
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Quando" descricao="Data, horário e com que frequência a mesa acontece.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="dataInicio">Data</Label>
@@ -432,7 +441,10 @@ export function NovaMesaAdminForm({
           )}
         </div>
       )}
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Quem joga" descricao="Quantas pessoas cabem e pra quem a mesa é.">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="vagasTotal">Vagas totais</Label>
@@ -489,7 +501,10 @@ export function NovaMesaAdminForm({
           </Select>
         </div>
       </div>
+      </SecaoForm>
 
+
+      <SecaoForm titulo="Preço e publicação" descricao="Quanto custa e se vai ao ar agora.">
       <div className="space-y-3 rounded-xl border border-border p-4">
         <div className="flex items-center gap-2">
           <Checkbox id="gratuita" checked={gratuita} onCheckedChange={(v) => setGratuita(v === true)} />
@@ -538,12 +553,16 @@ export function NovaMesaAdminForm({
           </Label>
         </div>
       )}
+      </SecaoForm>
 
-      {erro && <p className="text-sm text-destructive">{erro}</p>}
 
-      <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-        {pending ? (editando ? "Salvando..." : "Criando...") : editando ? "Salvar alterações" : "Criar mesa"}
-      </Button>
+      <BarraSalvar
+        pendente={pending}
+        erro={erro}
+        sujo={sujo}
+        rotulo={editando ? "Salvar alterações" : "Criar mesa"}
+        rotuloPendente={editando ? "Salvando..." : "Criando..."}
+      />
     </form>
   );
 }
