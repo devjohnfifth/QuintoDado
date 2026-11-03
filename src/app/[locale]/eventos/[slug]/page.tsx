@@ -425,8 +425,8 @@ export default async function EventoDetalhePage({
               <GradeAdaptavel
                 itens={mesas}
                 chave={(m) => m.slug}
-                colunas="sm:grid-cols-2"
-                render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+                variante="lista"
+                render={(mesa) => <MesaCard mesa={mesa} />}
               />
             </div>
           </section>

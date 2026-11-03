@@ -11,6 +11,7 @@ import { CapaPagina } from "@/components/site/capa-pagina";
 import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
+import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
 import mesaEscudo from "@/assets/eventos/uaiventura-mesa-escudo.webp";
 import { buttonVariants } from "@/components/ui/button";
@@ -63,7 +64,7 @@ async function buscarMesas(filtros: Filtros, favoritos: Set<string>): Promise<Me
   let query = supabase
     .from("mesas")
     .select(
-      "sistema_id, slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo)",
+      "sistema_id, id, slug, titulo, sinopse, tipo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, link_externo, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo), profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url)",
     )
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true });
@@ -158,6 +159,8 @@ export default async function MesasPage({
   // Paginação em memória: a ordenação por sistema favorito depende do
   // conjunto todo (ver buscarMesas), então a fatia sai depois dela.
   const { pagina, totalPaginas, fatia: mesas, total } = fatiar(todasMesas, filtros.pagina, POR_PAGINA);
+  // Onde a pessoa logada já se candidatou, só pras mesas desta página.
+  const situacoes = await minhasInscricoes(mesas.map((m) => m.id ?? ""));
 
   return (
     <>
@@ -231,10 +234,11 @@ export default async function MesasPage({
             <GradeAdaptavel
               itens={mesas}
               chave={(m) => m.slug}
-              render={(mesa, destaque) => (
+              variante="lista"
+              render={(mesa) => (
                 <MesaCard
                   mesa={mesa}
-                  destaque={destaque}
+                  situacao={mesa.id ? situacoes.get(mesa.id) : undefined}
                   favorito={Boolean(mesa.sistema_id && sistemasFavoritos.has(mesa.sistema_id))}
                 />
               )}

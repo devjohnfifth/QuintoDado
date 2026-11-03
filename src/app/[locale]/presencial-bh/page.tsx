@@ -12,6 +12,7 @@ import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
+import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
 import { buttonVariants } from "@/components/ui/button";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 
@@ -51,7 +52,7 @@ async function buscarMesasPresenciaisBh(): Promise<MesaCardData[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo)",
+      "id, slug, titulo, sinopse, tipo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, link_externo, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo), profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url)",
     )
     .eq("modalidade", "presencial")
     .in("status", ["publicada", "confirmada", "em_andamento"])
@@ -82,6 +83,7 @@ export default async function PresencialBhPage({
   const sp = await searchParams;
   const todasMesas = await buscarMesasPresenciaisBh();
   const { pagina, totalPaginas, fatia: mesas } = fatiar(todasMesas, sp.pagina, POR_PAGINA);
+  const situacoes = await minhasInscricoes(mesas.map((m) => m.id ?? ""));
 
   return (
     <>
@@ -156,7 +158,8 @@ export default async function PresencialBhPage({
               <GradeAdaptavel
                 itens={mesas}
                 chave={(m) => m.slug}
-                render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+                variante="lista"
+                render={(mesa) => <MesaCard mesa={mesa} situacao={mesa.id ? situacoes.get(mesa.id) : undefined} />}
               />
               <Paginacao caminho="/presencial-bh" pagina={pagina} totalPaginas={totalPaginas} />
             </>

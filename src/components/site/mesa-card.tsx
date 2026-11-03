@@ -1,27 +1,31 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Globe, MapPin, Repeat, Calendar, Clock, Flame, UserPlus, Lock, Star, CalendarDays, Dices } from "lucide-react";
+import { CheckCircle2, ExternalLink, Flame, Globe, MapPin, Repeat, Clock, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { formatBRL } from "@/lib/format";
-import { MODALIDADE_LABEL, FREQUENCIA_LABEL } from "@/lib/mesas/labels";
-import { diaSemanaAbreviado, diasParaComeco } from "@/lib/mesas/horario";
-import { LOGO_SISTEMA } from "@/lib/mesas/logos-sistemas";
+import { CLASSIFICACAO_LABEL, FREQUENCIA_LABEL, NIVEL_LABEL, TIPO_MESA_LABEL } from "@/lib/mesas/labels";
+import { diasParaComeco } from "@/lib/mesas/horario";
 import { FundoSemImagem } from "@/components/site/card-midia";
 import { Selo } from "@/components/site/selo";
 import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
 import { BrilhoCursor } from "@/components/site/brilho-cursor";
 import { corDoSistema } from "@/lib/mesas/cores-sistemas";
+import type { SituacaoNaMesa } from "@/lib/mesas/minhas-inscricoes";
 
 export type MesaCardData = {
   sistema_id?: string | null;
+  id?: string;
   slug: string;
   titulo: string;
+  sinopse?: string | null;
+  tipo?: string | null;
   modalidade: "online" | "presencial";
   cidade_uf: string | null;
   classificacao: string;
   nivel_experiencia: string;
   preco_centavos: number;
   frequencia: string;
+  qtd_sessoes?: number | null;
   data_inicio: string;
   horario_inicio: string;
   horario_fim: string;
@@ -29,51 +33,78 @@ export type MesaCardData = {
   min_jogadores: number;
   vagas_preenchidas: number;
   banner_url: string | null;
+  link_externo?: string | null;
   sistemas: { nome: string; slug: string } | null;
   sistema_outro: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
+  profiles?: { nome_exibicao: string; avatar_url: string | null } | null;
   eventos?: { titulo: string } | null;
 };
 
+/** Domínio do site externo, pro rótulo do botão ("Abrir no MesaQuest"). */
+function nomeDoSite(url: string) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "").split(".")[0];
+    return host.charAt(0).toUpperCase() + host.slice(1);
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Card de mesa com cara de ingresso: o banner em cima (inteiro — a arte já
- * traz o nome da mesa, então não sobrepomos texto), a linha picotada com as
- * duas mordidas, e o "talão" com as informações embaixo.
+ * Card de mesa, formato dossiê.
+ *
+ * Horizontal: capa em retrato à esquerda com a data colada nela, e à direita
+ * tudo que decide se a mesa serve pra quem está lendo — sistema, tipo, um fio
+ * de sinopse, classificação, nível, cadeiras e a ação.
+ *
+ * Por que não é um `<Link>` por fora: o card tem um botão próprio, e botão
+ * dentro de link é HTML inválido e vira dois destinos sobrepostos no leitor
+ * de tela. Em vez disso o TÍTULO é o link e se estende por cima do card
+ * inteiro (`after:absolute after:inset-0`). O botão de ação é decorativo pro
+ * leitor de tela (`aria-hidden`), porque leva ao mesmo lugar do título — ele
+ * existe pra deixar claro onde clicar, não pra ser um segundo destino.
  */
 export function MesaCard({
   mesa,
   favorito = false,
-  destaque = false,
+  situacao,
 }: {
   mesa: MesaCardData;
   favorito?: boolean;
-  /** Lista com uma mesa só: vira horizontal a partir do `sm` (banner à esquerda, picote vertical). */
-  destaque?: boolean;
+  /** Onde a pessoa logada está nesta mesa, se estiver. */
+  situacao?: SituacaoNaMesa;
 }) {
   const t = useTranslations("MesaCard");
-  const logo = mesa.sistemas ? LOGO_SISTEMA[mesa.sistemas.slug] : undefined;
-  const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
-  // Cor do sistema: dá variedade a uma lista que antes era toda azul e roxa.
   const cor = corDoSistema(mesa.sistemas?.slug);
+  const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
-  const faltamPraAbrir = mesa.min_jogadores - mesa.vagas_preenchidas;
   const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
   const lotada = vagasLivres <= 0;
-  const ultimaVaga = !lotada && vagasLivres === 1;
-  const data = new Date(`${mesa.data_inicio}T00:00:00`).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-  });
+  const faltamPraAbrir = mesa.min_jogadores - mesa.vagas_preenchidas;
+  const siteExterno = mesa.link_externo ? nomeDoSite(mesa.link_externo) : null;
+
+  const data = new Date(`${mesa.data_inicio}T00:00:00`);
+  const semPonto = (txt: string) => txt.replace(".", "");
+  const diaSemana = semPonto(data.toLocaleDateString("pt-BR", { weekday: "short" }));
+  const diaNumero = data.toLocaleDateString("pt-BR", { day: "2-digit" });
+  const mesCurto = semPonto(data.toLocaleDateString("pt-BR", { month: "short" }));
+  // Uma sessão única "acontece"; o que tem continuação "começa".
+  const quando = mesa.frequencia === "unica" ? t("acontece") : t("comeca");
+
+  const local = mesa.modalidade === "presencial" && mesa.cidade_uf ? mesa.cidade_uf : null;
+  const frequencia = FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia;
+  const sessoes = mesa.qtd_sessoes ? ` · ${t("sessoes", { n: mesa.qtd_sessoes })}` : "";
+
+  const classeBotao =
+    "relative z-10 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-transform duration-200 hover:scale-[1.03] active:scale-95";
 
   return (
-    <Link
-      href={`/mesas/${mesa.slug}`}
-      className={`group flex h-full flex-col transition-transform duration-300 hover:-translate-y-0.5 ${destaque ? "sm:flex-row" : ""}`}
-    >
-      {/* Canhoto: o banner. */}
+    <article className="group painel elevar hover:elevar-hover relative flex flex-col overflow-hidden rounded-2xl sm:flex-row">
+      {/* Capa em retrato, com o adesivo de data colado nela. */}
       <div
-        className={`relative aspect-[21/9] w-full shrink-0 overflow-hidden rounded-t-2xl border-x border-t border-border bg-card transition-colors duration-300 group-hover:border-primary/40 ${
-          destaque ? "sm:aspect-auto sm:w-1/2 sm:rounded-l-2xl sm:rounded-tr-none sm:border-y sm:border-l sm:border-r-0" : ""
+        className={`relative h-32 w-full shrink-0 overflow-hidden sm:h-auto sm:w-36 ${
+          lotada ? "opacity-60 saturate-50" : ""
         }`}
       >
         {mesa.banner_url ? (
@@ -82,114 +113,76 @@ export function MesaCard({
             alt=""
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes={destaque ? "(min-width: 640px) 50vw, 100vw" : "(min-width: 1024px) 330px, (min-width: 640px) 45vw, 100vw"}
+              sizes="(min-width: 640px) 144px, 100vw"
           />
         ) : (
-          <FundoSemImagem icone={Dices} chave={mesa.slug} />
+          <FundoSemImagem chave={mesa.slug} />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
-        <BrilhoCursor cor={cor} />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 
-        <div className="absolute inset-x-2.5 top-2.5 flex flex-wrap gap-1.5">
-          {mesa.eventos && (
-            <Selo tom="solido" icone={CalendarDays}>
-              {t("evento")}
+        {mesa.eventos && (
+          <span className="absolute inset-x-2 top-2">
+            <Selo tom="imagem">{mesa.eventos.titulo}</Selo>
+          </span>
+        )}
+        {!lotada && !mesa.eventos && dias >= 0 && dias <= 14 && (
+          <span className="absolute inset-x-2 top-2">
+            <Selo tom="imagem" icone={Flame}>
+              {dias === 0 ? t("hoje") : t("emDias", { n: dias })}
             </Selo>
-          )}
-          {lotada ? (
-            <Selo tom="imagem" icone={Lock}>
-              {t("lotada")}
-            </Selo>
-          ) : (
-            <>
-              {dias >= 0 && dias <= 14 && (
-                <Selo tom="imagem" icone={Flame} className="text-alerta">
-                  {dias === 0 ? t("hoje") : t("emDias", { n: dias })}
-                </Selo>
-              )}
-              {ultimaVaga ? (
-                <Selo tom="erro" icone={UserPlus} className="bg-erro text-white motion-safe:animate-pulse">
-                  {t("ultimaVaga")}
-                </Selo>
-              ) : (
-                faltamPraAbrir > 0 && (
-                  <Selo tom="imagem" icone={UserPlus}>
-                    {t("faltamPraAbrir", { n: faltamPraAbrir })}
-                  </Selo>
-                )
-              )}
-            </>
-          )}
+          </span>
+        )}
+
+        <div className="painel-alto absolute bottom-2 left-2 w-14 rounded-xl py-1.5 text-center">
+          <span className="rotulo-caps block text-[0.6rem] text-muted-foreground">{diaSemana}</span>
+          <span className="titulo-display block text-xl leading-tight">{diaNumero}</span>
+          <span className="rotulo-caps block text-[0.6rem] text-muted-foreground">{mesCurto}</span>
+          <span className="rotulo-caps mt-1 block border-t border-border/60 pt-1 text-[0.55rem] text-muted-foreground">
+            {quando}
+          </span>
         </div>
-
       </div>
 
-      {/* Picote: linha tracejada entre duas mordidas (círculos da cor do fundo por cima da borda). */}
-      <div aria-hidden className={`relative h-0 ${destaque ? "sm:h-auto sm:w-0" : ""}`}>
-        <span className={`absolute -left-3 -top-3 z-10 size-6 rounded-full bg-background`} />
-        <span
-          className={`absolute -right-3 -top-3 z-10 size-6 rounded-full bg-background ${destaque ? "sm:-bottom-3 sm:right-[-12px] sm:top-auto" : ""}`}
-        />
-        <span
-          className={`absolute inset-x-4 top-0 border-t-2 border-dashed border-foreground/25 ${
-            destaque ? "sm:bottom-4 sm:left-0 sm:right-auto sm:top-4 sm:border-l-2 sm:border-t-0" : ""
-          }`}
-        />
-      </div>
-
-      {/* Talão: as informações. */}
-      <div
-        className={`flex flex-1 flex-col rounded-b-2xl border-x border-b border-border bg-superficie p-4 transition-colors duration-300 group-hover:border-primary/40 ${
-          destaque ? "sm:rounded-r-2xl sm:rounded-bl-none sm:border-y sm:border-l-0 sm:border-r sm:p-6" : ""
-        }`}
-      >
-        {/* Fio da cor do sistema entre o canhoto e o talão: é a única
-            coisa colorida do card quando a mesa não tem capa. */}
-        <span aria-hidden className="-mx-4 -mt-4 mb-4 block h-0.5" style={{ backgroundColor: cor }} />
-
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
-            {logo && (
-              <span className="relative h-6 w-16 shrink-0 overflow-hidden rounded bg-white">
-                <Image src={logo} alt="" fill className="object-cover" sizes="64px" />
-              </span>
+      <div className={`flex min-w-0 flex-1 flex-col p-4 ${lotada ? "opacity-70" : ""}`}>
+        <div className="flex items-start justify-between gap-3">
+          <p className="truncate text-sm font-medium" style={{ color: cor }}>
+            {nomeSistema}
+            {mesa.tipo ? ` · ${TIPO_MESA_LABEL[mesa.tipo] ?? mesa.tipo}` : ""}
+          </p>
+          <div className="flex shrink-0 items-center gap-1.5">
+            {favorito && (
+              <Selo tom="alerta" icone={Star}>
+                {t("favorito")}
+              </Selo>
             )}
-            <span className="truncate text-sm font-medium" style={{ color: cor }}>
-              {nomeSistema}
-            </span>
+            {situacao ? (
+              <Selo tom="marca" icone={CheckCircle2}>
+                {situacao === "aprovado" ? t("confirmadoNaMesa") : t("candidaturaEnviada")}
+              </Selo>
+            ) : lotada ? (
+              <Selo tom="neutro">{t("lotada")}</Selo>
+            ) : vagasLivres === 1 ? (
+              <Selo tom="erro">{t("ultimaVaga")}</Selo>
+            ) : (
+              <Selo tom={mesa.preco_centavos === 0 ? "sucesso" : "marca"}>
+                {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
+              </Selo>
+            )}
           </div>
-          {favorito && (
-            <Selo tom="alerta" icone={Star}>
-              {t("favorito")}
-            </Selo>
-          )}
         </div>
 
-        <h3
-          className={`mt-2 font-heading font-bold leading-tight transition-colors group-hover:text-primary ${destaque ? "text-2xl" : "text-lg"}`}
-        >
-          {mesa.titulo}
+        <h3 className="titulo-display titulo-bloco mt-1.5">
+          <Link
+            href={`/mesas/${mesa.slug}`}
+            className="outline-offset-4 transition-colors after:absolute after:inset-0 group-hover:text-primary"
+          >
+            {mesa.titulo}
+          </Link>
         </h3>
 
-        <div className="mt-3 flex items-end justify-between gap-3">
-          <CadeirasVagas
-            total={mesa.vagas_total}
-            preenchidas={mesa.vagas_preenchidas}
-            jogadores={mesa.jogadores_aprovados ?? []}
-          />
-          <Selo tom={mesa.preco_centavos === 0 ? "sucesso" : "marca"} className="shrink-0">
-            {mesa.preco_centavos === 0 ? t("gratuita") : formatBRL(mesa.preco_centavos)}
-          </Selo>
-        </div>
+        {mesa.sinopse && <p className="mt-1 truncate text-sm text-muted-foreground">{mesa.sinopse}</p>}
 
-        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <dt className="sr-only">{t("data")}</dt>
-            <Calendar className="size-4 shrink-0 text-primary" aria-hidden />
-            <dd>
-              <span className="font-medium text-foreground">{diaSemanaAbreviado(mesa.data_inicio)}</span>, {data}
-            </dd>
-          </div>
+        <dl className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-border/60 pt-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <dt className="sr-only">{t("horario")}</dt>
             <Clock className="size-4 shrink-0 text-primary" aria-hidden />
@@ -204,17 +197,92 @@ export function MesaCard({
             ) : (
               <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
             )}
-            <dd className="truncate">
-              {mesa.modalidade === "presencial" && mesa.cidade_uf ? mesa.cidade_uf : MODALIDADE_LABEL[mesa.modalidade]}
-            </dd>
+            <dd className="truncate">{local ?? "Online"}</dd>
           </div>
           <div className="flex items-center gap-1.5">
             <dt className="sr-only">{t("frequencia")}</dt>
             <Repeat className="size-4 shrink-0 text-primary" aria-hidden />
-            <dd>{FREQUENCIA_LABEL[mesa.frequencia] ?? mesa.frequencia}</dd>
+            <dd>
+              {frequencia}
+              {sessoes}
+            </dd>
           </div>
+          <span className="rounded-md border border-border px-1.5 py-0.5 text-xs">
+            {CLASSIFICACAO_LABEL[mesa.classificacao] ?? mesa.classificacao}
+          </span>
+          <span className="rounded-md border border-border px-1.5 py-0.5 text-xs">
+            {NIVEL_LABEL[mesa.nivel_experiencia] ?? mesa.nivel_experiencia}
+          </span>
         </dl>
+
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-3 pt-4">
+          <div className="min-w-0">
+            <CadeirasVagas
+              total={mesa.vagas_total}
+              preenchidas={mesa.vagas_preenchidas}
+              jogadores={mesa.jogadores_aprovados ?? []}
+            />
+            {/* "Faltam N pra confirmar" é o convite mais forte que a mesa tem:
+                diz que a vaga de quem lê é a que destrava o jogo. */}
+            {!lotada && faltamPraAbrir > 0 ? (
+              <p className="text-alerta mt-1.5 text-sm">{t("faltamPraConfirmar", { n: faltamPraAbrir })}</p>
+            ) : (
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                {t("vagasRestantes", {
+                  preenchidas: mesa.vagas_preenchidas,
+                  total: mesa.vagas_total,
+                  n: Math.max(0, vagasLivres),
+                })}
+              </p>
+            )}
+            {mesa.profiles?.nome_exibicao && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                {mesa.profiles.avatar_url ? (
+                  <Image
+                    src={mesa.profiles.avatar_url}
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="size-5 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="flex size-5 items-center justify-center rounded-full bg-marca text-[0.6rem] font-bold text-white">
+                    {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
+              </p>
+            )}
+          </div>
+
+          {mesa.link_externo ? (
+            <a
+              href={mesa.link_externo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${classeBotao} border border-border hover:border-primary/40`}
+            >
+              <ExternalLink className="size-4" aria-hidden />
+              {siteExterno ? t("ctaExterno", { site: siteExterno }) : t("ctaVerMesa")}
+            </a>
+          ) : (
+            <Link
+              href={`/mesas/${mesa.slug}`}
+              tabIndex={-1}
+              aria-hidden
+              className={
+                situacao || lotada
+                  ? `${classeBotao} border border-border text-muted-foreground hover:border-primary/40`
+                  : `${classeBotao} bg-marca text-white`
+              }
+            >
+              {situacao ? t("ctaMinhaCandidatura") : lotada ? t("ctaVerMesa") : t("ctaEntrar")}
+            </Link>
+          )}
+        </div>
       </div>
-    </Link>
+
+      <BrilhoCursor cor={cor} />
+    </article>
   );
 }

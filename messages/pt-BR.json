@@ -266,7 +266,20 @@
     "modalidade": "Modalidade",
     "frequencia": "Frequência",
     "vagaLivre": "Vaga livre",
-    "vagaOcupada": "Vaga ocupada"
+    "vagaOcupada": "Vaga ocupada",
+    "acontece": "Acontece",
+    "comeca": "Começa",
+    "vagasRestantes": "{preenchidas} de {total} · {n, plural, =0 {sem vaga} one {resta # vaga} other {restam # vagas}}",
+    "faltamPraConfirmar": "{n, plural, one {Falta # pra confirmar a mesa} other {Faltam # pra confirmar a mesa}}",
+    "candidaturaEnviada": "Candidatura enviada",
+    "confirmadoNaMesa": "Você está na mesa",
+    "ctaEntrar": "Quero entrar",
+    "ctaEntrarDeslogado": "Entrar pra se candidatar",
+    "ctaMinhaCandidatura": "Ver minha candidatura",
+    "ctaExterno": "Abrir no {site}",
+    "ctaVerMesa": "Ver a mesa",
+    "mestradoPor": "Mestrado por {nome}",
+    "sessoes": "{n, plural, one {# sessão} other {# sessões}}"
   },
   "Painel": {
     "titulo": "Painel da mesa",

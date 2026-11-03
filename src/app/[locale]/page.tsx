@@ -7,6 +7,7 @@ import { Reveal } from "@/components/site/reveal";
 import { Container } from "@/components/site/container";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
+import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Carrossel } from "@/components/site/carrossel";
 import { NumeroAnimado } from "@/components/site/numero-animado";
@@ -53,7 +54,7 @@ async function buscarMesasAbertas(): Promise<MesaCardData[]> {
   const { data, error } = await supabase
     .from("mesas")
     .select(
-      "slug, titulo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo)",
+      "id, slug, titulo, sinopse, tipo, modalidade, cidade_uf, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, banner_url, link_externo, sistemas(nome, slug), sistema_outro, vagas_preenchidas, jogadores_aprovados, eventos(titulo), profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url)",
     )
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true })
@@ -164,6 +165,7 @@ export default async function HomePage({
   ]);
   // Na home só o que está no ar — o admin não vê rascunho misturado aqui.
   const publicados = todosSuplementos.filter((s) => s.publicado);
+  const situacoes = await minhasInscricoes(mesasAbertas.map((m) => m.id ?? ""));
 
   // Notícias: eventos abertos + até 3 suplementos publicados recentemente, do
   // mais novo pro mais antigo (evento conta pela data em que foi criado). Os
@@ -334,7 +336,8 @@ export default async function HomePage({
           <GradeAdaptavel
             itens={mesasAbertas}
             chave={(m) => m.slug}
-            render={(mesa, destaque) => <MesaCard mesa={mesa} destaque={destaque} />}
+            variante="lista"
+            render={(mesa) => <MesaCard mesa={mesa} situacao={mesa.id ? situacoes.get(mesa.id) : undefined} />}
           />
         </SecaoHome>
       )}
