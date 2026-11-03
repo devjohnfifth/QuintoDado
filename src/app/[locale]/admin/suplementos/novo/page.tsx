@@ -20,7 +20,7 @@ export default async function NovoSuplementoPage() {
           ← Voltar pra suplementos
         </Link>
       </p>
-      <h1 className="mt-2 font-heading text-2xl font-bold">Novo suplemento</h1>
+      <h1 className="titulo-display titulo-secao mt-2">Novo suplemento</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         Começa como rascunho. Arquivos e tabelas aleatórias entram na próxima tela.
       </p>

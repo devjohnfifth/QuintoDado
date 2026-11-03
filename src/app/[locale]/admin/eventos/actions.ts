@@ -5,19 +5,8 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/slugify";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
+import { exigirAdmin } from "@/lib/auth/exigir-admin";
 
-async function exigirAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado.");
-
-  const { data: perfil } = await supabase.from("profiles").select("papel").eq("id", user.id).single();
-  if (!perfil || perfil.papel !== "admin") throw new Error("Só admin pode fazer isso.");
-
-  return { supabase, adminId: user.id };
-}
 
 const tipoSchema = z.object({
   id: z.string().uuid().optional(),

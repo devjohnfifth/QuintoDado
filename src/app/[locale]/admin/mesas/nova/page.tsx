@@ -32,7 +32,7 @@ export default async function NovaMesaAdminPage({
 
   return (
     <div className="mx-auto max-w-2xl">
-      <h1 className="font-heading text-2xl font-bold">Nova mesa</h1>
+      <h1 className="titulo-display titulo-secao">Nova mesa</h1>
       <NovaMesaAdminForm sistemas={sistemas ?? []} eventoVinculado={eventoVinculado} />
     </div>
   );

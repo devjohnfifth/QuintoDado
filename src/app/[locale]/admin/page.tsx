@@ -37,56 +37,72 @@ async function buscarNumeros() {
 export default async function AdminHomePage() {
   const { aguardandoAprovacao, candidaturasPendentes, mesasAbertas, ingressosPendentes } = await buscarNumeros();
 
+  /*
+   * Cada número leva até onde se resolve ele. O painel existe pra dizer o
+   * que precisa de você — mostrar "3 mesas aguardando aprovação" e deixar
+   * a pessoa procurar essas três na mão era metade do trabalho.
+   */
   const cartoes = [
     {
       valor: aguardandoAprovacao,
       label: aguardandoAprovacao === 1 ? "mesa aguardando aprovação" : "mesas aguardando aprovação",
       Icon: ClipboardList,
       urgente: aguardandoAprovacao > 0,
+      href: { pathname: "/admin/mesas", query: { status: "aguardando_aprovacao" } },
     },
     {
       valor: candidaturasPendentes,
       label: candidaturasPendentes === 1 ? "candidatura pendente" : "candidaturas pendentes",
       Icon: UserCheck,
       urgente: candidaturasPendentes > 0,
+      // Candidatura se resolve dentro de cada mesa; a lista das que estão
+      // no ar é o caminho mais curto até elas.
+      href: { pathname: "/admin/mesas", query: { status: "publicada" } },
     },
     {
       valor: ingressosPendentes,
       label: ingressosPendentes === 1 ? "ingresso pendente" : "ingressos pendentes",
       Icon: Ticket,
       urgente: ingressosPendentes > 0,
+      href: { pathname: "/admin/eventos", query: { status: "publicado" } },
     },
     {
       valor: mesasAbertas,
       label: mesasAbertas === 1 ? "mesa aberta agora" : "mesas abertas agora",
       Icon: Dices,
       urgente: false,
+      href: { pathname: "/admin/mesas", query: { status: "publicada" } },
     },
   ];
 
   return (
     <div>
-      <h1 className="font-heading text-2xl font-bold">Painel</h1>
+      <h1 className="titulo-display titulo-secao">Painel</h1>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cartoes.map((c) => (
-          <div
+          <Link
             key={c.label}
-            className={`rounded-xl border p-5 ${
-              c.urgente ? "border-primary/40 bg-primary/[0.04]" : "border-border bg-card/60"
+            href={c.href}
+            className={`group rounded-xl p-5 transition-colors duration-200 ${
+              c.urgente
+                ? "border border-primary/40 bg-primary/[0.06] hover:bg-primary/[0.12]"
+                : "painel hover:border-primary/40"
             }`}
           >
             <c.Icon className={`size-5 ${c.urgente ? "text-primary" : "text-muted-foreground"}`} aria-hidden />
-            <p className="mt-3 font-heading text-3xl font-bold">{c.valor}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{c.label}</p>
-          </div>
+            <p className={`titulo-display mt-3 text-3xl ${c.urgente ? "text-primary" : ""}`}>{c.valor}</p>
+            <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
+              {c.label}
+            </p>
+          </Link>
         ))}
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/admin/mesas"
-          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+          className="group rounded-xl painel p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <p className="font-heading font-bold transition-colors group-hover:text-primary">Mesas</p>
           <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">
@@ -95,7 +111,7 @@ export default async function AdminHomePage() {
         </Link>
         <Link
           href="/admin/eventos"
-          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+          className="group rounded-xl painel p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <p className="flex items-center gap-1.5 font-heading font-bold transition-colors group-hover:text-primary">
             <CalendarDays className="size-4" aria-hidden />
@@ -107,7 +123,7 @@ export default async function AdminHomePage() {
         </Link>
         <Link
           href="/admin/suplementos"
-          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+          className="group rounded-xl painel p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <p className="flex items-center gap-1.5 font-heading font-bold transition-colors group-hover:text-primary">
             <BookOpen className="size-4" aria-hidden />
@@ -119,7 +135,7 @@ export default async function AdminHomePage() {
         </Link>
         <Link
           href="/admin/usuarios"
-          className="group rounded-xl border border-border bg-card/60 p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
+          className="group rounded-xl painel p-5 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/10"
         >
           <p className="flex items-center gap-1.5 font-heading font-bold transition-colors group-hover:text-primary">
             <Users className="size-4" aria-hidden />

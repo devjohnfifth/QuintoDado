@@ -75,7 +75,7 @@ export default async function EditarMesaAdminPage({
           ← Voltar pra mesa
         </Link>
       </p>
-      <h1 className="mt-2 font-heading text-2xl font-bold">Editar mesa</h1>
+      <h1 className="titulo-display titulo-secao mt-2">Editar mesa</h1>
       <NovaMesaAdminForm
         sistemas={sistemas ?? []}
         eventoVinculado={eventoVinculado}

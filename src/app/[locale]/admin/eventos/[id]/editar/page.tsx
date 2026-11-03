@@ -89,7 +89,7 @@ export default async function EditarEventoPage({
           Adicionar mesa
         </Link>
       </div>
-      <h1 className="mt-2 font-heading text-2xl font-bold">Editar evento</h1>
+      <h1 className="titulo-display titulo-secao mt-2">Editar evento</h1>
       <EventoForm eventoId={id} eventoExistente={eventoExistente} />
     </div>
   );

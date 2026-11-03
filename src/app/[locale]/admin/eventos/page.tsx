@@ -1,5 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Paginacao, fatiar } from "@/components/site/paginacao";
+import { ListaControles } from "../lista-controles";
 import { VendasToggleCompacto } from "./vendas-toggle-compacto";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -9,7 +11,15 @@ const STATUS_LABEL: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
-export default async function AdminEventosPage() {
+/** Ação primeiro, arquivo depois. */
+const ORDEM_STATUS = ["publicado", "rascunho", "encerrado", "cancelado"];
+
+const POR_PAGINA = 20;
+
+type Filtros = { status?: string; q?: string; pagina?: string };
+
+export default async function AdminEventosPage({ searchParams }: { searchParams: Promise<Filtros> }) {
+  const sp = await searchParams;
   const supabase = await createClient();
   const [{ data: eventos, error }, { data: pendentes }] = await Promise.all([
     supabase
@@ -28,10 +38,27 @@ export default async function AdminEventosPage() {
     pendentesPorEvento.set(p.evento_id, (pendentesPorEvento.get(p.evento_id) ?? 0) + 1);
   }
 
+  const todos = eventos ?? [];
+  const contagem = todos.reduce<Record<string, number>>((acc, e) => {
+    acc[e.status] = (acc[e.status] ?? 0) + 1;
+    return acc;
+  }, {});
+  const opcoes = ORDEM_STATUS.filter((st) => contagem[st] !== undefined).map((st) => ({
+    valor: st,
+    rotulo: STATUS_LABEL[st] ?? st,
+    n: contagem[st] ?? 0,
+  }));
+
+  const termo = sp.q?.trim().toLowerCase() ?? "";
+  const filtrados = todos.filter(
+    (e) => (!sp.status || e.status === sp.status) && (!termo || e.titulo.toLowerCase().includes(termo)),
+  );
+  const { pagina, totalPaginas, fatia } = fatiar(filtrados, sp.pagina, POR_PAGINA);
+
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-heading text-2xl font-bold">Eventos</h1>
+        <h1 className="titulo-display titulo-secao">Eventos</h1>
         <Link
           href="/admin/eventos/nova"
           className="rounded-full bg-marca px-4 py-2 text-sm font-medium text-white"
@@ -40,9 +67,18 @@ export default async function AdminEventosPage() {
         </Link>
       </div>
 
-      {!eventos || eventos.length === 0 ? (
+      <ListaControles
+        caminho="/admin/eventos"
+        statusAtual={sp.status}
+        opcoes={opcoes}
+        busca={sp.q}
+        placeholder="Buscar pelo título..."
+        total={todos.length}
+      />
+
+      {fatia.length === 0 ? (
         <p className="mt-8 rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          Nenhum evento ainda. Crie o primeiro.
+          {todos.length === 0 ? "Nenhum evento ainda. Crie o primeiro." : "Nenhum evento com esse filtro."}
         </p>
       ) : (
         <div className="mt-6 overflow-x-auto">
@@ -59,7 +95,7 @@ export default async function AdminEventosPage() {
               </tr>
             </thead>
             <tbody>
-              {eventos.map((evento) => {
+              {fatia.map((evento) => {
                 const pendentesDoEvento = pendentesPorEvento.get(evento.id) ?? 0;
                 return (
                   <tr
@@ -130,6 +166,13 @@ export default async function AdminEventosPage() {
           </table>
         </div>
       )}
+
+      <Paginacao
+        caminho="/admin/eventos"
+        pagina={pagina}
+        totalPaginas={totalPaginas}
+        filtros={{ status: sp.status, q: sp.q }}
+      />
     </div>
   );
 }

@@ -53,7 +53,7 @@ export default async function AdminMesaDetalhePage({
         </Link>
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-heading text-2xl font-bold">{mesa.titulo}</h1>
+        <h1 className="titulo-display titulo-secao">{mesa.titulo}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             href={`/admin/mesas/${id}/editar`}

@@ -10,23 +10,8 @@ import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
 import { hojeNoBrasil } from "@/lib/mesas/horario";
 import { notificarJogadoresAprovadosSobreCancelamento } from "@/lib/notificacoes/mesa-cancelada";
 import { notificarJogadoresAprovadosSobreReagendamento } from "@/lib/notificacoes/mesa-reagendada";
+import { exigirAdmin } from "@/lib/auth/exigir-admin";
 
-async function exigirAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado.");
-
-  const { data: perfil } = await supabase
-    .from("profiles")
-    .select("papel")
-    .eq("id", user.id)
-    .single();
-  if (!perfil || perfil.papel !== "admin") throw new Error("Só admin pode fazer isso.");
-
-  return { supabase, adminId: user.id };
-}
 
 /**
  * Mesa vinculada a evento não pode ter cidade nem data escolhidas livremente

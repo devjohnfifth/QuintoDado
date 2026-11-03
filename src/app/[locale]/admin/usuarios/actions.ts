@@ -1,21 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
+import { exigirAdmin } from "@/lib/auth/exigir-admin";
 
-async function exigirAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado.");
-
-  const { data: perfil } = await supabase.from("profiles").select("papel").eq("id", user.id).single();
-  if (!perfil || perfil.papel !== "admin") throw new Error("Só admin pode fazer isso.");
-
-  return { adminId: user.id };
-}
 
 export type AcaoUsuarioResult = { ok: true } | { ok: false; error: string };
 

@@ -67,7 +67,7 @@ export default async function EditarSuplementoPage({ params }: { params: Promise
         </Link>
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-heading text-2xl font-bold">{s.titulo}</h1>
+        <h1 className="titulo-display titulo-secao">{s.titulo}</h1>
         {s.publicado && (
           <Link
             href={`/suplementos/${s.slug}`}

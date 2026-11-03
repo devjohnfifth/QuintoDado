@@ -1,24 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
 import { formatBRL } from "@/lib/format";
 import { STATUS_INGRESSO_LABEL } from "@/lib/eventos/labels";
 import { notificarUsuarioSobreIngresso } from "@/lib/notificacoes/ingresso";
+import { exigirAdmin } from "@/lib/auth/exigir-admin";
 
-async function exigirAdmin() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Não autenticado.");
-
-  const { data: perfil } = await supabase.from("profiles").select("papel").eq("id", user.id).single();
-  if (!perfil || perfil.papel !== "admin") throw new Error("Só admin pode fazer isso.");
-
-  return { supabase };
-}
 
 export async function aprovarIngressoAction(ingressoId: string, eventoId: string) {
   const { supabase } = await exigirAdmin();

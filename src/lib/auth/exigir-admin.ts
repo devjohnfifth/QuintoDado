@@ -5,8 +5,11 @@ import { createClient } from "@/lib/supabase/server";
  * Confere que quem chama é admin e devolve o client já autenticado.
  *
  * É a checagem de mensagem clara; a garantia de verdade é o RLS (`eh_admin()`
- * nas policies). Existem cópias locais antigas desta função em
- * `admin/mesas`, `admin/eventos` e `admin/usuarios` — código novo usa esta.
+ * nas policies).
+ *
+ * Fonte única de propósito: havia cinco cópias idênticas espalhadas pelas
+ * actions do admin, e guarda de autorização duplicada é onde uma correção
+ * aplicada em quatro lugares de cinco vira buraco.
  */
 export async function exigirAdmin() {
   const supabase = await createClient();
