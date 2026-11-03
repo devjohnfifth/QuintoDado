@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { CIDADES_PRESENCIAIS } from "@/lib/mesas/cidades";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
@@ -41,7 +42,9 @@ const schema = z
     sistemaId: z.string().uuid("Escolha um sistema."),
     sistemaOutroNome: z.string().trim().max(60).optional(),
     sinopse: z.string().trim().min(10, "Conte um pouco mais sobre a mesa.").max(20000),
-    cidadeUf: z.string().trim().min(3, "Informe a cidade.").max(80),
+    // Lista fechada no servidor também: o formulário é só a primeira
+    // barreira, e mesa fora dessas cidades não apareceria na listagem.
+    cidadeUf: z.enum(CIDADES_PRESENCIAIS, { message: "Escolha uma das cidades disponíveis." }),
     dataInicio: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Data inválida."),
     horarioInicio: z.string().regex(/^\d{2}:\d{2}$/, "Horário inválido."),
     horarioFim: z.string().regex(/^\d{2}:\d{2}$/, "Horário inválido."),

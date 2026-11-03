@@ -214,9 +214,12 @@ export default async function MesaDetalhePage({
       mesa.modalidade === "online"
         ? { "@type": "VirtualLocation", url: `${site}/mesas/${slug}` }
         : {
+            // Sem inventar cidade: antes caía em "Belo Horizonte" quando o
+            // campo vinha vazio, o que com cinco cidades atendidas viraria
+            // informação errada no resultado de busca.
             "@type": "Place",
-            name: mesa.cidade_uf ?? "Belo Horizonte",
-            address: mesa.cidade_uf ?? "Belo Horizonte, MG",
+            name: mesa.cidade_uf ?? "Local combinado com a mesa",
+            ...(mesa.cidade_uf ? { address: mesa.cidade_uf } : {}),
           },
     image: mesa.banner_url ? [mesa.banner_url] : [`${site}${bannerOg.src}`],
     organizer: { "@type": "Person", name: "Mestre Quintão", url: site },

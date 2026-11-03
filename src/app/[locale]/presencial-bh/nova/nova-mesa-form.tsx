@@ -17,6 +17,7 @@ import {
 import { BannerUpload } from "@/components/site/banner-upload";
 import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
+import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
 import { criarMesaPresencial, atualizarMesaPresencialAction } from "./actions";
 
 export type MesaPresencialExistente = {
@@ -57,6 +58,9 @@ export function NovaMesaForm({
   const [classificacao, setClassificacao] = useState(mesaExistente?.classificacao ?? "livre");
   const [nivelExperiencia, setNivelExperiencia] = useState(mesaExistente?.nivelExperiencia ?? "todos");
   const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
+  const [cidadeUf, setCidadeUf] = useState<string>(
+    mesaExistente && ehCidadePresencial(mesaExistente.cidadeUf) ? mesaExistente.cidadeUf : CIDADES_PRESENCIAIS[0],
+  );
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
 
@@ -70,7 +74,7 @@ export function NovaMesaForm({
       sistemaId,
       sistemaOutroNome: ehOutro ? sistemaOutroNome : undefined,
       sinopse: formData.get("sinopse"),
-      cidadeUf: formData.get("cidadeUf"),
+      cidadeUf,
       dataInicio: formData.get("dataInicio"),
       horarioInicio: formData.get("horarioInicio"),
       horarioFim: formData.get("horarioFim"),
@@ -144,13 +148,21 @@ export function NovaMesaForm({
 
       <div className="space-y-2">
         <Label htmlFor="cidadeUf">{t("campoCidade")}</Label>
-        <Input
-          id="cidadeUf"
-          name="cidadeUf"
-          required
-          defaultValue={mesaExistente?.cidadeUf ?? "Belo Horizonte - MG"}
-          maxLength={80}
-        />
+        {/* Lista fechada: a listagem filtra por ela, então cidade digitada à
+            mão sumiria da página sem explicação. */}
+        <Select value={cidadeUf} onValueChange={(v) => v && setCidadeUf(v)}>
+          <SelectTrigger id="cidadeUf" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CIDADES_PRESENCIAIS.map((cidade) => (
+              <SelectItem key={cidade} value={cidade}>
+                {cidade}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-muted-foreground">{t("campoCidadeAjuda")}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

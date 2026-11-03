@@ -21,7 +21,7 @@
     "suplementos": "Suplementos",
     "mesas": "Mesas",
     "eventos": "Eventos",
-    "presencialBh": "Presencial BH",
+    "presencialBh": "Presencial",
     "sobre": "Sobre",
     "links": "Links",
     "entrar": "Entrar",
@@ -114,7 +114,7 @@
         },
         {
           "pergunta": "Quanto custa jogar?",
-          "resposta": "Depende da mesa — muitas são gratuitas. Mesas presenciais em BH podem ter um valor combinado direto com o mestre, só pra cobrir handouts."
+          "resposta": "Depende da mesa — muitas são gratuitas. Mesas presenciais podem ter um valor combinado direto com o mestre, só pra cobrir handouts."
         },
         {
           "pergunta": "Nunca joguei RPG de mesa antes, posso participar?",
@@ -125,8 +125,8 @@
           "resposta": "É a pergunta obrigatória em toda mesa sobre o que pode e o que não pode aparecer na sessão. Classificação etária também é levada a sério, não é só um selo decorativo."
         },
         {
-          "pergunta": "Dá pra jogar presencial em Belo Horizonte?",
-          "resposta": "Dá — mestres cadastrados publicam suas próprias mesas presenciais em BH, além das mesas online do Mestre Quintão."
+          "pergunta": "Dá pra jogar presencial?",
+          "resposta": "Dá — mestres cadastrados publicam suas próprias mesas presenciais em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, além das mesas online do Mestre Quintão. Cada mesa combina valor e local direto com quem mestra."
         }
       ]
     },
@@ -175,7 +175,7 @@
     "instagram": "Instagram",
     "tiktok": "TikTok",
     "youtube": "YouTube",
-    "presencialBh": "Mesas presenciais em BH"
+    "presencialBh": "Mesas presenciais"
   },
   "Mesas": {
     "titulo": "Mesas abertas",
@@ -375,29 +375,30 @@
     "lotacao": "{vendidos} de {total} lugares"
   },
   "PresencialBh": {
-    "titulo": "RPG de mesa presencial em BH",
-    "subtitulo": "Mestres cadastrados criam suas próprias mesas presenciais em Belo Horizonte — grátis ou com um valor combinado, definido por cada mestre pra cobrir handouts e material físico da sessão.",
+    "titulo": "RPG de mesa presencial",
+    "subtitulo": "Mestres cadastrados criam suas próprias mesas presenciais — grátis ou com um valor combinado, definido por cada mestre pra cobrir handouts e material físico da sessão.",
     "comoFunciona": "Como funciona",
     "comoFuncionaCorpo": "Qualquer mestre cadastrado pode publicar uma mesa presencial aqui. O valor mostrado é só informativo: o pagamento (quando existir) é combinado e feito na hora, direto com quem mestra — o site não processa esse pagamento.",
     "criarMesa": "Criar minha mesa presencial",
     "precisaSerMestre": "Pra criar uma mesa aqui você precisa ter o papel de mestre na sua conta. Fale com a gente na comunidade pra virar mestre.",
     "precisaEntrar": "Entre na sua conta pra criar uma mesa presencial.",
-    "vazioTitulo": "Nenhuma mesa presencial em BH publicada ainda",
-    "vazioCorpo": "Assim que um mestre publicar uma mesa presencial em Belo Horizonte, ela aparece aqui.",
+    "vazioTitulo": "Nenhuma mesa presencial publicada ainda",
+    "vazioCorpo": "Assim que um mestre publicar uma mesa presencial, ela aparece aqui.",
     "gratuita": "Gratuita",
     "valorHandouts": "Valor sugerido para handouts",
     "vagas": "{vagas, plural, one {# vaga} other {# vagas}}",
     "verMesa": "Ver mesa",
     "ilustracaoAlt": "Aventureiro de capuz à mesa com pão de queijo, café e um d20, ao lado de uma capivara",
     "passo1Titulo": "Publique a mesa",
-    "passo1Corpo": "Qualquer mestre cadastrado cria a própria mesa presencial aqui. Ela entra em análise e vai ao ar quando aprovada.",
+    "passo1Corpo": "Qualquer mestre cadastrado cria a própria mesa presencial aqui, em uma das cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba. Ela entra em análise e vai ao ar quando aprovada.",
     "passo2Titulo": "Combine na conversa",
     "passo2Corpo": "O valor mostrado é só informativo. Quando existir, é combinado direto entre jogador e mestre — o site não processa esse pagamento.",
     "passo3Titulo": "Joguem",
-    "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado."
+    "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado.",
+    "cidadesAtendidas": "Cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba."
   },
   "PresencialBhNova": {
-    "titulo": "Criar mesa presencial em BH",
+    "titulo": "Criar mesa presencial",
     "subtitulo": "Preencha os dados da sessão. Sua mesa entra em análise e vai ao ar assim que aprovada.",
     "precisaEntrar": "Entre na sua conta pra criar uma mesa presencial.",
     "precisaSerMestre": "Pra criar uma mesa aqui você precisa ter o papel de mestre na sua conta. Fale com a gente na comunidade pra virar mestre.",
@@ -429,7 +430,8 @@
     "enviando": "Enviando...",
     "sucesso": "Mesa enviada! Ela fica em análise até o admin aprovar.",
     "erroGenerico": "Não deu pra criar a mesa. Tente de novo em instantes.",
-    "falarComunidade": "Falar com a comunidade"
+    "falarComunidade": "Falar com a comunidade",
+    "campoCidadeAjuda": "Por enquanto o site atende Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba."
   },
   "Rodape": {
     "avisoLegal": "Quinto Dado é um projeto independente e não possui vínculo com as editoras dos sistemas citados. Materiais compatíveis são publicados sob as respectivas licenças abertas de cada sistema. Marcas e nomes mencionados pertencem a seus respectivos detentores.",
@@ -470,9 +472,9 @@
       "cta": "Ver eventos"
     },
     "presencial": {
-      "titulo": "Presencial em BH",
+      "titulo": "Mesas presenciais",
       "corpo": "Mesas de mestres da cidade, combinadas direto com quem mestra.",
-      "cta": "Ver mesas em BH"
+      "cta": "Ver mesas presenciais"
     },
     "mesaquest": {
       "titulo": "Minhas mesas no MesaQuest",

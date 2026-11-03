@@ -13,6 +13,7 @@ import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
 import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
+import { CIDADES_PRESENCIAIS } from "@/lib/mesas/cidades";
 import { buttonVariants } from "@/components/ui/button";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 
@@ -22,9 +23,9 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const title = "RPG de mesa presencial em Belo Horizonte — Quinto Dado";
+  const title = "RPG de mesa presencial: BH, SP, Rio, Fortaleza e Curitiba — Quinto Dado";
   const description =
-    "Mesas presenciais de RPG em BH, criadas por mestres cadastrados no Quinto Dado. Grátis ou com valor combinado pra handouts.";
+    "Mesas presenciais de RPG em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, criadas por mestres cadastrados no Quinto Dado. Grátis ou com valor combinado pra handouts.";
 
   return {
     title,
@@ -56,7 +57,7 @@ async function buscarMesasPresenciaisBh(): Promise<MesaCardData[]> {
     )
     .eq("modalidade", "presencial")
     .in("status", ["publicada", "confirmada", "em_andamento"])
-    .ilike("cidade_uf", "%belo horizonte%")
+    .in("cidade_uf", [...CIDADES_PRESENCIAIS])
     .order("data_inicio", { ascending: true });
 
   if (error) {
