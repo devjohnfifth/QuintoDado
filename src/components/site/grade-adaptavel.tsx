@@ -32,10 +32,24 @@ export function GradeAdaptavel<T>({
   variante?: "cards" | "lista";
 }) {
   if (variante === "lista") {
+    /*
+     * `minmax(0, 1fr)` e `min-w-0`, não `1fr` e nada: item de grid nasce com
+     * `min-width: auto`, então a coluna estica até caber o conteúdo mínimo do
+     * filho. O card de mesa tem a sinopse com `truncate` (= `nowrap`), cujo
+     * mínimo é a frase inteira numa linha — e a lista crescia pra milhares de
+     * pixels pra fora da tela. Travar o mínimo em 0 é o que deixa o `truncate`
+     * fazer o trabalho dele.
+     */
     return (
-      <ul className={`cascata grid gap-4 ${itens.length > 4 ? "xl:grid-cols-2" : ""}`}>
+      <ul
+        className={`cascata grid grid-cols-[minmax(0,1fr)] gap-4 ${
+          itens.length > 4 ? "xl:grid-cols-[repeat(2,minmax(0,1fr))]" : ""
+        }`}
+      >
         {itens.map((item) => (
-          <li key={chave(item)}>{render(item, false)}</li>
+          <li key={chave(item)} className="min-w-0">
+            {render(item, false)}
+          </li>
         ))}
       </ul>
     );
