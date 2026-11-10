@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code — launch.json é compartilhado; o resto é local da máquina
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
