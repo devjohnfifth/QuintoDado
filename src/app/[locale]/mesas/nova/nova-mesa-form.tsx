@@ -18,14 +18,18 @@ import { BannerUpload } from "@/components/site/banner-upload";
 import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
 import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
-import { criarMesaPresencial, atualizarMesaPresencialAction } from "./actions";
+import { criarMesaDoMestre, atualizarMesaDoMestreAction } from "./actions";
 
-export type MesaPresencialExistente = {
+export type MesaDoMestreExistente = {
   titulo: string;
+  modalidade: "online" | "presencial";
+  tipo: "one_shot" | "aventura" | "campanha";
   sistemaId: string;
   sistemaOutroNome: string | null;
   sinopse: string;
-  cidadeUf: string;
+  cidadeUf: string | null;
+  plataformaVtt: string | null;
+  plataformaVoz: string | null;
   dataInicio: string;
   horarioInicio: string;
   horarioFim: string;
@@ -42,10 +46,13 @@ export function NovaMesaForm({
   sistemas,
   mesaId,
   mesaExistente,
+  modalidadeInicial = "online",
 }: {
   sistemas: Sistema[];
   mesaId?: string;
-  mesaExistente?: MesaPresencialExistente;
+  mesaExistente?: MesaDoMestreExistente;
+  /** Qual modalidade vem marcada ao abrir. /presencial/nova manda "presencial". */
+  modalidadeInicial?: "online" | "presencial";
 }) {
   const editando = Boolean(mesaId && mesaExistente);
   const t = useTranslations("PresencialBhNova");
@@ -59,10 +66,19 @@ export function NovaMesaForm({
   const [nivelExperiencia, setNivelExperiencia] = useState(mesaExistente?.nivelExperiencia ?? "todos");
   const [bannerUrl, setBannerUrl] = useState<string | null>(mesaExistente?.bannerUrl ?? null);
   const [cidadeUf, setCidadeUf] = useState<string>(
-    mesaExistente && ehCidadePresencial(mesaExistente.cidadeUf) ? mesaExistente.cidadeUf : CIDADES_PRESENCIAIS[0],
+    mesaExistente && ehCidadePresencial(mesaExistente.cidadeUf ?? "")
+      ? mesaExistente.cidadeUf!
+      : CIDADES_PRESENCIAIS[0],
+  );
+  const [modalidade, setModalidade] = useState<"online" | "presencial">(
+    mesaExistente?.modalidade ?? modalidadeInicial,
+  );
+  const [tipo, setTipo] = useState<"one_shot" | "aventura" | "campanha">(
+    mesaExistente?.tipo ?? "one_shot",
   );
 
   const ehOutro = sistemas.find((s) => s.id === sistemaId)?.slug === "outro";
+  const ehPresencial = modalidade === "presencial";
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,10 +87,14 @@ export function NovaMesaForm({
     const formData = new FormData(e.currentTarget);
     const input = {
       titulo: formData.get("titulo"),
+      modalidade,
+      tipo,
       sistemaId,
       sistemaOutroNome: ehOutro ? sistemaOutroNome : undefined,
       sinopse: formData.get("sinopse"),
-      cidadeUf,
+      cidadeUf: ehPresencial ? cidadeUf : undefined,
+      plataformaVtt: ehPresencial ? undefined : (formData.get("plataformaVtt") as string) || undefined,
+      plataformaVoz: ehPresencial ? undefined : (formData.get("plataformaVoz") as string) || undefined,
       dataInicio: formData.get("dataInicio"),
       horarioInicio: formData.get("horarioInicio"),
       horarioFim: formData.get("horarioFim"),
@@ -89,13 +109,15 @@ export function NovaMesaForm({
 
     startTransition(async () => {
       const resultado = editando
-        ? await atualizarMesaPresencialAction(mesaId!, input)
-        : await criarMesaPresencial(input);
+        ? await atualizarMesaDoMestreAction(mesaId!, input)
+        : await criarMesaDoMestre(input);
       if (!resultado.ok) {
         setErro(resultado.error);
         return;
       }
-      router.push("/presencial");
+      // Volta pra listagem onde a mesa vai aparecer depois de aprovada —
+      // mandar quem criou mesa online pra /presencial não faria sentido.
+      router.push(ehPresencial ? "/presencial" : "/mesas");
       router.refresh();
     });
   }
@@ -146,24 +168,91 @@ export function NovaMesaForm({
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="cidadeUf">{t("campoCidade")}</Label>
-        {/* Lista fechada: a listagem filtra por ela, então cidade digitada à
-            mão sumiria da página sem explicação. */}
-        <Select value={cidadeUf} onValueChange={(v) => v && setCidadeUf(v)}>
-          <SelectTrigger id="cidadeUf" className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CIDADES_PRESENCIAIS.map((cidade) => (
-              <SelectItem key={cidade} value={cidade}>
-                {cidade}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <p className="text-sm text-muted-foreground">{t("campoCidadeAjuda")}</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="modalidade">{t("campoModalidade")}</Label>
+          <Select
+            value={modalidade}
+            onValueChange={(v) => v && setModalidade(v as "online" | "presencial")}
+          >
+            <SelectTrigger id="modalidade" className="w-full">
+              <SelectValue>
+                {(v: string) => (v === "presencial" ? t("modalidadePresencial") : t("modalidadeOnline"))}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="online">{t("modalidadeOnline")}</SelectItem>
+              <SelectItem value="presencial">{t("modalidadePresencial")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="tipo">{t("campoTipo")}</Label>
+          <Select
+            value={tipo}
+            onValueChange={(v) => v && setTipo(v as "one_shot" | "aventura" | "campanha")}
+          >
+            <SelectTrigger id="tipo" className="w-full">
+              <SelectValue>
+                {(v: string) =>
+                  v === "campanha" ? t("tipoCampanha") : v === "aventura" ? t("tipoAventura") : t("tipoOneShot")
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="one_shot">{t("tipoOneShot")}</SelectItem>
+              <SelectItem value="aventura">{t("tipoAventura")}</SelectItem>
+              <SelectItem value="campanha">{t("tipoCampanha")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {ehPresencial ? (
+        <div className="space-y-2">
+          <Label htmlFor="cidadeUf">{t("campoCidade")}</Label>
+          {/* Lista fechada: a listagem filtra por ela, então cidade digitada à
+              mão sumiria da página sem explicação. */}
+          <Select value={cidadeUf} onValueChange={(v) => v && setCidadeUf(v)}>
+            <SelectTrigger id="cidadeUf" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CIDADES_PRESENCIAIS.map((cidade) => (
+                <SelectItem key={cidade} value={cidade}>
+                  {cidade}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-sm text-muted-foreground">{t("campoCidadeAjuda")}</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="plataformaVtt">{t("campoVtt")}</Label>
+            <Input
+              id="plataformaVtt"
+              name="plataformaVtt"
+              maxLength={60}
+              placeholder={t("campoVttPlaceholder")}
+              defaultValue={mesaExistente?.plataformaVtt ?? ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="plataformaVoz">{t("campoVoz")}</Label>
+            <Input
+              id="plataformaVoz"
+              name="plataformaVoz"
+              maxLength={60}
+              placeholder={t("campoVozPlaceholder")}
+              defaultValue={mesaExistente?.plataformaVoz ?? ""}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground sm:col-span-2">{t("campoPlataformaAjuda")}</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-2">

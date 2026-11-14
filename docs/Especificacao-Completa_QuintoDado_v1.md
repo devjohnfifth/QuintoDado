@@ -824,6 +824,36 @@ lançado — editado direto em vez de empilhar migração):
   leitura acompanha a visibilidade da mesa; escrita é só do dono/admin.
 - Seed de `sistemas` (Ordem Paranormal/OP2, Tormenta 20, Vaesen, Fabula
   Ultima, Daggerheart, Sacramento RPG) em migração própria
+
+### 28.1 Extensão — mesa online do mestre (14/11/2026)
+
+D11 passa a valer para **as duas modalidades**: o mestre aprovado cria mesa
+online também, no mesmo formulário (`/mesas/nova`, que substituiu
+`/presencial/nova`). D12 e D13 seguem inalterados e continuam sendo o que
+mantém isso fora do Conflito A.
+
+O raciocínio: o risco de intermediação de pagamento vem do **site processar o
+dinheiro**, não da modalidade. Uma mesa online com
+`cobranca_gerenciada_pelo_site = false` tem exatamente o mesmo perfil de risco
+da presencial — valor informativo, combinado e pago fora do site. Mesa
+**comissionada** (o site cobra e repassa, com as faixas do §12.2) continua
+exclusiva do admin e segue dependendo do gateway, que é v1.
+
+**Correção de segurança junto** (migração
+`20261114120000_mesa_online_do_mestre.sql`): D12 e D13 eram garantidos só pelo
+formulário. A policy `mesa_cria` checava papel e dono, mas aceitava qualquer
+`cobranca_gerenciada_pelo_site` e qualquer `status`; e `mesa_mestre_edita`
+tinha só `using`, sem `with check` — e sem `with check` o Postgres valida
+apenas a linha antiga num UPDATE, então o dono gravava o valor novo que
+quisesse.
+
+Verificado por teste de comportamento antes da correção: um mestre autenticado
+conseguia criar mesa com cobrança gerenciada pelo site, criar mesa já
+`publicada` (pulando a moderação de D13), ligar a cobrança depois e se
+autopublicar. Agora a criação é travada pela policy e a edição por uma trigger
+`mesa_protege_campos`, que compara OLD com NEW — o que `with check` não
+alcança. A trigger deixa de fora o que o mestre deve poder fazer: editar o
+conteúdo da própria mesa e cancelá-la.
   (`20260907172353_seeds_iniciais.sql`) — item que já estava no roadmap do
   Alfa (§23) e ficou pendente até esta tarefa precisar dele pro formulário
   de criação.

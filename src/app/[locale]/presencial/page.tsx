@@ -113,7 +113,7 @@ export default async function PresencialPage({
           <h1 className="titulo-display titulo-pagina max-w-3xl">{t("titulo")}</h1>
           <p className="mt-4 max-w-2xl text-lg text-foreground/80">{t("subtitulo")}</p>
           <Link
-            href="/presencial/nova"
+            href="/mesas/nova?modalidade=presencial"
             className={buttonVariants({ variant: "outline", size: "lg", className: "mt-6 rounded-full" })}
           >
             {t("criarMesa")}
@@ -201,7 +201,7 @@ export default async function PresencialPage({
             ))}
           </ol>
           <Link
-            href="/presencial/nova"
+            href="/mesas/nova?modalidade=presencial"
             className={buttonVariants({ variant: "marca", size: "lg", className: "mt-7" })}
           >
             {t("criarMesa")}

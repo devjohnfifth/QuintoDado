@@ -8,18 +8,25 @@ import { NovaMesaForm } from "./nova-mesa-form";
 import { SolicitarMestreButton } from "./solicitar-mestre-button";
 
 export const metadata: Metadata = {
-  title: "Criar mesa presencial em BH — Quinto Dado",
+  title: "Criar mesa — Quinto Dado",
   robots: { index: false },
 };
 
-export default async function NovaMesaPresencialPage({
+export default async function NovaMesaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ modalidade?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("PresencialBhNova");
+
+  // /presencial/nova cai aqui com ?modalidade=presencial, então quem vinha
+  // pelo caminho antigo continua achando o formulário já na modalidade certa.
+  const { modalidade } = await searchParams;
+  const modalidadeInicial = modalidade === "presencial" ? "presencial" : "online";
 
   const conteudo = await resolverAcesso();
 
@@ -86,7 +93,7 @@ export default async function NovaMesaPresencialPage({
       .eq("ativo", true)
       .order("nome");
 
-    return <NovaMesaForm sistemas={sistemas ?? []} />;
+    return <NovaMesaForm sistemas={sistemas ?? []} modalidadeInicial={modalidadeInicial} />;
   }
 }
 

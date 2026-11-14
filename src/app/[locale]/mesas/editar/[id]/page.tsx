@@ -4,11 +4,11 @@ import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
-import { NovaMesaForm, type MesaPresencialExistente } from "../../nova/nova-mesa-form";
+import { NovaMesaForm, type MesaDoMestreExistente } from "../../nova/nova-mesa-form";
 
 export const metadata: Metadata = { title: "Editar mesa — Quinto Dado", robots: { index: false } };
 
-export default async function EditarMesaPresencialPage({
+export default async function EditarMesaDoMestrePage({
   params,
 }: {
   params: Promise<{ locale: string; id: string }>;
@@ -32,7 +32,7 @@ export default async function EditarMesaPresencialPage({
     supabase
       .from("mesas")
       .select(
-        "titulo, sistema_id, sistema_outro, sinopse, cidade_uf, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, banner_url, mestre_id, modalidade, status",
+        "titulo, sistema_id, sistema_outro, sinopse, cidade_uf, plataforma_vtt, plataforma_voz, tipo, data_inicio, horario_inicio, horario_fim, vagas_total, min_jogadores, classificacao, nivel_experiencia, preco_centavos, banner_url, mestre_id, modalidade, status, cobranca_gerenciada_pelo_site",
       )
       .eq("id", id)
       .maybeSingle(),
@@ -44,16 +44,30 @@ export default async function EditarMesaPresencialPage({
   // uma mensagem clara em vez de um erro de permissão genérico do banco.
   // Mesa cancelada também não edita mais — não faz sentido reabrir o
   // formulário pra algo que já foi encerrado.
-  if (!mesa || mesa.mestre_id !== user.id || mesa.modalidade !== "presencial" || mesa.status === "cancelada") {
+  //
+  // A trava de modalidade saiu (mestre agora cria online também), mas entrou
+  // uma mais importante: este formulário trata o preço como valor informativo,
+  // então mesa que o site cobra de verdade não passa por aqui. Editá-la neste
+  // form mudaria o preço de uma cobrança real — isso é do admin.
+  if (
+    !mesa ||
+    mesa.mestre_id !== user.id ||
+    mesa.status === "cancelada" ||
+    mesa.cobranca_gerenciada_pelo_site
+  ) {
     notFound();
   }
 
-  const mesaExistente: MesaPresencialExistente = {
+  const mesaExistente: MesaDoMestreExistente = {
     titulo: mesa.titulo,
+    modalidade: mesa.modalidade,
+    tipo: mesa.tipo,
     sistemaId: mesa.sistema_id,
     sistemaOutroNome: mesa.sistema_outro,
     sinopse: mesa.sinopse,
-    cidadeUf: mesa.cidade_uf ?? "",
+    cidadeUf: mesa.cidade_uf,
+    plataformaVtt: mesa.plataforma_vtt,
+    plataformaVoz: mesa.plataforma_voz,
     dataInicio: mesa.data_inicio,
     horarioInicio: mesa.horario_inicio,
     horarioFim: mesa.horario_fim,

@@ -70,11 +70,19 @@ Fora do escopo agora: pagamento integrado, suplementos pagos, split,
 avaliações, blog, lembretes automáticos, cartão e recorrência. Se uma tarefa
 pedir algo dessa lista, avise antes de implementar.
 
-**Exceção:** mestre cadastrado (não só admin) *pode* criar mesa — mas só a
-presencial de `/presencial-bh` (ver `docs/Especificacao-Completa_QuintoDado_v1.md`
+**Exceção:** mestre cadastrado (não só admin) *pode* criar mesa, **online ou
+presencial**, em `/mesas/nova` (ver `docs/Especificacao-Completa_QuintoDado_v1.md`
 §28, D11–D13). Nasce `aguardando_aprovacao` igual a qualquer mesa, valor é só
 informativo (`cobranca_gerenciada_pelo_site = false`, nunca entra no fluxo de
-Pix). Mesa online comissionada continua só do admin.
+Pix).
+
+**Mesa comissionada — a que o site cobra e repassa — continua só do admin**, em
+qualquer modalidade. O que traz o Conflito A (§5.1) é o site processar o
+dinheiro, não a modalidade da mesa: por isso a trava é a cobrança, não o
+"presencial". As duas garantias são do banco, não do formulário — policy
+`mesa_cria` (não-admin só insere com cobrança desligada e status
+`aguardando_aprovacao`) e trigger `mesa_protege_campos` (não-admin não liga a
+cobrança depois, não se autopublica, não transfere a mesa).
 
 ## Disciplina de qualidade (não repetir)
 

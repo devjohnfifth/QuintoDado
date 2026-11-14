@@ -11,10 +11,13 @@ export default function robots(): MetadataRoute.Robots {
         "/admin",
         "/conta",
         "/completar-cadastro",
-        // Cobre /presencial/nova, /presencial/[id] (revisão de
-        // candidaturas do mestre) e /presencial/[id]/editar de uma vez —
-        // tudo que não é a listagem pública em si.
+        // Cobre /presencial/[id] (revisão de candidaturas do mestre) sem
+        // tocar na listagem pública em si.
         "/presencial/*",
+        // Criar e editar mesa saíram pra cá. São telas de mestre logado:
+        // nada pra indexar, e /mesas em si continua liberada.
+        "/mesas/nova",
+        "/mesas/editar/*",
       ],
     },
     sitemap: `${site}/sitemap.xml`,

@@ -32,6 +32,36 @@ const nextConfig: NextConfig = {
         destination: "/:locale/presencial/:caminho*",
         permanent: true,
       },
+
+      /*
+       * Criar e editar mesa saiu de /presencial/* quando o mestre passou a
+       * criar mesa online também — o formulário é o mesmo, só muda a
+       * modalidade, e deixá-lo sob "presencial" ficaria mentiroso.
+       *
+       * /presencial/nova carrega ?modalidade=presencial pra que quem clicou
+       * em "publique a sua" na página de presencial continue caindo no
+       * formulário já marcado como presencial.
+       *
+       * Estas regras vêm DEPOIS das de presencial-bh de propósito: assim
+       * /presencial-bh/nova resolve primeiro pra /presencial/nova e só então
+       * chega aqui.
+       */
+      {
+        source: "/presencial/nova",
+        destination: "/mesas/nova?modalidade=presencial",
+        permanent: true,
+      },
+      {
+        source: "/:locale/presencial/nova",
+        destination: "/:locale/mesas/nova?modalidade=presencial",
+        permanent: true,
+      },
+      { source: "/presencial/:id/editar", destination: "/mesas/editar/:id", permanent: true },
+      {
+        source: "/:locale/presencial/:id/editar",
+        destination: "/:locale/mesas/editar/:id",
+        permanent: true,
+      },
     ];
   },
   async headers() {

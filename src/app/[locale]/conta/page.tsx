@@ -150,10 +150,7 @@ export default async function ContaPage({
         <>
           <div className="mt-10 flex items-center justify-between">
             <h2 className="font-heading text-lg font-bold">Minhas mesas</h2>
-            <Link
-              href="/presencial/nova"
-              className="text-sm font-medium text-primary hover:underline"
-            >
+            <Link href="/mesas/nova" className="text-sm font-medium text-primary hover:underline">
               + Nova mesa
             </Link>
           </div>
@@ -190,7 +187,7 @@ export default async function ContaPage({
                               Candidaturas
                             </Link>
                             <Link
-                              href={`/presencial/${mesa.id}/editar`}
+                              href={`/mesas/editar/${mesa.id}`}
                               className="text-xs text-primary hover:underline"
                             >
                               Editar

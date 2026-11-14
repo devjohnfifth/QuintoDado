@@ -1,13 +1,11 @@
 "use server";
 
-import { z } from "zod";
-import { CIDADES_PRESENCIAIS } from "@/lib/mesas/cidades";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { serviceRole } from "@/lib/supabase/service-role";
 import { slugify } from "@/lib/slugify";
 import { perguntasFixas } from "@/lib/mesas/perguntas-fixas";
-import { hojeNoBrasil } from "@/lib/mesas/horario";
+import { schemaMesaDoMestre, precoEmCentavos } from "@/lib/mesas/schema-mesa-mestre";
 import { notificarJogadoresAprovadosSobreReagendamento } from "@/lib/notificacoes/mesa-reagendada";
 import { notificarAdminsSobreSolicitacaoMestre } from "@/lib/notificacoes/solicitacao-mestre";
 
@@ -36,43 +34,23 @@ async function notificarAdminsSobreMesaPendente(mesaId: string, titulo: string, 
   }
 }
 
-const schema = z
-  .object({
-    titulo: z.string().trim().min(3, "Título muito curto.").max(120),
-    sistemaId: z.string().uuid("Escolha um sistema."),
-    sistemaOutroNome: z.string().trim().max(60).optional(),
-    sinopse: z.string().trim().min(10, "Conte um pouco mais sobre a mesa.").max(20000),
-    // Lista fechada no servidor também: o formulário é só a primeira
-    // barreira, e mesa fora dessas cidades não apareceria na listagem.
-    cidadeUf: z.enum(CIDADES_PRESENCIAIS, { message: "Escolha uma das cidades disponíveis." }),
-    dataInicio: z.string().refine((v) => !Number.isNaN(Date.parse(v)), "Data inválida."),
-    horarioInicio: z.string().regex(/^\d{2}:\d{2}$/, "Horário inválido."),
-    horarioFim: z.string().regex(/^\d{2}:\d{2}$/, "Horário inválido."),
-    vagasTotal: z.coerce.number().int().min(1).max(12),
-    minJogadores: z.coerce.number().int().min(1),
-    classificacao: z.enum(["livre", "14", "16", "18"]),
-    nivelExperiencia: z.enum(["iniciante", "intermediario", "avancado", "todos"]),
-    gratuita: z.coerce.boolean(),
-    valorReais: z.coerce.number().min(0).max(999).optional(),
-    bannerUrl: z.string().url().nullable().optional(),
-  })
-  .refine((d) => d.minJogadores <= d.vagasTotal, {
-    message: "O mínimo de jogadores não pode passar do total de vagas.",
-    path: ["minJogadores"],
-  })
-  .refine((d) => d.dataInicio >= hojeNoBrasil(), {
-    message: "A data de início não pode ser no passado.",
-    path: ["dataInicio"],
-  });
-
-export type CriarMesaPresencialResult =
+export type CriarMesaDoMestreResult =
   | { ok: true; slug: string }
   | { ok: false; error: string };
 
-export async function criarMesaPresencial(
+/**
+ * Criação de mesa pelo próprio mestre, online ou presencial.
+ *
+ * O que mantém isso fora do Conflito A (§5.1) é `cobranca_gerenciada_pelo_site:
+ * false` — o site nunca processa o dinheiro dessas mesas, o valor é só
+ * informativo e combinado fora. Mesa online comissionada continua sendo só do
+ * admin. Essas duas travas (cobrança e `aguardando_aprovacao`) também vivem na
+ * policy `mesa_cria`, então não dependem desta função.
+ */
+export async function criarMesaDoMestre(
   input: unknown,
-): Promise<CriarMesaPresencialResult> {
-  const parsed = schema.safeParse(input);
+): Promise<CriarMesaDoMestreResult> {
+  const parsed = schemaMesaDoMestre.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
@@ -97,13 +75,9 @@ export async function criarMesaPresencial(
     return { ok: false, error: "Você precisa ter o papel de mestre pra criar uma mesa." };
   }
 
-  const precoCentavos = dados.gratuita ? 0 : Math.round((dados.valorReais ?? 0) * 100);
-  if (!dados.gratuita && precoCentavos > 0 && precoCentavos < 500) {
-    return {
-      ok: false,
-      error: "O valor sugerido precisa ser R$5,00 ou mais (ou marque como gratuita).",
-    };
-  }
+  const preco = precoEmCentavos(dados);
+  if (!preco.ok) return { ok: false, error: preco.error };
+  const precoCentavos = preco.centavos;
 
   // "Outro" é uma linha real em `sistemas` (sem logo fixo) — confere pelo
   // slug no servidor, não confia só no que o cliente disse ser "outro".
@@ -127,9 +101,13 @@ export async function criarMesaPresencial(
       sinopse: dados.sinopse,
       sistema_id: dados.sistemaId,
       sistema_outro: sistemaEscolhido?.slug === "outro" ? dados.sistemaOutroNome : null,
-      tipo: "one_shot",
-      modalidade: "presencial",
-      cidade_uf: dados.cidadeUf,
+      tipo: dados.tipo,
+      modalidade: dados.modalidade,
+      // Cada modalidade zera os campos da outra: mesa que troca de modalidade
+      // numa edição não pode ficar com cidade órfã nem com VTT fantasma.
+      cidade_uf: dados.modalidade === "presencial" ? dados.cidadeUf : null,
+      plataforma_vtt: dados.modalidade === "online" ? dados.plataformaVtt || null : null,
+      plataforma_voz: dados.modalidade === "online" ? dados.plataformaVoz || null : null,
       classificacao: dados.classificacao,
       nivel_experiencia: dados.nivelExperiencia,
       vagas_total: dados.vagasTotal,
@@ -146,7 +124,7 @@ export async function criarMesaPresencial(
     .single();
 
   if (mesaError || !mesa) {
-    console.error("[criarMesaPresencial] erro ao inserir mesa:", mesaError?.message);
+    console.error("[criarMesaDoMestre] erro ao inserir mesa:", mesaError?.message);
     return { ok: false, error: "Não deu pra criar a mesa. Tente de novo em instantes." };
   }
 
@@ -155,16 +133,17 @@ export async function criarMesaPresencial(
     .insert(perguntasFixas(mesa.id));
 
   if (perguntasError) {
-    console.error("[criarMesaPresencial] erro ao semear perguntas fixas:", perguntasError.message);
+    console.error("[criarMesaDoMestre] erro ao semear perguntas fixas:", perguntasError.message);
   }
 
   await notificarAdminsSobreMesaPendente(mesa.id, dados.titulo, perfil.nome_exibicao);
 
+  revalidatePath("/mesas");
   revalidatePath("/presencial");
   return { ok: true, slug };
 }
 
-export type AtualizarMesaPresencialResult =
+export type AtualizarMesaDoMestreResult =
   | { ok: true; slug: string }
   | { ok: false; error: string };
 
@@ -175,11 +154,11 @@ export type AtualizarMesaPresencialResult =
  * status/aprovada_por/slug, e não deixa reduzir vagas abaixo de quem já
  * foi aprovado.
  */
-export async function atualizarMesaPresencialAction(
+export async function atualizarMesaDoMestreAction(
   mesaId: string,
   input: unknown,
-): Promise<AtualizarMesaPresencialResult> {
-  const parsed = schema.safeParse(input);
+): Promise<AtualizarMesaDoMestreResult> {
+  const parsed = schemaMesaDoMestre.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
   }
@@ -217,13 +196,9 @@ export async function atualizarMesaPresencialAction(
     };
   }
 
-  const precoCentavos = dados.gratuita ? 0 : Math.round((dados.valorReais ?? 0) * 100);
-  if (!dados.gratuita && precoCentavos > 0 && precoCentavos < 500) {
-    return {
-      ok: false,
-      error: "O valor sugerido precisa ser R$5,00 ou mais (ou marque como gratuita).",
-    };
-  }
+  const preco = precoEmCentavos(dados);
+  if (!preco.ok) return { ok: false, error: preco.error };
+  const precoCentavos = preco.centavos;
 
   const { data: sistemaEscolhido } = await supabase
     .from("sistemas")
@@ -241,7 +216,11 @@ export async function atualizarMesaPresencialAction(
       sinopse: dados.sinopse,
       sistema_id: dados.sistemaId,
       sistema_outro: sistemaEscolhido?.slug === "outro" ? dados.sistemaOutroNome : null,
-      cidade_uf: dados.cidadeUf,
+      tipo: dados.tipo,
+      modalidade: dados.modalidade,
+      cidade_uf: dados.modalidade === "presencial" ? dados.cidadeUf : null,
+      plataforma_vtt: dados.modalidade === "online" ? dados.plataformaVtt || null : null,
+      plataforma_voz: dados.modalidade === "online" ? dados.plataformaVoz || null : null,
       classificacao: dados.classificacao,
       nivel_experiencia: dados.nivelExperiencia,
       vagas_total: dados.vagasTotal,
@@ -255,7 +234,7 @@ export async function atualizarMesaPresencialAction(
     .eq("id", mesaId);
 
   if (error) {
-    console.error("[atualizarMesaPresencialAction] erro:", error.message);
+    console.error("[atualizarMesaDoMestreAction] erro:", error.message);
     return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
   }
 
@@ -263,6 +242,7 @@ export async function atualizarMesaPresencialAction(
     await notificarJogadoresAprovadosSobreReagendamento(mesaId);
   }
 
+  revalidatePath("/mesas");
   revalidatePath("/presencial");
   revalidatePath(`/mesas/${mesaAtual.slug}`);
   return { ok: true, slug: mesaAtual.slug };
@@ -271,7 +251,7 @@ export async function atualizarMesaPresencialAction(
 export type SolicitarMestreResult = { ok: true } | { ok: false; error: string };
 
 /**
- * CTA no gate de /presencial/nova pra quem ainda não é mestre. Não
+ * CTA no gate de /mesas/nova pra quem ainda não é mestre. Não
  * promove ninguém sozinho — só avisa os admins, que promovem pelo
  * painel (/admin/usuarios) depois de conferir o perfil.
  */
@@ -304,6 +284,6 @@ export async function solicitarMestreAction(): Promise<SolicitarMestreResult> {
 
   await notificarAdminsSobreSolicitacaoMestre(perfil.nome_exibicao);
 
-  revalidatePath("/presencial/nova");
+  revalidatePath("/mesas/nova");
   return { ok: true };
 }
