@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Bell, BellDot } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ type Notificacao = {
 };
 
 export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: number }) {
+  const t = useTranslations("Conta");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [naoLidas, setNaoLidas] = useState(naoLidasIniciais);
@@ -73,7 +75,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
     <DropdownMenu onOpenChange={aoAbrir}>
       <DropdownMenuTrigger
         render={<Button variant="ghost" size="icon" className="relative" />}
-        aria-label="Notificações"
+        aria-label={t("notificacoes")}
       >
         {naoLidas > 0 ? <BellDot className="size-5" /> : <Bell className="size-5" />}
         {naoLidas > 0 && (
@@ -85,7 +87,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuGroup>
           <div className="flex items-center justify-between px-2 py-1.5">
-            <DropdownMenuLabel className="p-0">Notificações</DropdownMenuLabel>
+            <DropdownMenuLabel className="p-0">{t("notificacoes")}</DropdownMenuLabel>
             <div className="flex items-center gap-3">
               {naoLidas > 0 && (
                 <button
@@ -109,7 +111,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
           </div>
           <DropdownMenuSeparator />
           {pending && (
-            <p className="px-2 py-3 text-center text-sm text-muted-foreground">Carregando...</p>
+            <p className="px-2 py-3 text-center text-sm text-muted-foreground">{t("carregando")}</p>
           )}
           {!pending && notificacoes?.length === 0 && (
             <p className="px-2 py-3 text-center text-sm text-muted-foreground">

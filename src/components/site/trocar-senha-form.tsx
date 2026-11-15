@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trocarSenhaAction } from "@/app/[locale]/conta/actions";
 
 export function TrocarSenhaForm() {
+  const t = useTranslations("Conta");
   const [aberto, setAberto] = useState(false);
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export function TrocarSenhaForm() {
     const confirmarSenha = formData.get("confirmarSenha");
 
     if (novaSenha !== confirmarSenha) {
-      setErro("A confirmação não bate com a nova senha.");
+      setErro(t("senhaNaoBate"));
       return;
     }
 
@@ -46,10 +48,10 @@ export function TrocarSenhaForm() {
   return (
     <div className="mt-10">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-lg font-bold">Segurança</h2>
+        <h2 className="font-heading text-lg font-bold">{t("seguranca")}</h2>
         {!aberto && (
           <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
-            Trocar senha
+            {t("trocarSenha")}
           </Button>
         )}
       </div>
@@ -57,11 +59,11 @@ export function TrocarSenhaForm() {
       {aberto && (
         <form onSubmit={onSubmit} className="mt-4 space-y-4 rounded-xl border border-border bg-card/40 p-5">
           <div className="space-y-2">
-            <Label htmlFor="senhaAtual">Senha atual</Label>
+            <Label htmlFor="senhaAtual">{t("senhaAtual")}</Label>
             <Input id="senhaAtual" name="senhaAtual" type="password" autoComplete="current-password" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="novaSenha">Nova senha</Label>
+            <Label htmlFor="novaSenha">{t("novaSenha")}</Label>
             <Input
               id="novaSenha"
               name="novaSenha"
@@ -72,7 +74,7 @@ export function TrocarSenhaForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmarSenha">Confirmar nova senha</Label>
+            <Label htmlFor="confirmarSenha">{t("confirmarNovaSenha")}</Label>
             <Input
               id="confirmarSenha"
               name="confirmarSenha"
@@ -84,14 +86,14 @@ export function TrocarSenhaForm() {
           </div>
 
           {erro && <p className="text-sm text-destructive">{erro}</p>}
-          {sucesso && <p className="text-sm text-sucesso">Senha alterada com sucesso.</p>}
+          {sucesso && <p className="text-sm text-sucesso">{t("senhaAlterada")}</p>}
 
           <div className="flex gap-2">
             <Button type="submit" disabled={pending}>
-              {pending ? "Salvando..." : "Salvar nova senha"}
+              {pending ? t("salvando") : t("salvarNovaSenha")}
             </Button>
             <Button type="button" variant="outline" onClick={fechar}>
-              {sucesso ? "Fechar" : "Cancelar"}
+              {sucesso ? t("fechar") : t("cancelar")}
             </Button>
           </div>
         </form>

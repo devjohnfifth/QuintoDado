@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { EditarPerfilForm } from "./editar-perfil-form";
@@ -35,6 +36,7 @@ export function PerfilSection({
   sistemasFavoritos: string[];
   sistemas: Sistema[];
 }) {
+  const t = useTranslations("Conta");
   const [editando, setEditando] = useState(false);
   const nomesFavoritos = sistemas
     .filter((s) => sistemasFavoritos.includes(s.id))
@@ -60,7 +62,7 @@ export function PerfilSection({
         </div>
         {!editando && (
           <Button variant="outline" size="sm" onClick={() => setEditando(true)}>
-            Editar perfil
+            {t("editarPerfil")}
           </Button>
         )}
       </div>

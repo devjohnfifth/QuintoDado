@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,9 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { cancelarMesaMestreAction } from "../presencial/[id]/actions";
+import { cancelarMesaMestreAction } from "../mesas/candidaturas/[id]/actions";
 
 export function CancelarMesaMestreButton({ mesaId }: { mesaId: string }) {
+  const t = useTranslations("Conta");
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function CancelarMesaMestreButton({ mesaId }: { mesaId: string }) {
         await cancelarMesaMestreAction(mesaId);
         setOpen(false);
       } catch (e) {
-        setErro(e instanceof Error ? e.message : "Não deu pra cancelar a mesa.");
+        setErro(e instanceof Error ? e.message : t("erroCancelarMesa"));
       }
     });
   }
@@ -37,22 +39,19 @@ export function CancelarMesaMestreButton({ mesaId }: { mesaId: string }) {
         onClick={() => setOpen(true)}
         className="text-xs text-muted-foreground hover:text-destructive hover:underline"
       >
-        Cancelar
+        {t("cancelar")}
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancelar essa mesa?</DialogTitle>
-            <DialogDescription>
-              A mesa some da listagem pública e para de aceitar candidaturas. Isso não pode ser
-              desfeito por aqui.
-            </DialogDescription>
+            <DialogTitle>{t("cancelarMesaTitulo")}</DialogTitle>
+            <DialogDescription>{t("cancelarMesaCorpo")}</DialogDescription>
           </DialogHeader>
           {erro && <p className="text-sm text-destructive">{erro}</p>}
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>Voltar</DialogClose>
+            <DialogClose render={<Button variant="outline" />}>{t("voltar")}</DialogClose>
             <Button variant="destructive" disabled={pending} onClick={confirmar}>
-              {pending ? "Cancelando..." : "Sim, cancelar mesa"}
+              {pending ? t("cancelando") : t("confirmarCancelarMesa")}
             </Button>
           </DialogFooter>
         </DialogContent>

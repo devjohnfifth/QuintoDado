@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Ticket } from "lucide-react";
 import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
+import { meusDadosPessoais } from "@/lib/auth/dados-pessoais";
 import { Button } from "@/components/ui/button";
+import { mesaVisivelParaODono } from "@/lib/mesas/cancelamento";
 import { PerfilSection } from "@/components/site/perfil-section";
 import { TrocarSenhaForm } from "@/components/site/trocar-senha-form";
 import { CancelarMesaMestreButton } from "./cancelar-mesa-mestre-button";
@@ -13,7 +16,10 @@ import { sairAction } from "../entrar/actions";
 
 const STATUS_MESA_CANCELAVEL = ["aguardando_aprovacao", "publicada", "confirmada", "em_andamento"];
 
-export const metadata: Metadata = { title: "Minha conta — Quinto Dado", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Conta");
+  return { title: t("metaTitulo"), robots: { index: false } };
+}
 
 const STATUS_LABEL: Record<string, string> = {
   candidatura_enviada: "Candidatura enviada",
@@ -75,6 +81,7 @@ export default async function ContaPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const t = await getTranslations("Conta");
 
   if (!isSupabaseConfigured()) {
     redirect({ href: "/entrar", locale });
@@ -91,12 +98,17 @@ export default async function ContaPage({
     return null;
   }
 
-  const [{ data: perfil }, { data: sistemas }] = await Promise.all([
+  // Nome civil e telefone vêm pela função `meus_dados_pessoais()`: desde a
+  // migration 20261115210000 essas colunas não são legíveis pelas chaves
+  // públicas, porque `profiles` precisa ser lido publicamente (nome de
+  // exibição e avatar) e isso arrastava junto o dado pessoal de todo mundo.
+  const [{ data: perfil }, pessoais, { data: sistemas }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, nome_exibicao, nome_completo, telefone, avatar_url, papel, bio, sistemas_favoritos")
+      .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos")
       .eq("id", user.id)
       .single(),
+    meusDadosPessoais(supabase),
     // "Outro" não faz sentido como sistema favorito fixo — só existe pra
     // deixar quem cria mesa apontar um sistema fora do catálogo.
     supabase.from("sistemas").select("id, nome").eq("ativo", true).neq("slug", "outro").order("nome"),
@@ -111,7 +123,7 @@ export default async function ContaPage({
     ["mestre", "admin"].includes(perfil?.papel ?? "")
       ? supabase
           .from("mesas")
-          .select("id, slug, titulo, status, modalidade")
+          .select("id, slug, titulo, status, modalidade, cancelado_em, cobranca_gerenciada_pelo_site")
           .eq("mestre_id", user.id)
           .order("criado_em", { ascending: false })
       : Promise.resolve({ data: null }),
@@ -122,12 +134,19 @@ export default async function ContaPage({
       .order("criado_em", { ascending: false }),
   ]);
 
+  // Mesa cancelada fica na lista por um dia — tempo de o mestre ver que o
+  // cancelamento pegou — e depois some, pra não entulhar a conta com mesa que
+  // não existe mais. O filtro é aqui e não na query porque a lista precisa
+  // distinguir "nunca criei mesa" de "as minhas já sumiram".
+  const mesasVisiveis = mesasCriadas?.filter((mesa) => mesaVisivelParaODono(mesa)) ?? null;
+  const escondeuCanceladas = (mesasCriadas?.length ?? 0) > (mesasVisiveis?.length ?? 0);
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <PerfilSection
         nomeExibicao={perfil?.nome_exibicao ?? "?"}
-        nomeCompleto={perfil?.nome_completo ?? null}
-        telefone={perfil?.telefone ?? null}
+        nomeCompleto={pessoais?.nome_completo ?? null}
+        telefone={pessoais?.telefone ?? null}
         username={perfil?.username ?? ""}
         bio={perfil?.bio ?? null}
         avatarUrl={perfil?.avatar_url ?? null}
@@ -142,25 +161,25 @@ export default async function ContaPage({
           href="/admin"
           className="mt-6 inline-block rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground"
         >
-          Ir para o painel admin
+          {t("painelAdmin")}
         </Link>
       )}
 
-      {mesasCriadas && (
+      {mesasVisiveis && (
         <>
           <div className="mt-10 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-bold">Minhas mesas</h2>
+            <h2 className="font-heading text-lg font-bold">{t("minhasMesas")}</h2>
             <Link href="/mesas/nova" className="text-sm font-medium text-primary hover:underline">
-              + Nova mesa
+              {t("novaMesa")}
             </Link>
           </div>
-          {mesasCriadas.length === 0 ? (
+          {mesasVisiveis.length === 0 ? (
             <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              Você ainda não criou nenhuma mesa.
+              {escondeuCanceladas ? t("semMesasAtivas") : t("semMesas")}
             </p>
           ) : (
             <ul className="mt-3 space-y-3">
-              {mesasCriadas.map((mesa) => (
+              {mesasVisiveis.map((mesa) => (
                 <li
                   key={mesa.id}
                   className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
@@ -176,31 +195,33 @@ export default async function ContaPage({
                     >
                       {STATUS_MESA_LABEL[mesa.status] ?? mesa.status}
                     </span>
-                    {mesa.modalidade === "presencial" && (
+                    {/* Vale pras duas modalidades: o mestre publica mesa
+                        online também, e antes ele ficava sem nenhuma ação
+                        aqui. Editar fica de fora quando o site é quem cobra a
+                        mesa — essa é do admin, e a tela de edição recusaria. */}
+                    {mesa.status !== "cancelada" && (
                       <>
-                        {mesa.status !== "cancelada" && (
-                          <>
-                            <Link
-                              href={`/presencial/${mesa.id}`}
-                              className="text-xs text-primary hover:underline"
-                            >
-                              Candidaturas
-                            </Link>
-                            <Link
-                              href={`/mesas/editar/${mesa.id}`}
-                              className="text-xs text-primary hover:underline"
-                            >
-                              Editar
-                            </Link>
-                          </>
-                        )}
-                        {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
-                          <AprovarMesaAdminButton mesaId={mesa.id} />
-                        )}
-                        {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
-                          <CancelarMesaMestreButton mesaId={mesa.id} />
+                        <Link
+                          href={`/mesas/candidaturas/${mesa.id}`}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {t("candidaturasDaMesa")}
+                        </Link>
+                        {!mesa.cobranca_gerenciada_pelo_site && (
+                          <Link
+                            href={`/mesas/editar/${mesa.id}`}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            {t("editarMesa")}
+                          </Link>
                         )}
                       </>
+                    )}
+                    {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
+                      <AprovarMesaAdminButton mesaId={mesa.id} />
+                    )}
+                    {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
+                      <CancelarMesaMestreButton mesaId={mesa.id} />
                     )}
                   </div>
                 </li>
@@ -210,10 +231,10 @@ export default async function ContaPage({
         </>
       )}
 
-      <h2 className="mt-10 font-heading text-lg font-bold">Minhas candidaturas</h2>
+      <h2 className="mt-10 font-heading text-lg font-bold">{t("minhasCandidaturas")}</h2>
       {!inscricoes || inscricoes.length === 0 ? (
         <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          Você ainda não se candidatou a nenhuma mesa.
+          {t("semCandidaturas")}
         </p>
       ) : (
         <ul className="mt-3 space-y-3">
@@ -242,7 +263,7 @@ export default async function ContaPage({
 
       {ingressos && ingressos.length > 0 && (
         <>
-          <h2 className="titulo-display titulo-secao mt-12">Meus ingressos</h2>
+          <h2 className="titulo-display titulo-secao mt-12">{t("meusIngressos")}</h2>
           {/* Com cara de ingresso de verdade: o canhoto à esquerda com o
               picote, igual ao card de mesa e aos ingressos do evento. Antes
               era uma linha de lista que não parecia valer nada. */}
@@ -286,7 +307,7 @@ export default async function ContaPage({
 
       <form action={sairAction} className="mt-10">
         <Button type="submit" variant="outline">
-          Sair da conta
+          {t("sair")}
         </Button>
       </form>
     </div>

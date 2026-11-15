@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Camera } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
@@ -33,6 +34,7 @@ export function EditarPerfilForm({
   sistemas: Sistema[];
   onCancelar: () => void;
 }) {
+  const t = useTranslations("Conta");
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
@@ -108,7 +110,7 @@ export function EditarPerfilForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nomeExibicao">Nome de exibição</Label>
+          <Label htmlFor="nomeExibicao">{t("nomeExibicao")}</Label>
           <Input
             id="nomeExibicao"
             value={nome}
@@ -119,7 +121,7 @@ export function EditarPerfilForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="nomeCompleto">Nome completo (opcional)</Label>
+          <Label htmlFor="nomeCompleto">{t("nomeCompleto")}</Label>
           <Input id="nomeCompleto" name="nomeCompleto" defaultValue={nomeCompleto ?? ""} maxLength={160} />
           <p className="text-xs text-muted-foreground">
             Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.
@@ -127,7 +129,7 @@ export function EditarPerfilForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="telefone">Telefone (opcional)</Label>
+          <Label htmlFor="telefone">{t("telefone")}</Label>
           <Input id="telefone" name="telefone" defaultValue={telefone ?? ""} maxLength={20} placeholder="31999999999" />
           <p className="text-xs text-muted-foreground">
             Também só pedido quando precisar, como comprar ingresso de evento.
@@ -140,7 +142,7 @@ export function EditarPerfilForm({
         </div>
 
         <div className="space-y-2">
-          <Label>Sistemas favoritos</Label>
+          <Label>{t("sistemasFavoritos")}</Label>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {sistemas.map((s) => (
               <label
@@ -161,10 +163,10 @@ export function EditarPerfilForm({
 
         <div className="flex gap-2">
           <Button type="submit" disabled={pending}>
-            {pending ? "Salvando..." : "Salvar perfil"}
+            {pending ? t("salvando") : t("salvarPerfil")}
           </Button>
           <Button type="button" variant="outline" onClick={onCancelar}>
-            Cancelar
+            {t("cancelar")}
           </Button>
         </div>
       </form>

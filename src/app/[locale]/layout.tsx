@@ -81,6 +81,7 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const nav = await getTranslations({ locale, namespace: "Nav" });
 
   return (
     <html lang={locale} className="dark">
@@ -92,7 +93,7 @@ export default async function LocaleLayout({
             href="#conteudo"
             className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:left-4 focus-visible:top-4 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-primary focus-visible:px-4 focus-visible:py-2 focus-visible:text-sm focus-visible:font-medium focus-visible:text-primary-foreground"
           >
-            Pular pro conteúdo
+            {nav("pularParaConteudo")}
           </a>
           <div className="relative isolate flex min-h-screen flex-col">
             {/* Halo de marca: o azul e o roxo presentes no alto de qualquer
