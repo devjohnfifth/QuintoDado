@@ -8,8 +8,9 @@ import { CIDADES_PRESENCIAIS, SLUG_CIDADE, type CidadePresencial } from "@/lib/m
  *
  * São links de verdade, não botões com estado no cliente: cada cidade vira
  * um endereço que dá pra compartilhar, o robô de busca rastreia, e funciona
- * sem JS. Paginar junto com o filtro também sai de graça, porque a
- * `Paginacao` repassa a query.
+ * sem JS. Desde que cada cidade ganhou página própria (`/presencial/[cidade]`)
+ * esses endereços também têm título e descrição próprios — é o que responde a
+ * busca por "RPG presencial em São Paulo".
  *
  * Cada chip carrega quantas mesas tem. Cidade sem mesa aparece apagada mas
  * continua clicável — esconder faria parecer que a cidade não é atendida,
@@ -25,7 +26,7 @@ export function FiltroCidades({
   selecionada: CidadePresencial | null;
   total: number;
 }) {
-  const t = useTranslations("PresencialBh");
+  const t = useTranslations("Presencial");
 
   const classe = (ativo: boolean, vazio: boolean) =>
     `inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
@@ -50,7 +51,7 @@ export function FiltroCidades({
         return (
           <Link
             key={cidade}
-            href={{ pathname: "/presencial", query: { cidade: SLUG_CIDADE[cidade] } }}
+            href={`/presencial/${SLUG_CIDADE[cidade]}`}
             aria-current={ativo ? "page" : undefined}
             className={classe(ativo, n === 0)}
           >

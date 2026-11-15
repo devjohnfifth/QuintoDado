@@ -52,7 +52,7 @@ export async function aprovarInscricaoMestreAction(inscricaoId: string, mesaId: 
 
   await notificarJogadorSobreCandidatura(inscricaoId, "aprovado");
 
-  revalidatePath(`/presencial/${mesaId}`);
+  revalidatePath(`/mesas/candidaturas/${mesaId}`);
   revalidatePath("/mesas");
 }
 
@@ -79,7 +79,7 @@ export async function recusarInscricaoMestreAction(
 
   await notificarJogadorSobreCandidatura(inscricaoId, "recusado", motivo);
 
-  revalidatePath(`/presencial/${mesaId}`);
+  revalidatePath(`/mesas/candidaturas/${mesaId}`);
   revalidatePath("/mesas");
 }
 

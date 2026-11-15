@@ -62,6 +62,25 @@ const nextConfig: NextConfig = {
         destination: "/:locale/mesas/editar/:id",
         permanent: true,
       },
+
+      /*
+       * O painel de candidaturas do mestre saiu de /presencial/[id] porque
+       * /presencial/[cidade] tomou o lugar: dois segmentos dinâmicos irmãos
+       * não convivem no App Router, e o endereço por cidade é o que ranqueia.
+       *
+       * O padrão de UUID no source é o que separa um do outro — sem ele,
+       * /presencial/belo-horizonte também cairia nesta regra.
+       */
+      {
+        source: "/presencial/:id(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})",
+        destination: "/mesas/candidaturas/:id",
+        permanent: true,
+      },
+      {
+        source: "/:locale/presencial/:id(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})",
+        destination: "/:locale/mesas/candidaturas/:id",
+        permanent: true,
+      },
     ];
   },
   async headers() {

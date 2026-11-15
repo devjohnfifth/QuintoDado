@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CarregandoPresencialBh() {
+export default function CarregandoPresencial() {
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 sm:py-28">

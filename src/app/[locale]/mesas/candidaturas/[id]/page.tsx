@@ -49,11 +49,14 @@ export default async function MinhasCandidaturasPage({
 
   const { data: mesa } = await supabase
     .from("mesas")
-    .select("id, slug, titulo, vagas_total, mestre_id, modalidade")
+    .select("id, slug, titulo, vagas_total, mestre_id")
     .eq("id", id)
     .maybeSingle();
 
-  if (!mesa || mesa.modalidade !== "presencial" || (mesa.mestre_id !== user.id && perfil?.papel !== "admin")) {
+  // Vale pra mesa online e presencial: desde que o mestre publica mesa online,
+  // travar este painel em "presencial" deixava ele sem jeito de ver quem se
+  // candidatou. Quem pode ver continua sendo só o dono da mesa (ou admin).
+  if (!mesa || (mesa.mestre_id !== user.id && perfil?.papel !== "admin")) {
     notFound();
   }
 

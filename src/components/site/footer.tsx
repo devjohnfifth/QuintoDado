@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Camera, Dices, MessageCircle, PlayCircle, type LucideIcon } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SITE_LINKS } from "@/lib/site-links";
+import { CIDADES_PRESENCIAIS, SLUG_CIDADE } from "@/lib/mesas/cidades";
 import { Container } from "@/components/site/container";
 import logo5d from "@/assets/brand/logo-5d.png";
 
@@ -36,7 +37,7 @@ export function SiteFooter() {
     { href: "/suplementos", label: nav("suplementos") },
     { href: "/mesas", label: nav("mesas") },
     { href: "/eventos", label: nav("eventos") },
-    { href: "/presencial", label: nav("presencialBh") },
+    { href: "/presencial", label: nav("presencial") },
     { href: "/sobre", label: nav("sobre") },
   ];
   const externos: { chave: string; href: string; label: string; Icone: LucideIcon }[] = [
@@ -45,6 +46,13 @@ export function SiteFooter() {
     { chave: "youtube", href: SITE_LINKS.youtube, label: t("youtube"), Icone: PlayCircle },
     { chave: "mesaquest", href: SITE_LINKS.mesaquest, label: t("mesaquest"), Icone: Dices },
   ];
+  /* As cidades no rodapé fazem dois trabalhos: dão um atalho de navegação em
+     toda página, e são link interno pras páginas que respondem a busca local
+     ("RPG presencial em Curitiba"). */
+  const cidades = CIDADES_PRESENCIAIS.map((cidade) => ({
+    href: `/presencial/${SLUG_CIDADE[cidade]}`,
+    label: cidade,
+  }));
   const legal = [
     { href: "/termos", label: t("termos") },
     { href: "/privacidade", label: t("privacidade") },
@@ -60,7 +68,7 @@ export function SiteFooter() {
       <div aria-hidden className="textura-hex pointer-events-none absolute inset-0 opacity-[0.045]" />
 
       <Container className="relative py-14">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="group inline-flex items-center gap-3">
               <Image
@@ -103,6 +111,18 @@ export function SiteFooter() {
               </li>
             ))}
           </Coluna>
+
+          <nav aria-label={t("cidades")}>
+            <Coluna titulo={t("cidades")}>
+              {cidades.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className={CLASSE_LINK}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </Coluna>
+          </nav>
 
           <nav aria-label={t("legal")}>
             <Coluna titulo={t("legal")}>
