@@ -39,3 +39,17 @@ export function cidadeDoSlug(slug: string | undefined): CidadePresencial | null 
   const achada = CIDADES_PRESENCIAIS.find((c) => SLUG_CIDADE[c] === slug);
   return achada ?? null;
 }
+
+/**
+ * As cidades atendidas em texto corrido: "A, B, C e D".
+ *
+ * Existe pra nenhum texto do site repetir essa lista à mão. Quando uma cidade
+ * nova entrar em `CIDADES_PRESENCIAIS`, ela aparece sozinha na FAQ, na ajuda
+ * do formulário e na seção de cidades atendidas — em vez de quatro textos
+ * ficarem desatualizados em silêncio, que é o que acontecia antes.
+ */
+export function listaDeCidades(cidades: readonly string[] = CIDADES_PRESENCIAIS): string {
+  if (cidades.length === 0) return "";
+  if (cidades.length === 1) return cidades[0];
+  return `${cidades.slice(0, -1).join(", ")} e ${cidades[cidades.length - 1]}`;
+}

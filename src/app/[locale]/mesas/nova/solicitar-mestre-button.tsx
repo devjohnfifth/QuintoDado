@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { UserPlus, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { solicitarMestreAction } from "./actions";
 
 export function SolicitarMestreButton({ jaSolicitado }: { jaSolicitado: boolean }) {
+  const t = useTranslations("MesaNova");
   const [enviado, setEnviado] = useState(jaSolicitado);
   const [erro, setErro] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -38,7 +40,7 @@ export function SolicitarMestreButton({ jaSolicitado }: { jaSolicitado: boolean 
         }
       >
         <UserPlus className="size-4" aria-hidden />
-        {pending ? "Enviando..." : "Quero ser mestre de mesas presenciais em BH"}
+        {pending ? t("solicitarEnviando") : t("solicitarMestre")}
       </Button>
       {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
     </div>

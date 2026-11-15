@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import pracaSete from "@/assets/presencial/praca-sete.webp";
 import { Container } from "@/components/site/container";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
-import { SLUG_CIDADE, cidadeDoSlug } from "@/lib/mesas/cidades";
+import { SLUG_CIDADE, cidadeDoSlug, listaDeCidades } from "@/lib/mesas/cidades";
 import { buttonVariants } from "@/components/ui/button";
 import {
   buscarMesasPresenciais,
@@ -21,9 +21,15 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const title = "RPG de mesa presencial: BH, SP, Rio, Fortaleza e Curitiba — Quinto Dado";
-  const description =
-    "Mesas presenciais de RPG em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, criadas por mestres cadastrados no Quinto Dado. Grátis ou com valor combinado pra handouts.";
+  /*
+   * O título não lista mais as cidades: com cinco já passava de 70 caracteres
+   * (o Google corta perto de 60) e a lista vai crescer. Quem procura por
+   * cidade cai na página dela, que carrega o nome no próprio título. Aqui
+   * fica a palavra-chave geral, e as cidades entram na descrição, montadas a
+   * partir da lista de verdade.
+   */
+  const title = "RPG de mesa presencial: ache mesa na sua cidade — Quinto Dado";
+  const description = `Mesas presenciais de RPG em ${listaDeCidades()}, criadas por mestres cadastrados no Quinto Dado. Grátis ou com valor combinado direto com quem mestra.`;
 
   return {
     title,

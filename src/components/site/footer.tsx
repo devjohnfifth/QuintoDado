@@ -68,7 +68,7 @@ export function SiteFooter() {
       <div aria-hidden className="textura-hex pointer-events-none absolute inset-0 opacity-[0.045]" />
 
       <Container className="relative py-14">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="group inline-flex items-center gap-3">
               <Image
@@ -112,18 +112,6 @@ export function SiteFooter() {
             ))}
           </Coluna>
 
-          <nav aria-label={t("cidades")}>
-            <Coluna titulo={t("cidades")}>
-              {cidades.map((l) => (
-                <li key={l.href}>
-                  <Link href={l.href} className={CLASSE_LINK}>
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </Coluna>
-          </nav>
-
           <nav aria-label={t("legal")}>
             <Coluna titulo={t("legal")}>
               {legal.map((l) => (
@@ -137,7 +125,29 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <div className="mt-12 border-t border-border/60 pt-6 text-xs text-muted-foreground">
+        {/* Cidades em faixa, não em coluna: como quinta coluna elas esmagavam
+            o grid inteiro (107px cada, com "Grupo no WhatsApp" e o próprio
+            nome do site quebrando em duas linhas). Em linha também aguenta a
+            lista crescer, que é o plano. */}
+        <nav aria-label={t("cidades")} className="mt-10 border-t border-border/60 pt-6">
+          <h3 className="rotulo-caps text-foreground/70">{t("cidades")}</h3>
+          <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2">
+            {cidades.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className={CLASSE_LINK}>
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <Link href="/presencial" className={`${CLASSE_LINK} text-primary`}>
+                {t("todasAsCidades")}
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="mt-10 border-t border-border/60 pt-6 text-xs text-muted-foreground">
           <p className="max-w-3xl leading-relaxed">{t("avisoLegal")}</p>
           <p className="mt-3">{t("direitos", { ano: new Date().getFullYear() })}</p>
         </div>

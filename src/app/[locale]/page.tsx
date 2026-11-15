@@ -9,6 +9,7 @@ import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
 import { lotadasPorUltimo, mesaLotada } from "@/lib/mesas/vagas";
+import { listaDeCidades } from "@/lib/mesas/cidades";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Carrossel } from "@/components/site/carrossel";
 import { NumeroAnimado } from "@/components/site/numero-animado";
@@ -212,7 +213,12 @@ export default async function HomePage({
     ) : (
       <SuplementoCard suplemento={n.suplemento} destaque={destaque} noticia />
     );
-  const perguntasFaq = t.raw("faq.perguntas") as { pergunta: string; resposta: string }[];
+  // A FAQ vem por `t.raw` (é uma lista), então o ICU não interpola sozinho.
+  // A lista de cidades entra aqui pra ninguém precisar reescrever a resposta
+  // quando uma cidade nova for atendida.
+  const perguntasFaq = (t.raw("faq.perguntas") as { pergunta: string; resposta: string }[]).map(
+    (item) => ({ ...item, resposta: item.resposta.replace("{cidades}", listaDeCidades()) }),
+  );
 
   return (
     <>

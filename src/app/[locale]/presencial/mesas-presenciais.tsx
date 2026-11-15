@@ -11,7 +11,12 @@ import { FiltroCidades } from "@/components/site/filtro-cidades";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
-import { CIDADES_PRESENCIAIS, SLUG_CIDADE, type CidadePresencial } from "@/lib/mesas/cidades";
+import {
+  CIDADES_PRESENCIAIS,
+  SLUG_CIDADE,
+  listaDeCidades,
+  type CidadePresencial,
+} from "@/lib/mesas/cidades";
 import { lotadasPorUltimo } from "@/lib/mesas/vagas";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -168,7 +173,9 @@ export async function OutraCidade() {
             <MessageCircle className="size-4" aria-hidden />
             {t("outraCidadeCta")}
           </a>
-          <p className="mt-4 text-sm text-muted-foreground">{t("cidadesAtendidas")}</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            {t("cidadesAtendidas", { cidades: listaDeCidades() })}
+          </p>
         </div>
       </Container>
     </section>

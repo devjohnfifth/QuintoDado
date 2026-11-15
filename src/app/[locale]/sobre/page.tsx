@@ -30,8 +30,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const title = "O que é o Quinto Dado";
+  // Sem contar as frentes: o número estava travado aqui e no corpo da página,
+  // e o braço de jogos digitais vem aí.
   const description =
-    "Mesas de RPG, material autoral gratuito e uma comunidade que leva ferramentas de segurança a sério. Conheça as três frentes do Quinto Dado.";
+    "Mesas de RPG online e presenciais, material autoral gratuito e uma comunidade que leva ferramentas de segurança a sério. Conheça o Quinto Dado e quem mestra por aqui.";
 
   return {
     title,

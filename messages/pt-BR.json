@@ -99,7 +99,7 @@
     },
     "mesasAbertas": {
       "titulo": "Mesas abertas",
-      "subtitulo": "RPG de mesa online e presencial com vaga aberta agora.",
+      "subtitulo": "RPG de mesa online e presencial. As que ainda têm vaga aparecem primeiro.",
       "verTodas": "Ver todas as mesas"
     },
     "faq": {
@@ -127,7 +127,7 @@
         },
         {
           "pergunta": "Dá pra jogar presencial?",
-          "resposta": "Dá. Mestres cadastrados publicam as próprias mesas presenciais em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, e cada mesa combina valor e local direto com quem mestra. Cada cidade tem página própria, com as mesas abertas nela."
+          "resposta": "Dá. Mestres cadastrados publicam as próprias mesas presenciais em {cidades}, e cada mesa combina valor e local direto com quem mestra. Cada cidade tem página própria, com as mesas abertas nela."
         },
         {
           "pergunta": "E se a minha cidade não estiver na lista?",
@@ -153,7 +153,7 @@
   },
   "Sobre": {
     "titulo": "O que é o Quinto Dado",
-    "intro": "Quinto Dado é uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério.\n\nNasceu do trabalho do Mestre Quintão, mas cresce com quem mais entra: outros mestres cadastrados publicam as próprias mesas aqui, online ou presenciais, nas cidades que o site atende.",
+    "intro": "Quinto Dado é uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério.\n\nNasceu do trabalho do Mestre Quintão, mas cresce com quem vai chegando: outros mestres cadastrados publicam as próprias mesas aqui, online ou presenciais, nas cidades que o site atende.",
     "pilaresTitulo": "O que tem aqui",
     "pilarSuplementosTitulo": "Suplementos",
     "pilarSuplementosCorpo": "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas. Publicação nova toda semana, a maior parte gratuita.",
@@ -378,11 +378,9 @@
     "vazioEnquantoIsso": "Enquanto isso",
     "restamIngressos": "{n, plural, one {Resta # ingresso} other {Restam # ingressos}}",
     "lotacao": "{vendidos} de {total} lugares",
-    "metaTituloCidade": "Eventos de RPG de mesa em {cidade} — Quinto Dado",
     "jaAconteceu": "Esse evento já aconteceu",
     "jaAconteceuCorpo": "As inscrições estão encerradas. A página fica no ar como registro — e o próximo encontro é anunciado primeiro no grupo do WhatsApp.",
     "seloEncerrado": "Já rolou",
-    "proximosTitulo": "Próximos encontros",
     "jaRolaramTitulo": "Já rolaram",
     "jaRolaramSubtitulo": "O que já aconteceu — fotos, mesas e quem passou por lá."
   },
@@ -406,11 +404,11 @@
     "passo2Corpo": "O valor mostrado é só informativo. Quando existir, é combinado direto entre jogador e mestre — o site não processa esse pagamento.",
     "passo3Titulo": "Joguem",
     "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado.",
-    "cidadesAtendidas": "Por enquanto o site atende Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba — e a lista aumenta conforme a comunidade cresce.",
+    "cidadesAtendidas": "Por enquanto o site atende {cidades} — e a lista aumenta conforme a comunidade cresce.",
     "filtroLabel": "Filtrar por cidade",
     "todasCidades": "Todas",
-    "resumo": "{mesas, plural, one {# mesa aberta} other {# mesas abertas}} em {cidades, plural, one {# cidade} other {# cidades}}",
-    "resumoCidade": "{mesas, plural, one {# mesa aberta} other {# mesas abertas}} em {cidade}",
+    "resumo": "{mesas, plural, one {# mesa} other {# mesas}} em {cidades, plural, one {# cidade} other {# cidades}}",
+    "resumoCidade": "{mesas, plural, one {# mesa} other {# mesas}} em {cidade}",
     "vazioCidadeTitulo": "Nenhuma mesa em {cidade} ainda",
     "vazioCidadeCorpo": "Ainda não tem mesa presencial publicada em {cidade}. Veja as outras cidades ou entre no grupo pra saber assim que abrir uma.",
     "verTodasCidades": "Ver todas as cidades",
@@ -459,7 +457,7 @@
     "sucesso": "Mesa enviada! Ela fica em análise até o admin aprovar.",
     "erroGenerico": "Não deu pra criar a mesa. Tente de novo em instantes.",
     "falarComunidade": "Falar com a comunidade",
-    "campoCidadeAjuda": "Por enquanto o site atende Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba.",
+    "campoCidadeAjuda": "Por enquanto o site atende {cidades}.",
     "campoModalidade": "Modalidade",
     "modalidadeOnline": "Online",
     "modalidadePresencial": "Presencial",
@@ -471,7 +469,9 @@
     "campoVttPlaceholder": "Foundry, Roll20, Owlbear...",
     "campoVoz": "Voz (opcional)",
     "campoVozPlaceholder": "Discord, Meet...",
-    "campoPlataformaAjuda": "Se ainda não decidiu, deixe em branco e combine com o grupo depois."
+    "campoPlataformaAjuda": "Se ainda não decidiu, deixe em branco e combine com o grupo depois.",
+    "solicitarMestre": "Quero publicar minhas próprias mesas",
+    "solicitarEnviando": "Enviando..."
   },
   "Rodape": {
     "avisoLegal": "Quinto Dado é um projeto independente e não possui vínculo com as editoras dos sistemas citados. Materiais compatíveis são publicados sob as respectivas licenças abertas de cada sistema. Marcas e nomes mencionados pertencem a seus respectivos detentores.",
@@ -489,7 +489,8 @@
     "mesaquest": "Mesas no MesaQuest",
     "direitos": "© {ano} Quinto Dado",
     "navRodape": "Rodapé",
-    "cidades": "Presencial por cidade"
+    "cidades": "Presencial por cidade",
+    "todasAsCidades": "Ver todas →"
   },
   "Fechamento": {
     "rotulo": "Pra onde ir agora",
@@ -499,7 +500,7 @@
     "comunidadeCta": "Entrar no grupo",
     "mesas": {
       "titulo": "Mesas abertas",
-      "corpo": "One-shots e campanhas online e presenciais com vaga agora.",
+      "corpo": "One-shots e campanhas, online e presenciais. As com vaga vêm primeiro.",
       "cta": "Ver mesas"
     },
     "suplementos": {

@@ -17,7 +17,7 @@ import {
 import { BannerUpload } from "@/components/site/banner-upload";
 import { EditorMarkdown } from "@/components/site/editor-markdown";
 import type { Sistema } from "@/lib/mesas/types";
-import { CIDADES_PRESENCIAIS, ehCidadePresencial } from "@/lib/mesas/cidades";
+import { CIDADES_PRESENCIAIS, ehCidadePresencial, listaDeCidades } from "@/lib/mesas/cidades";
 import { criarMesaDoMestre, atualizarMesaDoMestreAction } from "./actions";
 
 export type MesaDoMestreExistente = {
@@ -226,7 +226,7 @@ export function NovaMesaForm({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">{t("campoCidadeAjuda")}</p>
+          <p className="text-sm text-muted-foreground">{t("campoCidadeAjuda", { cidades: listaDeCidades() })}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
