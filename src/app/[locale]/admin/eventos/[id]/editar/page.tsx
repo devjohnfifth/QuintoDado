@@ -12,14 +12,20 @@ export default async function EditarEventoPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: evento }, { data: tipos }, { data: imagens }, { data: apoiadores }, { data: atracoes }, { data: mestres }] =
+  const [{ data: evento }, { data: pagamento }, { data: tipos }, { data: imagens }, { data: apoiadores }, { data: atracoes }, { data: mestres }] =
     await Promise.all([
       supabase
         .from("eventos")
         .select(
-          "titulo, subtitulo, descricao, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, chave_pix, whatsapp_confirmacao, capacidade_maxima, banner_url",
+          "titulo, subtitulo, descricao, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, capacidade_maxima, banner_url",
         )
         .eq("id", id)
+        .maybeSingle(),
+      // Chave Pix e WhatsApp saíram de `eventos` na migration 20261115220000.
+      supabase
+        .from("evento_pagamento")
+        .select("chave_pix, whatsapp_confirmacao")
+        .eq("evento_id", id)
         .maybeSingle(),
       supabase
         .from("evento_ingresso_tipos")
@@ -49,8 +55,8 @@ export default async function EditarEventoPage({
     dataFim: evento.data_fim ?? "",
     horarioInicio: evento.horario_inicio?.slice(0, 5) ?? "",
     horarioFim: evento.horario_fim?.slice(0, 5) ?? "",
-    chavePix: evento.chave_pix ?? "",
-    whatsappConfirmacao: evento.whatsapp_confirmacao ?? "",
+    chavePix: pagamento?.chave_pix ?? "",
+    whatsappConfirmacao: pagamento?.whatsapp_confirmacao ?? "",
     capacidadeMaxima: evento.capacidade_maxima,
     bannerUrl: evento.banner_url,
     tipos: (tipos ?? []).map((t) => ({

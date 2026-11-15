@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { meusDadosPessoais } from "@/lib/auth/dados-pessoais";
 import { notificarAdminsSobreIngressoPendente } from "@/lib/notificacoes/ingresso";
 
 const schema = z.object({
@@ -35,8 +36,9 @@ export async function comprarIngressoAction(input: unknown): Promise<ComprarIngr
     return { ok: false, error: "Você precisa estar logado." };
   }
 
-  const [{ data: perfil }, { data: evento }, { data: tipo }] = await Promise.all([
-    supabase.from("profiles").select("nome_completo, telefone").eq("id", user.id).single(),
+  const [perfil, { data: evento }, { data: tipo }] = await Promise.all([
+    // Dados pessoais vêm pela função, não pela coluna (migration 20261115210000).
+    meusDadosPessoais(supabase),
     supabase
       .from("eventos")
       .select("titulo, status, capacidade_maxima, ingressos_vendidos, vendas_abertas")
@@ -129,18 +131,32 @@ export async function dadosPagamentoAction(slug: string): Promise<DadosPagamento
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "Você precisa estar logado." };
 
-  const { data, error } = await supabase
+  // Os dados moram em `evento_pagamento` desde a migration 20261115220000, e
+  // a policy de lá repete o que esta action já checava: precisa de sessão e o
+  // evento precisa estar publicado. O embed parte do evento pelo slug.
+  const { data: encontrado, error } = await supabase
     .from("eventos")
-    .select("chave_pix, whatsapp_confirmacao")
+    .select("evento_pagamento(chave_pix, whatsapp_confirmacao)")
     .eq("slug", slug)
     .eq("status", "publicado")
     .maybeSingle();
+
+  const data = (encontrado?.evento_pagamento ?? null) as {
+    chave_pix: string | null;
+    whatsapp_confirmacao: string | null;
+  } | null;
 
   if (error) {
     console.error("[eventos/pagamento] erro ao buscar dados:", error.message);
     return { ok: false, error: "Não deu pra carregar os dados de pagamento agora." };
   }
-  if (!data) return { ok: false, error: "Esse evento não está mais disponível." };
+  // Dois "vazios" diferentes: evento que não existe (ou saiu do ar) e evento
+  // publicado sem dado de pagamento cadastrado. A mensagem antiga servia só
+  // pro primeiro, e o segundo mandaria a pessoa embora sem motivo.
+  if (!encontrado) return { ok: false, error: "Esse evento não está mais disponível." };
+  if (!data || (!data.chave_pix && !data.whatsapp_confirmacao)) {
+    return { ok: false, error: "Os dados de pagamento desse evento ainda não foram cadastrados." };
+  }
 
   return { ok: true, chavePix: data.chave_pix, whatsapp: data.whatsapp_confirmacao };
 }

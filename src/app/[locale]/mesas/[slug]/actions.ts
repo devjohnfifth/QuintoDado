@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { minhaIdade } from "@/lib/auth/dados-pessoais";
 import { serviceRole } from "@/lib/supabase/service-role";
-import { idadeEmAnos } from "@/lib/idade";
 import { limiteIdadeClassificacao } from "@/lib/mesas/labels";
 
 const schema = z.object({
@@ -31,13 +31,16 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
     return { ok: false, error: "Você precisa estar logado pra se candidatar." };
   }
 
-  const [{ data: mesa }, { data: perfil }, { data: perguntas }] = await Promise.all([
+  const [{ data: mesa }, idadeDoUsuario, { data: perguntas }] = await Promise.all([
     supabase
       .from("mesas")
       .select("classificacao, vagas_total, vagas_preenchidas, mestre_id, evento_id")
       .eq("id", mesaId)
       .single(),
-    supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+    // A idade vem pela função `minha_idade()` e não pela coluna: desde a
+    // migration 20261115210000 `data_nascimento` não é legível pelas chaves
+    // públicas. A função é security definer e só enxerga o próprio usuário.
+    minhaIdade(supabase),
     supabase.from("mesa_perguntas").select("id, obrigatoria").eq("mesa_id", mesaId),
   ]);
 
@@ -91,7 +94,8 @@ export async function criarCandidatura(input: unknown): Promise<CriarCandidatura
   }
 
   const limite = limiteIdadeClassificacao(mesa.classificacao);
-  const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
+  // Falha fechado: sem idade confirmada, trata como menor.
+  const idade = idadeDoUsuario ?? -1;
   if (limite > 0 && idade < limite) {
     return {
       ok: false,

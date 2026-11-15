@@ -97,8 +97,6 @@ export async function criarEventoAction(input: unknown): Promise<EventoActionRes
       data_fim: d.dataFim || null,
       horario_inicio: d.horarioInicio || null,
       horario_fim: d.horarioFim || null,
-      chave_pix: d.chavePix || null,
-      whatsapp_confirmacao: d.whatsappConfirmacao || null,
       capacidade_maxima: d.capacidadeMaxima ?? null,
       status: d.publicarAgora ? "publicado" : "rascunho",
     })
@@ -108,6 +106,21 @@ export async function criarEventoAction(input: unknown): Promise<EventoActionRes
   if (eventoError || !evento) {
     console.error("[criarEventoAction] erro ao inserir evento:", eventoError?.message);
     return { ok: false, error: "Não deu pra criar o evento. Tente de novo." };
+  }
+
+  // Chave Pix e WhatsApp moraram em `eventos` até a migration 20261115220000.
+  // Agora ficam numa tabela à parte, que a RLS só abre pra admin e pra quem
+  // está logado num evento publicado.
+  const { error: pagamentoError } = await supabase.from("evento_pagamento").upsert({
+    evento_id: evento.id,
+    chave_pix: d.chavePix || null,
+    whatsapp_confirmacao: d.whatsappConfirmacao || null,
+    atualizado_em: new Date().toISOString(),
+  });
+
+  if (pagamentoError) {
+    console.error("[criarEventoAction] erro ao salvar pagamento:", pagamentoError.message);
+    return { ok: false, error: "O evento foi criado, mas os dados de pagamento não salvaram." };
   }
 
   const { error: tiposError } = await supabase.from("evento_ingresso_tipos").insert(
@@ -228,8 +241,6 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
       data_fim: d.dataFim || null,
       horario_inicio: d.horarioInicio || null,
       horario_fim: d.horarioFim || null,
-      chave_pix: d.chavePix || null,
-      whatsapp_confirmacao: d.whatsappConfirmacao || null,
       capacidade_maxima: d.capacidadeMaxima ?? null,
       atualizado_em: new Date().toISOString(),
     })
@@ -238,6 +249,19 @@ export async function atualizarEventoAction(eventoId: string, input: unknown): P
   if (eventoError) {
     console.error("[atualizarEventoAction] erro:", eventoError.message);
     return { ok: false, error: "Não deu pra salvar as alterações. Tente de novo." };
+  }
+
+  // Tabela à parte desde a migration 20261115220000 — ver criarEventoAction.
+  const { error: pagamentoError } = await supabase.from("evento_pagamento").upsert({
+    evento_id: eventoId,
+    chave_pix: d.chavePix || null,
+    whatsapp_confirmacao: d.whatsappConfirmacao || null,
+    atualizado_em: new Date().toISOString(),
+  });
+
+  if (pagamentoError) {
+    console.error("[atualizarEventoAction] erro ao salvar pagamento:", pagamentoError.message);
+    return { ok: false, error: "Não deu pra salvar os dados de pagamento. Tente de novo." };
   }
 
   const { data: tiposExistentes } = await supabase

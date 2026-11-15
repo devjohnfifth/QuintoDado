@@ -25,10 +25,24 @@ Next.js 15 (App Router) · TypeScript · Tailwind · shadcn/ui · Supabase
 3. **Webhook é a fonte da verdade do pagamento.** Nunca confie no redirect de
    sucesso. Valide assinatura e trate reentrega como no-op.
 4. **Nunca exponha** `whatsapp_mestre`, `link_grupo_wpp`, `mensagem_boas_vindas`,
-   `data_nascimento` ou respostas de linhas e véus em endpoint público, payload
-   de RSC, sitemap ou JSON-LD. Só para inscrição com status `aprovado`.
-5. **Gating etário no servidor**, nunca só no front. Menor não pode alcançar
-   conteúdo acima da faixa nem por URL direta.
+   `data_nascimento`, nome civil, telefone ou respostas de linhas e véus em
+   endpoint público, payload de RSC, sitemap ou JSON-LD. Só para inscrição com
+   status `aprovado`.
+   **RLS protege a linha, não a coluna.** Tabela lida publicamente entrega
+   todas as colunas dela pra chave anônima — foi assim que nome civil e data de
+   nascimento de 55 cadastros ficaram abertos até 15/11/2026. Dado sensível em
+   tabela pública mora em **tabela satélite** com RLS própria (`mesa_contato`,
+   `evento_pagamento`), não em coluna revogada: grant por coluna quebra as
+   *computed columns* (`vagas_preenchidas`, `ingressos_vendidos` recebem a linha
+   inteira e exigem SELECT na tabela toda). O que é do próprio usuário sai por
+   função `security definer` (`minha_idade`, `meus_dados_pessoais`); o que é de
+   terceiros, só por `service_role` com checagem de admin no próprio arquivo.
+5. **Gating etário no servidor**, nunca só no front. O gating está em
+   **entrar**, não em **ver**: mesa publicada aparece na listagem pra qualquer
+   visitante, com o selo de classificação, e a policy `inscricao_cria` é que
+   barra a candidatura de quem não tem idade. Esconder a mesa inteira tratava
+   todo visitante deslogado como menor e deixava mesa +16 invisível até pro
+   Google.
 6. **Toda página pública renderiza no servidor** com metadata e Open Graph.
    SEO é prioridade alta neste projeto.
 7. **Nenhum texto de interface embutido no JSX.** Tudo em arquivo de mensagem do
@@ -66,6 +80,17 @@ papéis e gating etário, catálogo de suplementos gratuitos, uma tabela aleató
 interativa, `/mesas` com candidatura **sem pagamento**, admin mínimo, SEO base
 e páginas legais.
 
+**Multi-região:** o site atende uma lista fechada de cidades
+(`src/lib/mesas/cidades.ts`), que cresce quando o João decidir. Cada cidade tem
+página própria em `/presencial/[cidade]` — é o que responde "RPG presencial em
+São Paulo" na busca, e por isso `/presencial/*` **não** pode voltar pro
+`disallow` do robots. Quem é de outra região entra pela seção "Sua cidade não
+está na lista?", que leva ao moderador regional no WhatsApp.
+
+**Jogos digitais** são um braço futuro da comunidade (jogar junto + conteúdo).
+Os textos já comportam a quarta frente; nada anunciado na tela ainda, e o
+título da home não muda — é ele que ranqueia hoje.
+
 Fora do escopo agora: pagamento integrado, suplementos pagos, split,
 avaliações, blog, lembretes automáticos, cartão e recorrência. Se uma tarefa
 pedir algo dessa lista, avise antes de implementar.
@@ -75,6 +100,10 @@ presencial**, em `/mesas/nova` (ver `docs/Especificacao-Completa_QuintoDado_v1.m
 §28, D11–D13). Nasce `aguardando_aprovacao` igual a qualquer mesa, valor é só
 informativo (`cobranca_gerenciada_pelo_site = false`, nunca entra no fluxo de
 Pix).
+
+O mestre gerencia a própria mesa em `/mesas/candidaturas/[id]` (candidaturas),
+`/mesas/editar/[id]` e pelo botão de cancelar em `/conta` — vale pras duas
+modalidades.
 
 **Mesa comissionada — a que o site cobra e repassa — continua só do admin**, em
 qualquer modalidade. O que traz o Conflito A (§5.1) é o site processar o

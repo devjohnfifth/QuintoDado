@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Pencil, ExternalLink, Plus } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { serviceRole } from "@/lib/supabase/service-role";
 import { formatBRL } from "@/lib/format";
 import { STATUS_INGRESSO_LABEL } from "@/lib/eventos/labels";
 import { IngressoActions } from "./ingresso-actions";
@@ -56,7 +57,11 @@ export default async function AdminEventoDetalhePage({
   const { pagina, inicio, fim } = intervalo(sp.pagina, POR_PAGINA);
 
   const [{ data: ingressos, count: totalIngressos }, { data: mesas }] = await Promise.all([
-    supabase
+    // Nome civil e telefone do pedido vêm pelo service_role: as chaves
+    // públicas não leem mais essas colunas (migration 20261115210000). Quem
+    // chega aqui já passou pelo guard de admin do layout e pelo exigirAdmin
+    // das actions desta tela.
+    serviceRole()
       .from("evento_ingressos")
       .select(
         "id, status, criado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_exibicao, nome_completo, username, avatar_url, telefone), evento_ingresso_tipos(nome, preco_centavos)",

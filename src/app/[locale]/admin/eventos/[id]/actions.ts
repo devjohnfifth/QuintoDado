@@ -61,9 +61,12 @@ function celula(valor: string | number | null | undefined) {
 export async function exportarIngressosAction(eventoId: string) {
   const { supabase } = await exigirAdmin();
 
+  // Nome civil e telefone saíram do alcance das chaves públicas (migration
+  // 20261115210000), então o embed de profiles vem pelo service_role. A
+  // permissão já foi conferida no exigirAdmin() acima.
   const [{ data: evento }, { data: ingressos, error }] = await Promise.all([
     supabase.from("eventos").select("slug, titulo").eq("id", eventoId).maybeSingle(),
-    supabase
+    serviceRole()
       .from("evento_ingressos")
       .select(
         "status, criado_em, aprovado_em, usuario_id, profiles!evento_ingressos_usuario_id_fkey(nome_completo, nome_exibicao, username, telefone), evento_ingresso_tipos(nome, preco_centavos)",
