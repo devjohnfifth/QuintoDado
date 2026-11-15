@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import {
 import { sairDaMesaAction } from "./actions";
 
 export function SairDaMesaButton({ inscricaoId, slug }: { inscricaoId: string; slug: string }) {
+  const t = useTranslations("Mesas");
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
@@ -33,22 +35,19 @@ export function SairDaMesaButton({ inscricaoId, slug }: { inscricaoId: string; s
   return (
     <>
       <Button variant="outline" onClick={() => setOpen(true)}>
-        Sair da mesa
+        {t("sairDaMesa")}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Sair dessa mesa?</DialogTitle>
-            <DialogDescription>
-              Sua vaga fica livre pra outra pessoa. Isso não pode ser desfeito por aqui — se mudar
-              de ideia, fale com o mestre.
-            </DialogDescription>
+            <DialogTitle>{t("sairTitulo")}</DialogTitle>
+            <DialogDescription>{t("sairCorpo")}</DialogDescription>
           </DialogHeader>
           {erro && <p className="text-sm text-destructive">{erro}</p>}
           <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>Cancelar</DialogClose>
+            <DialogClose render={<Button variant="outline" />}>{t("sairCancelar")}</DialogClose>
             <Button variant="destructive" disabled={pending} onClick={confirmar}>
-              {pending ? "Saindo..." : "Sim, sair da mesa"}
+              {pending ? t("saindo") : t("sairConfirmar")}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,10 +1,12 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { DescricaoMarkdown } from "@/components/site/descricao-markdown";
 
 export function SinopseExpansivel({ texto }: { texto: string }) {
+  const t = useTranslations("Mesas");
   const [aberto, setAberto] = useState(false);
   // Só vale a pena ter o botão se o texto for realmente longo — abaixo
   // disso o corte nem aconteceria, e o botão apareceria à toa.
@@ -29,7 +31,7 @@ export function SinopseExpansivel({ texto }: { texto: string }) {
           onClick={() => setAberto((v) => !v)}
           className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
         >
-          {aberto ? "Ler menos" : "Ler mais"}
+          {aberto ? t("lerMenos") : t("lerMais")}
           <ChevronDown className={`size-4 transition-transform ${aberto ? "rotate-180" : ""}`} aria-hidden />
         </button>
       )}

@@ -21,17 +21,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("metaTitulo"), robots: { index: false } };
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  candidatura_enviada: "Candidatura enviada",
-  aguardando_pagamento: "Aguardando pagamento",
-  pago_em_analise: "Pagamento em análise",
-  aprovado: "Aprovado",
-  recusado: "Recusado",
-  expirada: "Expirada",
-  cancelada_jogador: "Cancelada por você",
-  cancelada_mestre: "Cancelada pelo mestre",
-  reembolsada: "Reembolsada",
-  concluida: "Concluída",
+/* Status → chave de tradução. Os mapas de cor ficam como estão: classe de
+   CSS não é texto de interface. */
+const STATUS_CHAVE: Record<string, string> = {
+  candidatura_enviada: "inscricaoCandidaturaEnviada",
+  aguardando_pagamento: "inscricaoAguardandoPagamento",
+  pago_em_analise: "inscricaoPagoEmAnalise",
+  aprovado: "inscricaoAprovado",
+  recusado: "inscricaoRecusado",
+  expirada: "inscricaoExpirada",
+  cancelada_jogador: "inscricaoCanceladaJogador",
+  cancelada_mestre: "inscricaoCanceladaMestre",
+  reembolsada: "inscricaoReembolsada",
+  concluida: "inscricaoConcluida",
 };
 
 const STATUS_COR: Record<string, string> = {
@@ -44,14 +46,14 @@ const STATUS_COR: Record<string, string> = {
   reembolsada: "border-border text-muted-foreground",
 };
 
-const STATUS_MESA_LABEL: Record<string, string> = {
-  rascunho: "Rascunho",
-  aguardando_aprovacao: "Aguardando aprovação",
-  publicada: "Publicada",
-  confirmada: "Confirmada",
-  em_andamento: "Em andamento",
-  concluida: "Concluída",
-  cancelada: "Cancelada",
+const STATUS_MESA_CHAVE: Record<string, string> = {
+  rascunho: "mesaRascunho",
+  aguardando_aprovacao: "mesaAguardandoAprovacao",
+  publicada: "mesaPublicada",
+  confirmada: "mesaConfirmada",
+  em_andamento: "mesaEmAndamento",
+  concluida: "mesaConcluida",
+  cancelada: "mesaCancelada",
 };
 
 const STATUS_MESA_COR: Record<string, string> = {
@@ -62,11 +64,11 @@ const STATUS_MESA_COR: Record<string, string> = {
   cancelada: "border-destructive/40 text-destructive",
 };
 
-const STATUS_INGRESSO_LABEL: Record<string, string> = {
-  pendente: "Pendente",
-  aprovado: "Aprovado",
-  recusado: "Recusado",
-  cancelado: "Cancelado",
+const STATUS_INGRESSO_CHAVE: Record<string, string> = {
+  pendente: "ingressoPendente",
+  aprovado: "ingressoAprovado",
+  recusado: "ingressoRecusado",
+  cancelado: "ingressoCancelado",
 };
 
 const STATUS_INGRESSO_COR: Record<string, string> = {
@@ -193,7 +195,7 @@ export default async function ContaPage({
                         STATUS_MESA_COR[mesa.status] ?? "border-border text-muted-foreground"
                       }`}
                     >
-                      {STATUS_MESA_LABEL[mesa.status] ?? mesa.status}
+                      {STATUS_MESA_CHAVE[mesa.status] ? t(STATUS_MESA_CHAVE[mesa.status]) : mesa.status}
                     </span>
                     {/* Vale pras duas modalidades: o mestre publica mesa
                         online também, e antes ele ficava sem nenhuma ação
@@ -253,7 +255,7 @@ export default async function ContaPage({
                     STATUS_COR[inscricao.status] ?? "border-border text-muted-foreground"
                   }`}
                 >
-                  {STATUS_LABEL[inscricao.status] ?? inscricao.status}
+                  {STATUS_CHAVE[inscricao.status] ? t(STATUS_CHAVE[inscricao.status]) : inscricao.status}
                 </span>
               </li>
             );
@@ -295,7 +297,7 @@ export default async function ContaPage({
                         STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
                       }`}
                     >
-                      {STATUS_INGRESSO_LABEL[ingresso.status] ?? ingresso.status}
+                      {STATUS_INGRESSO_CHAVE[ingresso.status] ? t(STATUS_INGRESSO_CHAVE[ingresso.status]) : ingresso.status}
                     </span>
                   </div>
                 </li>

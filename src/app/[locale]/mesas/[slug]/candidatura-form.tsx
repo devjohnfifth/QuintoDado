@@ -55,7 +55,7 @@ export function CandidaturaForm({
       (p) => p.obrigatoria && p.tipo === "escolha_unica" && !escolhas[p.id]?.trim(),
     );
     if (faltaObrigatoria) {
-      setErro("Preencha todas as respostas obrigatórias.");
+      setErro(t("respostasObrigatorias"));
       return;
     }
 
@@ -105,8 +105,8 @@ export function CandidaturaForm({
               onValueChange={(v) => v && setEscolhas((prev) => ({ ...prev, [pergunta.id]: v }))}
             >
               <SelectTrigger id={pergunta.id} className="w-full">
-                <SelectValue placeholder="Escolha uma opção">
-                  {(v: string) => v || "Escolha uma opção"}
+                <SelectValue placeholder={t("escolhaUmaOpcao")}>
+                  {(v: string) => v || t("escolhaUmaOpcao")}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>

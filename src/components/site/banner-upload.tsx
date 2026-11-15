@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { ImageUp, X, Loader2 } from "lucide-react";
@@ -19,6 +21,7 @@ export function BannerUpload({
   hideHint?: boolean;
   previewClassName?: string;
 }) {
+  const t = useTranslations("Conta");
   const inputRef = useRef<HTMLInputElement>(null);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -51,7 +54,7 @@ export function BannerUpload({
             type="button"
             onClick={() => onChange(null)}
             className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
-            aria-label="Remover imagem"
+            aria-label={t("removerImagem")}
           >
             <X className="size-4" />
           </button>
@@ -65,7 +68,7 @@ export function BannerUpload({
           className="gap-2"
         >
           {enviando ? <Loader2 className="size-4 animate-spin" /> : <ImageUp className="size-4" />}
-          {enviando ? "Enviando..." : "Escolher imagem de capa"}
+          {enviando ? t("enviando") : t("escolherCapa")}
         </Button>
       )}
       <input

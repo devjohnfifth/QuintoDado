@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { RedefinirSenhaForm } from "./redefinir-senha-form";
@@ -8,6 +10,7 @@ import { RedefinirSenhaCodigoForm } from "./redefinir-senha-codigo-form";
 type Estado = "verificando" | "pronto" | "invalido";
 
 export function RedefinirSenhaGate() {
+  const t = useTranslations("Erro");
   const [estado, setEstado] = useState<Estado>("verificando");
 
   useEffect(() => {
@@ -111,7 +114,7 @@ export function RedefinirSenhaGate() {
   }, []);
 
   if (estado === "verificando") {
-    return <p className="mt-8 text-center text-sm text-muted-foreground">Verificando o link...</p>;
+    return <p className="mt-8 text-center text-sm text-muted-foreground">{t("verificandoLink")}</p>;
   }
 
   if (estado === "invalido") {

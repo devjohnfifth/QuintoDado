@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { RedefinirSenhaGate } from "./redefinir-senha-gate";
 
-export const metadata: Metadata = { title: "Redefinir senha — Quinto Dado", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Entrar");
+  return { title: t("redefinirMetaTitulo"), robots: { index: false } };
+}
 
 export default function RedefinirSenhaPage() {
   return (

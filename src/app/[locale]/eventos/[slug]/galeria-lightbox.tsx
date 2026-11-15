@@ -1,4 +1,5 @@
 "use client";
+import { useTranslations } from "next-intl";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -6,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export function GaleriaLightbox({ imagens }: { imagens: string[] }) {
+  const t = useTranslations("Eventos");
   const [aberta, setAberta] = useState<number | null>(null);
 
   function mudar(delta: number) {
@@ -49,7 +51,7 @@ export function GaleriaLightbox({ imagens }: { imagens: string[] }) {
                   <button
                     type="button"
                     onClick={() => mudar(-1)}
-                    aria-label="Foto anterior"
+                    aria-label={t("fotoAnterior")}
                     className="absolute left-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
                   >
                     <ChevronLeft className="size-5" aria-hidden />
@@ -57,7 +59,7 @@ export function GaleriaLightbox({ imagens }: { imagens: string[] }) {
                   <button
                     type="button"
                     onClick={() => mudar(1)}
-                    aria-label="Próxima foto"
+                    aria-label={t("proximaFoto")}
                     className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white transition-colors hover:bg-black/80"
                   >
                     <ChevronRight className="size-5" aria-hidden />

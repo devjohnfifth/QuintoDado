@@ -164,7 +164,7 @@ export function NovaMesaForm({
       </div>
 
       <div className="space-y-2">
-        <Label>Imagem de capa</Label>
+        <Label>{t("imagemDeCapa")}</Label>
         <BannerUpload value={bannerUrl} onChange={setBannerUrl} />
       </div>
 
@@ -391,7 +391,7 @@ export function NovaMesaForm({
       {erro && <p className="text-sm text-destructive">{erro}</p>}
 
       <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-        {pending ? t("enviando") : editando ? "Salvar alterações" : t("enviar")}
+        {pending ? t("enviando") : editando ? t("salvarAlteracoes") : t("enviar")}
       </Button>
     </form>
   );

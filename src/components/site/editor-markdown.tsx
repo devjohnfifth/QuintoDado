@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useRef, useState } from "react";
 import { Bold, Italic, Heading2, List, Quote, Minus, ImageUp, Loader2, Eye, Pencil } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,13 +19,15 @@ type Marcacao = {
   bloco?: string;
 };
 
+/* O rótulo de cada botão é chave de tradução, resolvida no componente: a
+   lista é constante de módulo e não tem como chamar o hook aqui. */
 const MARCACOES: Marcacao[] = [
-  { titulo: "Negrito", Icon: Bold, envolve: "**" },
-  { titulo: "Itálico", Icon: Italic, envolve: "_" },
-  { titulo: "Título", Icon: Heading2, prefixo: "## " },
-  { titulo: "Lista", Icon: List, prefixo: "- " },
-  { titulo: "Citação em destaque", Icon: Quote, prefixo: "> " },
-  { titulo: "Linha divisória", Icon: Minus, bloco: "\n---\n" },
+  { titulo: "negrito", Icon: Bold, envolve: "**" },
+  { titulo: "italico", Icon: Italic, envolve: "_" },
+  { titulo: "titulo", Icon: Heading2, prefixo: "## " },
+  { titulo: "lista", Icon: List, prefixo: "- " },
+  { titulo: "citacao", Icon: Quote, prefixo: "> " },
+  { titulo: "linhaDivisoria", Icon: Minus, bloco: "\n---\n" },
 ];
 
 export function EditorMarkdown({
@@ -43,6 +47,7 @@ export function EditorMarkdown({
    */
   aoMudar?: (texto: string) => void;
 }) {
+  const t = useTranslations("Editor");
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [texto, definirTexto] = useState(defaultValue);
@@ -117,8 +122,8 @@ export function EditorMarkdown({
           <button
             key={m.titulo}
             type="button"
-            title={m.titulo}
-            aria-label={m.titulo}
+            title={t(m.titulo)}
+            aria-label={t(m.titulo)}
             disabled={previa}
             onClick={() => aplicar(m)}
             className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
@@ -129,8 +134,8 @@ export function EditorMarkdown({
 
         <button
           type="button"
-          title="Inserir imagem"
-          aria-label="Inserir imagem"
+          title={t("inserirImagem")}
+          aria-label={t("inserirImagem")}
           disabled={enviando || previa}
           onClick={() => inputRef.current?.click()}
           className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-40"
@@ -144,7 +149,7 @@ export function EditorMarkdown({
           className="ml-auto flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           {previa ? <Pencil className="size-3.5" aria-hidden /> : <Eye className="size-3.5" aria-hidden />}
-          {previa ? "Escrever" : "Pré-visualizar"}
+          {previa ? t("escrever") : t("preVisualizar")}
         </button>
       </div>
 
@@ -157,7 +162,7 @@ export function EditorMarkdown({
           {texto.trim() ? (
             <DescricaoMarkdown texto={texto} />
           ) : (
-            <p className="text-sm text-muted-foreground">Nada escrito ainda.</p>
+            <p className="text-sm text-muted-foreground">{t("nadaEscrito")}</p>
           )}
         </div>
       ) : (
@@ -166,7 +171,7 @@ export function EditorMarkdown({
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           rows={12}
-          placeholder="Conte do que é a mesa. Dá pra usar títulos, listas, citação em destaque, linha divisória e imagens pelos botões acima."
+          placeholder={t("ajuda")}
         />
       )}
 

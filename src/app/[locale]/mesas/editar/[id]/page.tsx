@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { NovaMesaForm, type MesaDoMestreExistente } from "../../nova/nova-mesa-form";
 
-export const metadata: Metadata = { title: "Editar mesa — Quinto Dado", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("MesaNova");
+  return { title: t("editarMetaTitulo"), robots: { index: false } };
+}
 
 export default async function EditarMesaDoMestrePage({
   params,

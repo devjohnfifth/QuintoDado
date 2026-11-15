@@ -44,7 +44,7 @@ export default async function EntrarPage({
       : sp.erro === "oauth"
         ? t("mensagemErroOauth")
         : sp.recuperacao === "enviada"
-          ? "Se esse e-mail tiver conta, mandamos um link de recuperação. Confira sua caixa de entrada."
+          ? t("linkRecuperacaoEnviado")
           : undefined;
 
   // Quem chega pelo botão de baixar/candidatar/comprar vê por que precisa entrar.

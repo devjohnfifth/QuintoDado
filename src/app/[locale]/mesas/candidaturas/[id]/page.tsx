@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Pencil, ExternalLink } from "lucide-react";
 import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
@@ -8,19 +9,23 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { InscricaoActionsMestre } from "./inscricao-actions-mestre";
 
-export const metadata: Metadata = { title: "Candidaturas da mesa — Quinto Dado", robots: { index: false } };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Candidaturas");
+  return { title: t("metaTitulo"), robots: { index: false } };
+}
 
-const STATUS_LABEL: Record<string, string> = {
-  candidatura_enviada: "Candidatura enviada",
-  aguardando_pagamento: "Aguardando pagamento",
-  pago_em_analise: "Pagamento em análise",
-  aprovado: "Aprovado",
-  recusado: "Recusado",
-  expirada: "Expirada",
-  cancelada_jogador: "Cancelada pelo jogador",
-  cancelada_mestre: "Cancelada pelo mestre",
-  reembolsada: "Reembolsada",
-  concluida: "Concluída",
+/** Status da inscrição → chave de tradução. */
+const STATUS_CHAVE: Record<string, string> = {
+  candidatura_enviada: "statusCandidaturaEnviada",
+  aguardando_pagamento: "statusAguardandoPagamento",
+  pago_em_analise: "statusPagoEmAnalise",
+  aprovado: "statusAprovado",
+  recusado: "statusRecusado",
+  expirada: "statusExpirada",
+  cancelada_jogador: "statusCanceladaJogador",
+  cancelada_mestre: "statusCanceladaMestre",
+  reembolsada: "statusReembolsada",
+  concluida: "statusConcluida",
 };
 
 const PENDENTES = ["candidatura_enviada", "aguardando_pagamento", "pago_em_analise"];
@@ -31,6 +36,7 @@ export default async function MinhasCandidaturasPage({
   params: Promise<{ locale: string; id: string }>;
 }) {
   const { locale, id } = await params;
+  const t = await getTranslations("Candidaturas");
 
   if (!isSupabaseConfigured()) {
     redirect({ href: "/entrar", locale });
@@ -72,7 +78,7 @@ export default async function MinhasCandidaturasPage({
     <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
       <p className="text-sm text-muted-foreground">
         <Link href="/conta" className="hover:underline">
-          ← Voltar pra minha conta
+          {t("voltar")}
         </Link>
       </p>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -83,25 +89,25 @@ export default async function MinhasCandidaturasPage({
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             <Pencil className="size-3.5" aria-hidden />
-            Editar mesa
+            {t("editarMesa")}
           </Link>
           <Link
             href={`/mesas/${mesa.slug}`}
             className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             <ExternalLink className="size-3.5" aria-hidden />
-            Ver página pública
+            {t("verPaginaPublica")}
           </Link>
         </div>
       </div>
 
       <h2 className="mt-8 font-heading text-lg font-bold">
-        Candidaturas ({inscricoes?.length ?? 0})
+        {t("titulo", { n: inscricoes?.length ?? 0 })}
       </h2>
 
       {!inscricoes || inscricoes.length === 0 ? (
         <p className="mt-4 rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-          Nenhuma candidatura ainda.
+          {t("vazio")}
         </p>
       ) : (
         <ul className="mt-4 space-y-4">
@@ -139,12 +145,12 @@ export default async function MinhasCandidaturasPage({
                       </span>
                     )}
                     <div>
-                      <p className="font-medium">{perfilCandidato?.nome_exibicao ?? "Jogador"}</p>
+                      <p className="font-medium">{perfilCandidato?.nome_exibicao ?? t("jogadorSemNome")}</p>
                       <p className="text-xs text-muted-foreground">@{perfilCandidato?.username}</p>
                     </div>
                   </div>
                   <span className="rounded-full border border-border px-2 py-0.5 text-xs">
-                    {STATUS_LABEL[inscricao.status] ?? inscricao.status}
+                    {STATUS_CHAVE[inscricao.status] ? t(STATUS_CHAVE[inscricao.status]) : inscricao.status}
                   </span>
                 </div>
 
@@ -153,7 +159,7 @@ export default async function MinhasCandidaturasPage({
                     {respostas.map((r, i) => (
                       <div key={i}>
                         <dt className="text-xs text-muted-foreground">
-                          {r.mesa_perguntas?.enunciado ?? "Pergunta"}
+                          {r.mesa_perguntas?.enunciado ?? t("perguntaSemEnunciado")}
                         </dt>
                         <dd className="mt-0.5">{r.resposta || "—"}</dd>
                       </div>

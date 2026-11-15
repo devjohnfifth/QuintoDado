@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import {
@@ -26,6 +28,7 @@ export function AvatarCropDialog({
   onFechar: () => void;
   onSalvo: (url: string) => void;
 }) {
+  const t = useTranslations("Conta");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const arrastoRef = useRef<{ x: number; y: number } | null>(null);
@@ -120,7 +123,7 @@ export function AvatarCropDialog({
       canvasSaida.toBlob(resolve, "image/jpeg", 0.9),
     );
     if (!blob) {
-      setErro("Não deu pra processar a imagem.");
+      setErro(t("erroProcessarImagem"));
       setEnviando(false);
       return;
     }
@@ -130,7 +133,7 @@ export function AvatarCropDialog({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setErro("Sua sessão expirou. Recarregue a página.");
+      setErro(t("erroSessaoExpirada"));
       setEnviando(false);
       return;
     }
@@ -143,7 +146,7 @@ export function AvatarCropDialog({
     });
 
     if (error) {
-      setErro("Não deu pra enviar a foto. Tente de novo.");
+      setErro(t("erroEnviarFoto"));
       setEnviando(false);
       return;
     }
@@ -157,8 +160,8 @@ export function AvatarCropDialog({
     <Dialog open={Boolean(arquivo)} onOpenChange={(aberto) => !aberto && onFechar()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Editar foto de perfil</DialogTitle>
-          <DialogDescription>Arraste pra reposicionar e use o zoom pra ajustar o enquadramento.</DialogDescription>
+          <DialogTitle>{t("editarFoto")}</DialogTitle>
+          <DialogDescription>{t("editarFotoAjuda")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex justify-center py-2">
@@ -190,10 +193,10 @@ export function AvatarCropDialog({
 
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onFechar} disabled={enviando}>
-            Cancelar
+            {t("cancelar")}
           </Button>
           <Button type="button" onClick={salvar} disabled={enviando}>
-            {enviando ? <Loader2 className="size-4 animate-spin" /> : "Salvar"}
+            {enviando ? <Loader2 className="size-4 animate-spin" /> : t("salvar")}
           </Button>
         </DialogFooter>
       </DialogContent>

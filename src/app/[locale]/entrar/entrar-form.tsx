@@ -87,20 +87,19 @@ function FormLogin({ destino }: { destino: string }) {
 }
 
 function FormEsqueciSenha({ onVoltar }: { onVoltar: () => void }) {
+  const t = useTranslations("Entrar");
   const [estado, formAction, pending] = useActionState(esqueciSenhaAction, null);
 
   return (
     <form action={formAction} className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Digite seu e-mail e mandamos um link pra você escolher uma senha nova.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("esqueciSenhaAjuda")}</p>
       <div className="space-y-2">
-        <Label htmlFor="email-recuperacao">E-mail</Label>
+        <Label htmlFor="email-recuperacao">{t("campoEmail")}</Label>
         <Input id="email-recuperacao" name="email" type="email" required autoFocus />
       </div>
       {estado?.erro && <p className="text-sm text-destructive">{estado.erro}</p>}
       <Button type="submit" variant="marca" size="lg" disabled={pending} className="w-full">
-        {pending ? "Enviando..." : "Enviar link de recuperação"}
+        {pending ? t("enviando") : t("enviarLinkRecuperacao")}
       </Button>
       <button
         type="button"

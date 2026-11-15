@@ -48,6 +48,8 @@ Next.js 15 (App Router) · TypeScript · Tailwind · shadcn/ui · Supabase
 7. **Nenhum texto de interface embutido no JSX.** Tudo em arquivo de mensagem do
    `next-intl` desde o primeiro commit. O site é pt-BR na v1, mas o inglês vem —
    pt-BR fica na raiz sem prefixo, `/en` é reservado. Nunca use `/pt/...`.
+   Tudo fora de `/admin` já está migrado (15/11/2026); o painel admin é a
+   dívida que sobrou, e tela nova dele nasce com `next-intl` mesmo assim.
 8. **Mobile-first.** Tema escuro é o padrão.
 9. Regra que mexe em dinheiro ou em reembolso **exige teste automatizado**.
 
