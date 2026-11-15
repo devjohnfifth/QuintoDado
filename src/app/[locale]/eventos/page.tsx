@@ -55,6 +55,33 @@ async function buscarEventos(inicio: number, fim: number): Promise<{ eventos: Ev
   return { eventos: (data ?? []) as unknown as EventoCardData[], total: count ?? 0 };
 }
 
+/**
+ * Os que já aconteceram.
+ *
+ * Evento encerrado some da lista de "próximos" mas continua no site desde a
+ * migration 20261115230000: é prova de que a coisa acontece de verdade, e
+ * numa página que às vezes não tem nenhum evento aberto, é o que resta pra
+ * mostrar. Vem do mais recente pro mais antigo, e sem paginação — são poucos.
+ */
+async function buscarEventosPassados(): Promise<EventoCardData[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("eventos")
+    .select("slug, titulo, subtitulo, cidade_uf, data_inicio, banner_url, evento_ingresso_tipos(preco_centavos)")
+    .eq("status", "encerrado")
+    .order("data_inicio", { ascending: false })
+    .limit(6);
+
+  if (error) {
+    console.error("[/eventos] erro ao buscar eventos passados:", error.message);
+    return [];
+  }
+
+  return (data ?? []) as unknown as EventoCardData[];
+}
+
 export default async function EventosPage({
   params,
   searchParams,
@@ -67,7 +94,10 @@ export default async function EventosPage({
   const t = await getTranslations("Eventos");
   const sp = await searchParams;
   const { pagina, inicio, fim } = intervalo(sp.pagina, POR_PAGINA);
-  const { eventos, total } = await buscarEventos(inicio, fim);
+  const [{ eventos, total }, passados] = await Promise.all([
+    buscarEventos(inicio, fim),
+    buscarEventosPassados(),
+  ]);
   const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
   const vazio = eventos.length === 0;
@@ -139,6 +169,20 @@ export default async function EventosPage({
             </>
           )}
         </div>
+
+        {passados.length > 0 && (
+          <section className="mt-16">
+            <h2 className="titulo-display titulo-secao">{t("jaRolaramTitulo")}</h2>
+            <p className="mt-1.5 text-muted-foreground">{t("jaRolaramSubtitulo")}</p>
+            <div className="mt-6">
+              <GradeAdaptavel
+                itens={passados}
+                chave={(e) => e.slug}
+                render={(evento) => <EventoCard evento={evento} encerrado />}
+              />
+            </div>
+          </section>
+        )}
       </Container>
 
       <BlocoFechamento caminhos={vazio ? ["presencial", "mesas", "suplementos"] : ["presencial", "mesas", "sobre"]} />

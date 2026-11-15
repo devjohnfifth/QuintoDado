@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Calendar, MapPin, Ticket, Clock, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { meusDadosPessoais } from "@/lib/auth/dados-pessoais";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
@@ -16,6 +17,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { ComprarIngressoButton } from "./comprar-ingresso-button";
 import { GaleriaLightbox } from "./galeria-lightbox";
 import bannerOg from "@/assets/brand/banner-og.webp";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 async function buscarEvento(slug: string) {
   if (!isSupabaseConfigured()) return null;
@@ -26,7 +28,7 @@ async function buscarEvento(slug: string) {
     .select(
       // Sem `chave_pix` e `whatsapp_confirmacao`: são dados de pagamento e
       // saem só pela dadosPagamentoAction, pra quem tem sessão.
-      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, capacidade_maxima, ingressos_vendidos, vendas_abertas",
+      "id, titulo, subtitulo, descricao, banner_url, cidade_uf, local, data_inicio, data_fim, horario_inicio, horario_fim, capacidade_maxima, ingressos_vendidos, vendas_abertas, status",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -79,14 +81,15 @@ async function buscarEvento(slug: string) {
   let nomeCompletoAtual: string | null = null;
   let telefoneAtual: string | null = null;
   if (user) {
-    const [{ data: ingressoData }, { data: perfil }] = await Promise.all([
+    const [{ data: ingressoData }, perfil] = await Promise.all([
       supabase
         .from("evento_ingressos")
         .select("status, motivo_recusa")
         .eq("evento_id", evento.id)
         .eq("usuario_id", user.id)
         .maybeSingle(),
-      supabase.from("profiles").select("nome_completo, telefone").eq("id", user.id).single(),
+      // Dados pessoais vêm pela função, não pela coluna (migration 20261115210000).
+      meusDadosPessoais(supabase),
     ]);
     ingressoExistente = ingressoData;
     nomeCompletoAtual = perfil?.nome_completo ?? null;
@@ -118,8 +121,10 @@ export async function generateMetadata({
   if (!resultado) return { title: "Evento não encontrado — Quinto Dado" };
 
   const { evento } = resultado;
-  const title = `${evento.titulo} — Quinto Dado`;
-  const description = evento.subtitulo || evento.descricao.slice(0, 160);
+  // A cidade entra no título e na descrição porque é assim que se procura
+  // evento: "evento de RPG em Belo Horizonte", não só pelo nome dele.
+  const title = `${evento.titulo} — evento de RPG em ${evento.cidade_uf} — Quinto Dado`;
+  const description = `${evento.subtitulo || evento.descricao.slice(0, 120)} Evento presencial de RPG de mesa em ${evento.cidade_uf}.`;
   const imagem = evento.banner_url
     ? [{ url: evento.banner_url, width: 1200, height: 630 }]
     : [{ url: bannerOg.src, width: bannerOg.width, height: bannerOg.height }];
@@ -176,7 +181,12 @@ export default async function EventoDetalhePage({
   const esgotado = Boolean(evento.capacidade_maxima && evento.ingressos_vendidos >= evento.capacidade_maxima);
   const menorPreco = tipos.length > 0 ? Math.min(...tipos.map((tp) => tp.preco_centavos)) : null;
   // Botão do topo e barra fixa do celular só quando dá pra comprar de fato.
-  const vendaAtiva = evento.vendas_abertas && !esgotado && tipos.length > 0 && !ingressoExistente;
+  // Evento encerrado continua visível (migration 20261115230000), mas não
+  // vende mais: sem o `status` aqui, um evento com `vendas_abertas` esquecido
+  // em true continuaria oferecendo ingresso depois de acontecer.
+  const jaAconteceu = evento.status === "encerrado";
+  const vendaAtiva =
+    !jaAconteceu && evento.vendas_abertas && !esgotado && tipos.length > 0 && !ingressoExistente;
   const statusIngresso: Record<string, string> = {
     pendente: t("statusPendente"),
     aprovado: t("statusAprovado"),
@@ -184,8 +194,60 @@ export default async function EventoDetalhePage({
     cancelado: t("statusCancelado"),
   };
 
+  /*
+   * A página de evento não tinha dado estruturado nenhum. `Event` é o tipo
+   * que o Google mostra em destaque na busca (data, local e ingresso direto
+   * no resultado), então é o que mais rende aqui.
+   */
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const precoMinimo = tipos.length > 0 ? Math.min(...tipos.map((t) => t.preco_centavos)) : null;
+  const eventoLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: evento.titulo,
+    description: evento.subtitulo || evento.descricao.slice(0, 300),
+    startDate: evento.horario_inicio
+      ? `${evento.data_inicio}T${evento.horario_inicio}`
+      : evento.data_inicio,
+    endDate: evento.data_fim ?? evento.data_inicio,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: evento.local || evento.cidade_uf,
+      address: { "@type": "PostalAddress", addressLocality: evento.cidade_uf, addressCountry: "BR" },
+    },
+    image: evento.banner_url ? [evento.banner_url] : [`${site}${bannerOg.src}`],
+    organizer: { "@type": "Organization", name: "Quinto Dado", url: site },
+    url: `${site}/eventos/${slug}`,
+    ...(precoMinimo !== null
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: (precoMinimo / 100).toFixed(2),
+            priceCurrency: "BRL",
+            url: `${site}/eventos/${slug}`,
+            availability: esgotado
+              ? "https://schema.org/SoldOut"
+              : "https://schema.org/InStock",
+          },
+        }
+      : {}),
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: t("breadcrumbInicio"), item: site },
+      { "@type": "ListItem", position: 2, name: t("titulo"), item: `${site}/eventos` },
+      { "@type": "ListItem", position: 3, name: evento.titulo, item: `${site}/eventos/${slug}` },
+    ],
+  };
+
   return (
     <article className={vendaAtiva ? "pb-24 sm:pb-0" : undefined}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(eventoLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
       {/* Capa sangrada, com a data em bloco de calendário ao lado do título:
           num evento, a data é a informação que decide, e ela estava perdida
           no meio de uma fileira de pílulas cinzas. */}
@@ -211,8 +273,19 @@ export default async function EventoDetalhePage({
                 <span className="rotulo-caps text-muted-foreground">{mesCurto}</span>
               </div>
               <div className="min-w-0">
+                {/* Diz logo de cara que já passou: quem chega pelo Google num
+                    evento antigo precisa entender isso antes de procurar
+                    ingresso. */}
+                {jaAconteceu && (
+                  <p className="mb-2 inline-flex w-fit items-center rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {t("seloEncerrado")}
+                  </p>
+                )}
                 <h1 className="titulo-display titulo-pagina">{evento.titulo}</h1>
                 {evento.subtitulo && <p className="mt-2 text-lg text-foreground/80">{evento.subtitulo}</p>}
+                {jaAconteceu && (
+                  <p className="mt-3 max-w-xl text-sm text-muted-foreground">{t("jaAconteceuCorpo")}</p>
+                )}
               </div>
             </div>
             {vendaAtiva && (
@@ -330,7 +403,11 @@ export default async function EventoDetalhePage({
                       </p>
                     )}
                     <div className="mt-auto pt-5">
-                      {!evento.vendas_abertas ? (
+                      {jaAconteceu ? (
+                        <p className="rounded-full border border-dashed border-border px-3 py-2.5 text-center text-sm text-muted-foreground">
+                          {t("jaAconteceu")}
+                        </p>
+                      ) : !evento.vendas_abertas ? (
                         <p className="rounded-full border border-dashed border-border px-3 py-2.5 text-center text-sm text-muted-foreground">
                           {t("vendasFechadas")}
                         </p>

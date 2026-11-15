@@ -66,6 +66,7 @@ export function CardMidia({
   iconeSemImagem,
   selosImagem,
   destaque = false,
+  className,
   children,
 }: {
   href: string;
@@ -74,6 +75,8 @@ export function CardMidia({
   /** Selos sobre a imagem, no canto superior. */
   selosImagem?: ReactNode;
   destaque?: boolean;
+  /** Classes extras no card inteiro (ex.: apagar um evento já encerrado). */
+  className?: string;
   children: ReactNode;
 }) {
   return (
@@ -81,7 +84,7 @@ export function CardMidia({
       href={href}
       className={`group elevar hover:elevar-hover flex h-full overflow-hidden rounded-2xl painel ${
         destaque ? "flex-col sm:flex-row" : "flex-col"
-      }`}
+      } ${className ?? ""}`}
     >
       <div
         className={`relative w-full shrink-0 overflow-hidden ${destaque ? "aspect-[16/9] sm:aspect-auto sm:min-h-64 sm:w-1/2" : "aspect-[16/9]"}`}

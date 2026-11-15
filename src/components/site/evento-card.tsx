@@ -14,7 +14,16 @@ export type EventoCardData = {
   evento_ingresso_tipos: { preco_centavos: number }[] | null;
 };
 
-export function EventoCard({ evento, destaque = false }: { evento: EventoCardData; destaque?: boolean }) {
+export function EventoCard({
+  evento,
+  destaque = false,
+  encerrado = false,
+}: {
+  evento: EventoCardData;
+  destaque?: boolean;
+  /** Evento que já aconteceu: entra apagado e com selo, sem preço. */
+  encerrado?: boolean;
+}) {
   const t = useTranslations("Eventos");
   const precos = (evento.evento_ingresso_tipos ?? []).map((tp) => tp.preco_centavos);
   const menorPreco = precos.length > 0 ? Math.min(...precos) : null;
@@ -31,9 +40,12 @@ export function EventoCard({ evento, destaque = false }: { evento: EventoCardDat
           <Selo tom="imagem" icone={Calendar}>
             {data.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
           </Selo>
-          <Selo tom="solido">{t("selo")}</Selo>
+          <Selo tom={encerrado ? "neutro" : "solido"}>
+            {encerrado ? t("seloEncerrado") : t("selo")}
+          </Selo>
         </>
       }
+      className={encerrado ? "opacity-75 saturate-[0.85]" : undefined}
     >
       <p
         className={`font-heading font-bold leading-tight transition-colors group-hover:text-primary ${destaque ? "text-2xl" : "text-lg"}`}
@@ -54,7 +66,9 @@ export function EventoCard({ evento, destaque = false }: { evento: EventoCardDat
         </p>
       </div>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4">
-        {menorPreco !== null && <Selo>{t("aPartirDe", { preco: formatBRL(menorPreco) })}</Selo>}
+        {menorPreco !== null && !encerrado && (
+          <Selo>{t("aPartirDe", { preco: formatBRL(menorPreco) })}</Selo>
+        )}
         {destaque && (
           <span className="text-sm font-medium text-primary transition-transform group-hover:translate-x-0.5">
             {t("verEvento")} →
