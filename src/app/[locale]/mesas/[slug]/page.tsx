@@ -26,6 +26,7 @@ import { FundoSemImagem } from "@/components/site/card-midia";
 import { BarraAcaoMovel } from "@/components/site/barra-acao-movel";
 import { buttonVariants } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
+import { minhaIdade } from "@/lib/auth/dados-pessoais";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { formatBRL } from "@/lib/format";
 import { SairDaMesaButton } from "./sair-da-mesa-button";
@@ -39,7 +40,6 @@ import {
 } from "@/lib/mesas/labels";
 import { dataFimPrevista } from "@/lib/mesas/horario";
 import { jsonLdSeguro } from "@/lib/json-ld";
-import { idadeEmAnos } from "@/lib/idade";
 import { CandidaturaForm } from "./candidatura-form";
 import { ShareButton } from "./share-button";
 import { SinopseExpansivel } from "./sinopse-expansivel";
@@ -114,14 +114,15 @@ async function buscarMesa(slug: string) {
   let idadeInsuficiente = false;
   let ingressoEventoAprovado = false;
   if (user) {
-    const [{ data: inscricaoData }, { data: perfil }, { data: ingressoData }] = await Promise.all([
+    const [{ data: inscricaoData }, idadeDoUsuario, { data: ingressoData }] = await Promise.all([
       supabase
         .from("inscricoes")
         .select("id, status")
         .eq("mesa_id", mesa.id)
         .eq("usuario_id", user.id)
         .maybeSingle(),
-      supabase.from("profiles").select("data_nascimento").eq("id", user.id).single(),
+      // Idade pela função, não pela coluna (migration 20261115210000).
+      minhaIdade(supabase),
       mesaTyped.evento_id
         ? supabase
             .from("evento_ingressos")
@@ -135,7 +136,8 @@ async function buscarMesa(slug: string) {
     ingressoEventoAprovado = ingressoData?.status === "aprovado";
 
     const limite = limiteIdadeClassificacao(mesa.classificacao);
-    const idade = perfil ? idadeEmAnos(perfil.data_nascimento) : -1;
+    // Falha fechado: sem idade confirmada, trata como menor.
+    const idade = idadeDoUsuario ?? -1;
     idadeInsuficiente = limite > 0 && idade < limite;
   }
 
@@ -222,7 +224,14 @@ export default async function MesaDetalhePage({
             ...(mesa.cidade_uf ? { address: mesa.cidade_uf } : {}),
           },
     image: mesa.banner_url ? [mesa.banner_url] : [`${site}${bannerOg.src}`],
-    organizer: { "@type": "Person", name: "Mestre Quintão", url: site },
+    // Quem mestra a mesa, não o dono do site: desde que outros mestres
+    // publicam aqui, cravar "Mestre Quintão" atribuía a ele mesa que não é
+    // dele — e isso ia parar no resultado de busca.
+    organizer: {
+      "@type": "Person",
+      name: mesa.profiles?.nome_exibicao ?? "Quinto Dado",
+      url: site,
+    },
     offers: {
       "@type": "Offer",
       price: (mesa.preco_centavos / 100).toFixed(2),

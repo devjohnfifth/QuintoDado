@@ -86,10 +86,36 @@ export default async function SuplementoPage({
     ],
   };
 
+  /*
+   * Os suplementos só tinham breadcrumb. `CreativeWork` descreve o que a
+   * página é de fato — material autoral, gratuito, de um tipo e um sistema —
+   * e é o que dá ao buscador motivo pra mostrar a página pra quem procura
+   * "tabela de encontros" em vez de só pro nome exato dela.
+   */
+  const creativeWorkLd = {
+    "@context": "https://schema.org",
+    "@type": "CreativeWork",
+    name: s.titulo,
+    description: s.resumo,
+    genre: tipo,
+    inLanguage: "pt-BR",
+    url: `${site}/suplementos/${slug}`,
+    ...(s.capa_url ? { image: [s.capa_url] } : {}),
+    ...(s.publicado_em ? { datePublished: s.publicado_em } : {}),
+    author: { "@type": "Person", name: "Mestre Quintão", url: site },
+    publisher: { "@type": "Organization", name: "Quinto Dado", url: site },
+    isAccessibleForFree: true,
+    ...(s.sistemas?.nome ? { about: s.sistemas.nome } : {}),
+    ...(s.licenca_base ? { license: s.licenca_base } : {}),
+  };
+
   return (
     <article>
       {s.publicado && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(creativeWorkLd) }} />
+        </>
       )}
 
       {/* A capa sangra de borda a borda e o título vive em cima dela: antes
