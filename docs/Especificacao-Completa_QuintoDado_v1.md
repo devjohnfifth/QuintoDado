@@ -871,3 +871,87 @@ atrás de checagem de papel `mestre`/`admin`). Ambas construídas; a criação
 em si (grava no banco) ainda não foi testada de ponta a ponta porque não
 existe projeto Supabase real neste ambiente — só a validação de sintaxe da
 migração (`libpg-query`) e o build/render das páginas foram verificados.
+
+---
+
+## §29 — Multi-região, privacidade de coluna e gating de "ver" x "entrar" (15/11/2026)
+
+Três decisões tomadas juntas porque dependem umas das outras.
+
+### 29.1 Escopo regional
+
+O site deixou de ser "Belo Horizonte + online". A lista de cidades atendidas
+(`src/lib/mesas/cidades.ts`) continua **fechada** — cresce por decisão, não por
+cadastro livre — mas agora cada cidade tem página própria em
+`/presencial/[cidade]`, com `h1`, `title`, `description`, canonical e entrada no
+sitemap. Antes o filtro vivia em `?cidade=sao-paulo` com canonical apontando pra
+`/presencial`, o que instrui o buscador a ignorar a URL: na prática, o site não
+respondia "RPG presencial em São Paulo".
+
+A página existe mesmo sem mesa publicada na cidade, porque não é só uma lista:
+explica como funciona e leva ao **moderador regional** da comunidade. Quem é de
+fora das cidades atendidas entra pela seção "Sua cidade não está na lista?", que
+é a porta de entrada de uma região nova — e a resposta da FAQ correspondente
+existe pra capturar essa busca.
+
+Consequência estrutural: `/presencial/[id]` (painel de candidaturas do mestre)
+virou `/mesas/candidaturas/[id]`, porque o App Router não aceita dois segmentos
+dinâmicos irmãos e porque `/presencial/*` precisava sair do `disallow` do
+robots. O painel também deixou de recusar mesa online — desde §28.1 o mestre
+publica nas duas modalidades e ficava sem onde ver as candidaturas.
+
+### 29.2 RLS protege a linha, não a coluna
+
+Auditoria encontrou `profiles.data_nascimento` e `profiles.nome_completo`
+legíveis pela chave anônima — 55 cadastros, dado pessoal, contra a regra 4 do
+CLAUDE.md e contra a LGPD. A causa não é policy errada: `profiles` **precisa**
+ser lido publicamente (nome de exibição e avatar aparecem em card de mesa, elenco
+e página de evento), e o grant de tabela inteira arrasta junto todas as colunas.
+
+Primeira tentativa — revogar o SELECT da tabela e devolver coluna por coluna,
+como `20261027120000` fez em `eventos` — funciona para leitura comum e **quebra
+as computed columns**: `vagas_preenchidas(m mesas)` e `ingressos_vendidos(e
+eventos)` recebem a linha inteira, e montar esse record exige SELECT na tabela
+toda. O mesmo defeito já estava no ar em `eventos` desde outubro, invisível
+porque não havia evento publicado.
+
+**Padrão adotado:** dado sensível em tabela de leitura pública mora em **tabela
+satélite** com RLS própria — `mesa_contato` (whatsapp do mestre, link do grupo,
+mensagem de boas-vindas) e `evento_pagamento` (chave Pix, whatsapp de
+confirmação). A regra fica numa policy que dá pra testar, em vez de numa lista
+de colunas que alguém precisa lembrar de atualizar quando a tabela cresce.
+`mesa_contato` só abre para admin, para o mestre da mesa e para quem tem
+inscrição **aprovada** — a regra 4 escrita onde o banco aplica.
+
+Para `profiles`, que não tem computed column, o grant por coluna serve. O que é
+do próprio usuário sai por função `security definer` (`minha_idade()`,
+`meus_dados_pessoais()`, ambas presas a `auth.uid()`); o que é de terceiros sai
+só por `service_role`, com checagem de admin explícita no arquivo que lê.
+
+### 29.3 Gating etário: ver não é entrar
+
+`classificacoes_permitidas()` devolve `['livre','14']` quando não há sessão —
+visitante deslogado é tratado como menor, porque não há como saber a idade de
+quem não tem conta. Combinado com `mesa_leitura`, isso escondia a **linha
+inteira**: uma mesa +16 publicada não existia para ninguém de fora, nem pela URL
+direta, nem para o buscador. Mesa invisível não enche.
+
+A decisão: o gating passa a morar em **entrar**, não em **ver**. Mesa publicada
+aparece na listagem e tem página própria para qualquer visitante, com o selo de
+classificação visível; a policy `inscricao_cria` continua exigindo
+`classificacao = any (classificacoes_permitidas())` para inserir candidatura.
+Menor vê que a mesa existe e não consegue entrar nela — o mesmo desenho de loja
+de jogo e de serviço de streaming. Os campos sensíveis seguem fechados (§29.2).
+
+Verificado por comportamento, com usuário de 15 anos criado e apagado no teste:
+vê a mesa, é bloqueado na candidatura com `42501`, e não alcança `mesa_contato`
+em nenhum estado de inscrição que não seja `aprovado`.
+
+### 29.4 Evento encerrado continua no ar
+
+`evento_leitura` liberava só `publicado`, então marcar um evento como encerrado
+dava 404 na página inteira — fotos, apoiadores, mestres e texto sumiam, e o
+endereço já indexado virava link morto. Evento encerrado passa a ser acervo:
+página no ar, selo "Já rolou", listagem separada em "Já rolaram", venda travada
+pelo `status` (não só por `vendas_abertas`) e `evento_pagamento` ainda restrito a
+evento publicado.

@@ -160,12 +160,17 @@ sistemas de RPG).
 ## Rotas
 
 **Públicas** — `/` · `/mesas` · `/mesas/[slug]` · `/presencial` ·
-`/eventos` · `/eventos/[slug]` · `/suplementos` · `/suplementos/[slug]` ·
-`/sobre` · `/links` · legais (`/termos`, `/privacidade`, `/reembolso`,
-`/licenca-de-uso`).
+`/presencial/[cidade]` (uma por cidade atendida) · `/eventos` ·
+`/eventos/[slug]` · `/suplementos` · `/suplementos/[slug]` · `/sobre` ·
+`/links` · legais (`/termos`, `/privacidade`, `/reembolso`, `/licenca-de-uso`).
+
+As páginas de cidade são o que responde busca local ("RPG presencial em São
+Paulo"). Existem mesmo sem mesa publicada na cidade, porque também explicam
+como funciona e levam ao moderador regional — por isso `/presencial/*` **não**
+pode entrar no `disallow` do robots.
 
 **Autenticadas** — `/conta` · `/mesas/[slug]/painel` (+ `/elenco`, `/sessoes`) ·
-`/presencial/nova` e `/presencial/[id]` (mestres).
+`/mesas/nova`, `/mesas/editar/[id]` e `/mesas/candidaturas/[id]` (mestres).
 
 **Admin** (`papel = 'admin'`) — `/admin` e as seções de mesas, eventos,
 suplementos e usuários. Bloqueadas no `robots.ts`.
@@ -173,22 +178,25 @@ suplementos e usuários. Bloqueadas no `robots.ts`.
 **Redirects permanentes** (`next.config.ts`) — `/presencial-bh` e suas rotas
 filhas respondem **308** para `/presencial`. O endereço antigo está indexado e
 circulou no link-in-bio; um 404 jogaria fora o SEO e quebraria link de quem
-salvou.
+salvou. Na mesma lista: `/presencial/nova` → `/mesas/nova`,
+`/presencial/[id]/editar` → `/mesas/editar/[id]` e `/presencial/<uuid>` →
+`/mesas/candidaturas/<uuid>`. Esta última casa só com padrão de UUID — sem
+isso, `/presencial/belo-horizonte` cairia nela.
 
 ---
 
 ## Banco de dados (Supabase)
 
-**44 tabelas** em `public`, criadas por **30 migrações versionadas** em
+**46 tabelas** em `public`, criadas por **34 migrações versionadas** em
 `supabase/migrations/`. Os blocos principais:
 
 | Bloco | Tabelas |
 |---|---|
 | Identidade | `profiles`, `aceites_termos`, `consentimentos_responsavel` |
 | Taxonomia | `sistemas`, `tags`, `mesa_tags`, `suplemento_tags` |
-| Mesas | `mesas`, `inscricoes`, `inscricao_respostas`, `mesa_perguntas`, `mesa_sessoes` |
+| Mesas | `mesas`, `mesa_contato`, `inscricoes`, `inscricao_respostas`, `mesa_perguntas`, `mesa_sessoes` |
 | Painel de campanha | `painel_entidades`, `painel_campos`, `painel_sessoes`, `painel_anotacoes`, `painel_rotulos`, `painel_relacionamentos`, `painel_revelacoes` |
-| Eventos | `eventos`, `evento_ingressos`, `evento_ingresso_tipos`, `evento_mestres`, `evento_atracoes`, `evento_imagens`, `evento_apoiadores` |
+| Eventos | `eventos`, `evento_pagamento`, `evento_ingressos`, `evento_ingresso_tipos`, `evento_mestres`, `evento_atracoes`, `evento_imagens`, `evento_apoiadores` |
 | Suplementos | `suplementos`, `arquivos_suplemento`, `tabelas_aleatorias`, `tabela_itens`, `downloads`, `kits`, `kit_suplementos` |
 | Pagamento (Fase 2) | `pagamentos`, `compras`, `repasses`, `faixas_comissao`, `webhook_eventos` |
 | Operação | `notificacoes`, `audit_log`, `favoritos`, `depoimentos`, `links`, `eventos_analytics` |
@@ -198,6 +206,14 @@ salvou.
 1. **RLS ligada em toda tabela, negando por padrão.** A garantia é o banco, não
    a tela. `service_role` existe só no servidor e só onde a permissão já foi
    checada no código.
+
+   **RLS protege a linha, não a coluna.** Tabela de leitura pública entrega
+   todas as suas colunas pra chave anônima. Por isso dado sensível mora em
+   tabela satélite com RLS própria — `mesa_contato` e `evento_pagamento` — e não
+   em coluna revogada: grant por coluna quebra as *computed columns*
+   (`vagas_preenchidas`, `ingressos_vendidos` recebem a linha inteira). O que é
+   do próprio usuário sai por função `security definer` (`minha_idade`,
+   `meus_dados_pessoais`).
 2. **Dinheiro em centavos**, `integer`, com coluna de moeda. Nunca `float`.
 3. **Gating etário no servidor.** `classificacoes_permitidas()` filtra por
    idade na própria policy — menor não alcança conteúdo acima da faixa nem por
