@@ -21,7 +21,7 @@ export default async function NovaMesaPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = await getTranslations("PresencialBhNova");
+  const t = await getTranslations("MesaNova");
 
   // /presencial/nova cai aqui com ?modalidade=presencial, então quem vinha
   // pelo caminho antigo continua achando o formulário já na modalidade certa.

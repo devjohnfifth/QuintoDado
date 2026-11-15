@@ -21,13 +21,14 @@
     "suplementos": "Suplementos",
     "mesas": "Mesas",
     "eventos": "Eventos",
-    "presencialBh": "Presencial",
+    "presencial": "Presencial",
     "sobre": "Sobre",
     "links": "Links",
     "entrar": "Entrar",
     "minhaConta": "Minha conta",
     "abrirMenu": "Abrir menu",
-    "fecharMenu": "Fechar menu"
+    "fecharMenu": "Fechar menu",
+    "pularParaConteudo": "Pular pro conteúdo"
   },
   "Entrar": {
     "titulo": "Entrar no Quinto Dado",
@@ -126,7 +127,11 @@
         },
         {
           "pergunta": "Dá pra jogar presencial?",
-          "resposta": "Dá — mestres cadastrados publicam suas próprias mesas presenciais em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, além das mesas online do Mestre Quintão. Cada mesa combina valor e local direto com quem mestra."
+          "resposta": "Dá. Mestres cadastrados publicam as próprias mesas presenciais em Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba, e cada mesa combina valor e local direto com quem mestra. Cada cidade tem página própria, com as mesas abertas nela."
+        },
+        {
+          "pergunta": "E se a minha cidade não estiver na lista?",
+          "resposta": "A lista de cidades cresce conforme aparece gente querendo jogar. A comunidade tem moderadores por região: entra no grupo do WhatsApp, diz de onde você é, e a gente te apresenta a quem cuida da sua região — pra jogar ou pra mestrar por aí. Mesa online não tem essa limitação: dá pra jogar de qualquer lugar."
         }
       ]
     },
@@ -137,25 +142,25 @@
     },
     "mesas": {
       "titulo": "Sente-se à mesa",
-      "corpo": "One-shots online, para iniciantes e veteranos. Vagas limitadas, linhas e véus combinados antes de começar.",
+      "corpo": "One-shots, aventuras e campanhas — online e presenciais, para iniciantes e veteranos. Vagas limitadas, linhas e véus combinados antes de começar.",
       "cta": "Ver mesas abertas"
     },
     "comunidade": {
       "titulo": "A comunidade do Quinto Dado",
-      "corpo": "Um grupo no WhatsApp onde eu aviso das mesas novas, solto material antes e a galera combina jogo.",
+      "corpo": "Um grupo no WhatsApp onde eu aviso das mesas novas, solto material antes e a galera combina jogo — de mesa e de tela.",
       "cta": "Entrar no grupo"
     }
   },
   "Sobre": {
     "titulo": "O que é o Quinto Dado",
-    "intro": "Quinto Dado é uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério.\n\nNasceu do trabalho do Mestre Quintão, mas cresce com quem mais entra: outros mestres cadastrados também publicam suas próprias mesas presenciais, como as de Belo Horizonte.",
-    "pilaresTitulo": "Três frentes",
+    "intro": "Quinto Dado é uma comunidade de RPG de mesa: um lugar pra achar mesa pra jogar — online ou presencial —, material autoral gratuito pra usar na sua própria sessão, e gente que leva ferramentas de segurança a sério.\n\nNasceu do trabalho do Mestre Quintão, mas cresce com quem mais entra: outros mestres cadastrados publicam as próprias mesas aqui, online ou presenciais, nas cidades que o site atende.",
+    "pilaresTitulo": "O que tem aqui",
     "pilarSuplementosTitulo": "Suplementos",
     "pilarSuplementosCorpo": "Tabelas de encontros, mapas, tokens, homebrews e aventuras prontas. Publicação nova toda semana, a maior parte gratuita.",
     "pilarMesasTitulo": "Mesas",
-    "pilarMesasCorpo": "One-shots online com o Mestre Quintão, e mesas presenciais publicadas por qualquer mestre cadastrado — como as de Belo Horizonte.",
+    "pilarMesasCorpo": "One-shots, aventuras e campanhas com o Mestre Quintão e com os outros mestres cadastrados — online ou presenciais, nas cidades atendidas.",
     "pilarComunidadeTitulo": "Comunidade",
-    "pilarComunidadeCorpo": "Um grupo no WhatsApp onde a galera fica sabendo de mesa nova, material novo, e combina jogo.",
+    "pilarComunidadeCorpo": "Um grupo no WhatsApp onde a galera fica sabendo de mesa nova, material novo, combina jogo e troca ideia sobre o que anda jogando — na mesa e na tela.",
     "segurancaTitulo": "Segurança em primeiro lugar",
     "segurancaCorpo": "Linhas e véus são pergunta obrigatória em toda mesa — o que pode e o que não pode aparecer na sessão. Classificação etária é levada a sério, não só um selo decorativo. Mesa boa é mesa em que todo mundo se sente seguro pra jogar.",
     "mestreTitulo": "Quem sou eu",
@@ -175,11 +180,11 @@
     "instagram": "Instagram",
     "tiktok": "TikTok",
     "youtube": "YouTube",
-    "presencialBh": "Mesas presenciais"
+    "presencial": "Mesas presenciais"
   },
   "Mesas": {
     "titulo": "Mesas abertas",
-    "subtitulo": "One-shots online e presenciais com o Quinto Dado. Vagas limitadas, linhas e véus combinados antes de começar.",
+    "subtitulo": "One-shots, aventuras e campanhas — online e presenciais. Vagas limitadas, linhas e véus combinados antes de começar.",
     "vazioTitulo": "Nenhuma mesa aberta no momento",
     "vazioCorpo": "Assim que uma mesa nova for publicada, ela aparece aqui. Entra na comunidade pra saber em primeira mão.",
     "filtros": {
@@ -339,8 +344,8 @@
     "resumoDoMestre": "Resumo do mestre"
   },
   "Eventos": {
-    "metaTitulo": "Eventos de RPG de mesa em BH — Quinto Dado",
-    "metaDescricao": "Eventos presenciais de RPG de mesa organizados pelo Quinto Dado em Belo Horizonte: mesas, sorteios e comunidade.",
+    "metaTitulo": "Eventos de RPG de mesa — Quinto Dado",
+    "metaDescricao": "Encontros presenciais de RPG de mesa organizados pelo Quinto Dado: várias mesas no mesmo dia, sorteios e comunidade.",
     "titulo": "Eventos",
     "subtitulo": "Encontros presenciais de RPG de mesa organizados pelo Quinto Dado.",
     "vazioTitulo": "Nenhum evento aberto agora",
@@ -372,11 +377,18 @@
     "vazioSecundario": "Ver mesas abertas",
     "vazioEnquantoIsso": "Enquanto isso",
     "restamIngressos": "{n, plural, one {Resta # ingresso} other {Restam # ingressos}}",
-    "lotacao": "{vendidos} de {total} lugares"
+    "lotacao": "{vendidos} de {total} lugares",
+    "metaTituloCidade": "Eventos de RPG de mesa em {cidade} — Quinto Dado",
+    "jaAconteceu": "Esse evento já aconteceu",
+    "jaAconteceuCorpo": "As inscrições estão encerradas. A página fica no ar como registro — e o próximo encontro é anunciado primeiro no grupo do WhatsApp.",
+    "seloEncerrado": "Já rolou",
+    "proximosTitulo": "Próximos encontros",
+    "jaRolaramTitulo": "Já rolaram",
+    "jaRolaramSubtitulo": "O que já aconteceu — fotos, mesas e quem passou por lá."
   },
-  "PresencialBh": {
+  "Presencial": {
     "titulo": "RPG de mesa presencial",
-    "subtitulo": "Mestres cadastrados criam suas próprias mesas presenciais — grátis ou com um valor combinado, definido por cada mestre pra cobrir handouts e material físico da sessão.",
+    "subtitulo": "Mesas presenciais criadas por mestres cadastrados, nas cidades que o site atende — grátis ou com um valor combinado direto com quem mestra, pra cobrir handouts e material da sessão.",
     "comoFunciona": "Como funciona",
     "comoFuncionaCorpo": "Qualquer mestre cadastrado pode publicar uma mesa presencial aqui. O valor mostrado é só informativo: o pagamento (quando existir) é combinado e feito na hora, direto com quem mestra — o site não processa esse pagamento.",
     "criarMesa": "Criar minha mesa presencial",
@@ -389,12 +401,12 @@
     "vagas": "{vagas, plural, one {# vaga} other {# vagas}}",
     "verMesa": "Ver mesa",
     "passo1Titulo": "Publique a mesa",
-    "passo1Corpo": "Qualquer mestre cadastrado cria a própria mesa presencial aqui, em uma das cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba. Ela entra em análise e vai ao ar quando aprovada.",
+    "passo1Corpo": "Qualquer mestre cadastrado cria a própria mesa presencial aqui, numa das cidades atendidas. Ela entra em análise e vai ao ar quando aprovada.",
     "passo2Titulo": "Combine na conversa",
     "passo2Corpo": "O valor mostrado é só informativo. Quando existir, é combinado direto entre jogador e mestre — o site não processa esse pagamento.",
     "passo3Titulo": "Joguem",
     "passo3Corpo": "Linhas e véus combinados antes de começar, como em toda mesa do Quinto Dado.",
-    "cidadesAtendidas": "Cidades atendidas: Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba.",
+    "cidadesAtendidas": "Por enquanto o site atende Belo Horizonte, São Paulo, Rio de Janeiro, Fortaleza e Curitiba — e a lista aumenta conforme a comunidade cresce.",
     "filtroLabel": "Filtrar por cidade",
     "todasCidades": "Todas",
     "resumo": "{mesas, plural, one {# mesa aberta} other {# mesas abertas}} em {cidades, plural, one {# cidade} other {# cidades}}",
@@ -402,9 +414,18 @@
     "vazioCidadeTitulo": "Nenhuma mesa em {cidade} ainda",
     "vazioCidadeCorpo": "Ainda não tem mesa presencial publicada em {cidade}. Veja as outras cidades ou entre no grupo pra saber assim que abrir uma.",
     "verTodasCidades": "Ver todas as cidades",
-    "comoFuncionaTitulo": "É mestre? Publique a sua"
+    "comoFuncionaTitulo": "É mestre? Publique a sua",
+    "tituloCidade": "RPG de mesa presencial em {cidade}",
+    "subtituloCidade": "Mesas presenciais abertas em {cidade}, criadas por mestres cadastrados no Quinto Dado. O valor, quando existe, é combinado direto com quem mestra — o site não processa esse pagamento.",
+    "metaTituloCidade": "RPG de mesa presencial em {cidade} — Quinto Dado",
+    "metaDescricaoCidade": "Mesas de RPG presenciais em {cidade}: one-shots, aventuras e campanhas abertas, com vagas e linhas e véus combinados antes de começar. Publicadas por mestres cadastrados no Quinto Dado.",
+    "voltarParaTodas": "Ver todas as cidades",
+    "outraCidadeTitulo": "Sua cidade não está na lista?",
+    "outraCidadeCorpo": "A lista cresce conforme aparece gente querendo jogar. A comunidade tem moderadores por região, e é com eles que uma cidade nova começa: chega no grupo, diz de onde você é e a gente te liga com quem cuida da sua região — seja pra jogar ou pra mestrar por aí.",
+    "outraCidadeCta": "Falar com a gente no grupo",
+    "vazioAvisarCta": "Entrar no grupo e ser avisado"
   },
-  "PresencialBhNova": {
+  "MesaNova": {
     "titulo": "Criar mesa",
     "subtitulo": "Preencha os dados da mesa. Ela entra em análise e vai ao ar assim que aprovada.",
     "precisaEntrar": "Entre na sua conta pra criar uma mesa.",
@@ -458,7 +479,7 @@
     "privacidade": "Privacidade",
     "reembolso": "Reembolso",
     "licenca": "Licença de uso",
-    "tagline": "RPG de mesa com o Mestre Quintão: mesas online e presenciais, eventos em BH e material autoral gratuito.",
+    "tagline": "RPG de mesa com o Mestre Quintão: mesas online e presenciais, eventos e material autoral gratuito.",
     "explorar": "Explorar",
     "comunidade": "Comunidade",
     "legal": "Legal",
@@ -467,7 +488,8 @@
     "youtube": "YouTube",
     "mesaquest": "Mesas no MesaQuest",
     "direitos": "© {ano} Quinto Dado",
-    "navRodape": "Rodapé"
+    "navRodape": "Rodapé",
+    "cidades": "Presencial por cidade"
   },
   "Fechamento": {
     "rotulo": "Pra onde ir agora",
@@ -486,13 +508,13 @@
       "cta": "Ver a biblioteca"
     },
     "eventos": {
-      "titulo": "Eventos em BH",
+      "titulo": "Eventos presenciais",
       "corpo": "Encontros presenciais com várias mesas no mesmo dia.",
       "cta": "Ver eventos"
     },
     "presencial": {
       "titulo": "Mesas presenciais",
-      "corpo": "Mesas de mestres da cidade, combinadas direto com quem mestra.",
+      "corpo": "Mesas de mestres da sua cidade, combinadas direto com quem mestra.",
       "cta": "Ver mesas presenciais"
     },
     "mesaquest": {
@@ -569,5 +591,47 @@
     "licencaCorpo": "Os sistemas de RPG citados no Quinto Dado (Ordem Paranormal, Tormenta 20, Vaesen, Fabula Ultima, Daggerheart, Sacramento RPG e outros) pertencem às suas respectivas editoras e autores. O Quinto Dado não tem vínculo oficial com nenhuma delas.\n\nMaterial autoral publicado no Quinto Dado (tabelas, mapas, homebrews, aventuras) pode ser usado livremente nas suas próprias mesas, sem fins comerciais, com crédito ao Quinto Dado quando possível.\n\nConteúdo compatível com sistemas de licença aberta (como licenças de terceira-parte dos próprios sistemas) segue os termos dessa licença específica, indicados junto ao material quando aplicável.\n\nNão reproduza nem redistribua material protegido dos sistemas originais sem autorização de quem detém os direitos.",
     "atualizadoEm": "Última atualização: 7 de setembro de 2026",
     "voltar": "Voltar pro início"
+  },
+  "Conta": {
+    "metaTitulo": "Minha conta — Quinto Dado",
+    "painelAdmin": "Ir para o painel admin",
+    "sair": "Sair da conta",
+    "minhasMesas": "Minhas mesas",
+    "novaMesa": "+ Nova mesa",
+    "semMesas": "Você ainda não criou nenhuma mesa.",
+    "semMesasAtivas": "Nenhuma mesa ativa por aqui. As canceladas saem da lista um dia depois.",
+    "candidaturasDaMesa": "Candidaturas",
+    "editarMesa": "Editar",
+    "minhasCandidaturas": "Minhas candidaturas",
+    "semCandidaturas": "Você ainda não se candidatou a nenhuma mesa.",
+    "meusIngressos": "Meus ingressos",
+    "editarPerfil": "Editar perfil",
+    "nomeExibicao": "Nome de exibição",
+    "nomeCompleto": "Nome completo (opcional)",
+    "telefone": "Telefone (opcional)",
+    "sistemasFavoritos": "Sistemas favoritos",
+    "salvarPerfil": "Salvar perfil",
+    "salvando": "Salvando...",
+    "cancelar": "Cancelar",
+    "seguranca": "Segurança",
+    "trocarSenha": "Trocar senha",
+    "senhaAtual": "Senha atual",
+    "novaSenha": "Nova senha",
+    "confirmarNovaSenha": "Confirmar nova senha",
+    "senhaNaoBate": "A confirmação não bate com a nova senha.",
+    "senhaAlterada": "Senha alterada com sucesso.",
+    "salvarNovaSenha": "Salvar nova senha",
+    "fechar": "Fechar",
+    "aprovar": "Aprovar",
+    "aprovando": "Aprovando...",
+    "erroAprovarMesa": "Não deu pra aprovar a mesa.",
+    "cancelarMesaTitulo": "Cancelar essa mesa?",
+    "cancelarMesaCorpo": "A mesa some da listagem pública e para de aceitar candidaturas. Isso não pode ser desfeito por aqui.",
+    "voltar": "Voltar",
+    "cancelando": "Cancelando...",
+    "confirmarCancelarMesa": "Sim, cancelar mesa",
+    "erroCancelarMesa": "Não deu pra cancelar a mesa.",
+    "notificacoes": "Notificações",
+    "carregando": "Carregando..."
   }
 }

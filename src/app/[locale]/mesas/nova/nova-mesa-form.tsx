@@ -55,7 +55,7 @@ export function NovaMesaForm({
   modalidadeInicial?: "online" | "presencial";
 }) {
   const editando = Boolean(mesaId && mesaExistente);
-  const t = useTranslations("PresencialBhNova");
+  const t = useTranslations("MesaNova");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
