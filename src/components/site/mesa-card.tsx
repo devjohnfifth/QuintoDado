@@ -10,6 +10,7 @@ import { Selo } from "@/components/site/selo";
 import { CadeirasVagas } from "@/components/site/cadeiras-vagas";
 import { BrilhoCursor } from "@/components/site/brilho-cursor";
 import { corDoSistema } from "@/lib/mesas/cores-sistemas";
+import { vagasLivres as calcularVagasLivres, mesaLotada } from "@/lib/mesas/vagas";
 import type { SituacaoNaMesa } from "@/lib/mesas/minhas-inscricoes";
 
 export type MesaCardData = {
@@ -79,8 +80,8 @@ export function MesaCard({
   const cor = corDoSistema(mesa.sistemas?.slug);
   const nomeSistema = mesa.sistema_outro || mesa.sistemas?.nome || "—";
   const dias = diasParaComeco(mesa.data_inicio);
-  const vagasLivres = mesa.vagas_total - mesa.vagas_preenchidas;
-  const lotada = vagasLivres <= 0;
+  const vagasLivres = calcularVagasLivres(mesa);
+  const lotada = mesaLotada(mesa);
   const faltamPraAbrir = mesa.min_jogadores - mesa.vagas_preenchidas;
   const siteExterno = mesa.link_externo ? nomeDoSite(mesa.link_externo) : null;
 
@@ -231,7 +232,7 @@ export function MesaCard({
                 {t("vagasRestantes", {
                   preenchidas: mesa.vagas_preenchidas,
                   total: mesa.vagas_total,
-                  n: Math.max(0, vagasLivres),
+                  n: vagasLivres,
                 })}
               </p>
             )}

@@ -12,6 +12,7 @@ import { EstadoVazio } from "@/components/site/estado-vazio";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
 import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
+import { lotadasPorUltimo } from "@/lib/mesas/vagas";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
 import mesaEscudo from "@/assets/eventos/uaiventura-mesa-escudo.webp";
 import { buttonVariants } from "@/components/ui/button";
@@ -24,7 +25,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const title = "RPG de mesa: mesas abertas — Quinto Dado";
   const description =
-    "Encontre uma mesa de RPG de mesa aberta com o Mestre Quintão: one-shots online e presenciais. Vagas limitadas, linhas e véus combinados antes de começar.";
+    "Encontre uma mesa de RPG aberta no Quinto Dado: one-shots, aventuras e campanhas, online e presenciais, com o Mestre Quintão e outros mestres cadastrados. Vagas limitadas, linhas e véus combinados antes de começar.";
   return {
     title,
     description,
@@ -103,7 +104,10 @@ async function buscarMesas(filtros: Filtros, favoritos: Set<string>): Promise<Me
     });
   }
 
-  return filtradas;
+  // Por último, e por isso o critério mais forte: mesa cheia vai pro fim.
+  // Não adianta ser do sistema favorito e começar amanhã se não dá pra
+  // entrar. Os dois sorts acima continuam valendo dentro de cada grupo.
+  return lotadasPorUltimo(filtradas);
 }
 
 async function buscarSistemasComMesaAberta(): Promise<{ nome: string; slug: string }[]> {

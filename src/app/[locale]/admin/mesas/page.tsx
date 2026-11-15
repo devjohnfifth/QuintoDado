@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MODALIDADE_LABEL, TIPO_MESA_LABEL } from "@/lib/mesas/labels";
+import { filtroMesasSemCanceladasAntigas } from "@/lib/mesas/cancelamento";
 import { Paginacao, fatiar } from "@/components/site/paginacao";
 import { ListaControles } from "../lista-controles";
 import { MesaRowActions } from "./mesa-row-actions";
@@ -33,11 +34,11 @@ type Filtros = { status?: string; q?: string; pagina?: string };
 export default async function AdminMesasPage({ searchParams }: { searchParams: Promise<Filtros> }) {
   const sp = await searchParams;
   const supabase = await createClient();
-  const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { data: mesas, error } = await supabase
     .from("mesas")
     .select("id, slug, titulo, status, modalidade, cidade_uf, tipo, data_inicio, sistemas(nome), sistema_outro")
-    .or(`status.neq.cancelada,cancelado_em.gte.${umDiaAtras}`)
+    // Mesma janela que a lista do mestre em /conta, vinda do mesmo lugar.
+    .or(filtroMesasSemCanceladasAntigas())
     .order("criado_em", { ascending: false });
 
   if (error) {

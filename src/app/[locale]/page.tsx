@@ -8,6 +8,7 @@ import { Container } from "@/components/site/container";
 import { GradeAdaptavel } from "@/components/site/grade-adaptavel";
 import { MesaCard, type MesaCardData } from "@/components/site/mesa-card";
 import { minhasInscricoes } from "@/lib/mesas/minhas-inscricoes";
+import { lotadasPorUltimo, mesaLotada } from "@/lib/mesas/vagas";
 import { SuplementoCard } from "@/components/site/suplemento-card";
 import { Carrossel } from "@/components/site/carrossel";
 import { NumeroAnimado } from "@/components/site/numero-animado";
@@ -47,6 +48,11 @@ const jsonLd = {
   ],
 };
 
+/** Quantas mesas a home mostra na vitrine. */
+const MESAS_NA_HOME = 3;
+/** E quantas ela olha antes de escolher essas três (ver comentário na query). */
+const MESAS_CONSIDERADAS_NA_HOME = 24;
+
 async function buscarMesasAbertas(): Promise<MesaCardData[]> {
   if (!isSupabaseConfigured()) return [];
 
@@ -58,14 +64,18 @@ async function buscarMesasAbertas(): Promise<MesaCardData[]> {
     )
     .in("status", ["publicada", "confirmada", "em_andamento"])
     .order("data_inicio", { ascending: true })
-    .limit(3);
+    // Busca mais do que as 3 que vão aparecer: "lotada por último" é decidido
+    // aqui no servidor, e cortar em 3 antes de ordenar encheria a home de
+    // mesa cheia só porque a data dela é mais próxima. O teto existe pra home
+    // não carregar o catálogo inteiro quando houver muita mesa aberta.
+    .limit(MESAS_CONSIDERADAS_NA_HOME);
 
   if (error) {
     console.error("[home] erro ao buscar mesas abertas:", error.message);
     return [];
   }
 
-  return (data ?? []) as unknown as MesaCardData[];
+  return lotadasPorUltimo((data ?? []) as unknown as MesaCardData[]).slice(0, MESAS_NA_HOME);
 }
 
 type EventoNoticia = EventoCardData & { criado_em: string };
@@ -95,8 +105,15 @@ async function buscarEventosAbertos(): Promise<EventoNoticia[]> {
 async function contarConteudo() {
   if (!isSupabaseConfigured()) return { mesas: 0, suplementos: 0, tabelas: 0 };
   const supabase = await createClient();
-  const [{ count: mesas }, { count: suplementos }, { count: tabelas }] = await Promise.all([
-    supabase.from("mesas").select("id", { count: "exact", head: true }).in("status", ["publicada", "confirmada", "em_andamento"]),
+  const [{ data: mesasAbertas }, { count: suplementos }, { count: tabelas }] = await Promise.all([
+    // Conta mesa com vaga, não mesa publicada: o herói diz "N mesas abertas",
+    // e anunciar como aberta uma mesa lotada é promessa que a pessoa descobre
+    // quebrada no clique seguinte. `vagas_preenchidas` é função do banco, não
+    // dá pra comparar com `vagas_total` no filtro — então conta aqui.
+    supabase
+      .from("mesas")
+      .select("id, vagas_total, vagas_preenchidas")
+      .in("status", ["publicada", "confirmada", "em_andamento"]),
     supabase.from("suplementos").select("id", { count: "exact", head: true }).eq("publicado", true).eq("gratuito", true),
     // `!inner` pra só contar tabela que está mesmo no ar: a contagem aparece
     // no herói e não pode incluir rascunho.
@@ -106,7 +123,11 @@ async function contarConteudo() {
       .eq("suplementos.publicado", true)
       .eq("suplementos.gratuito", true),
   ]);
-  return { mesas: mesas ?? 0, suplementos: suplementos ?? 0, tabelas: tabelas ?? 0 };
+  const comVaga = (mesasAbertas ?? []).filter(
+    (m: { vagas_total: number; vagas_preenchidas: number }) => !mesaLotada(m),
+  ).length;
+
+  return { mesas: comVaga, suplementos: suplementos ?? 0, tabelas: tabelas ?? 0 };
 }
 
 /** Cabeçalho de seção da home: título, subtítulo e "ver todos" (no celular o link desce pro fim da seção). */
