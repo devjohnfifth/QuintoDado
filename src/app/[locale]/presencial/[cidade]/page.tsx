@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import pracaSete from "@/assets/presencial/praca-sete.webp";
-import bannerOg from "@/assets/brand/banner-og.webp";
 import { Container } from "@/components/site/container";
 import { BlocoFechamento } from "@/components/site/bloco-fechamento";
 import { CIDADES_PRESENCIAIS, SLUG_CIDADE, cidadeDoSlug } from "@/lib/mesas/cidades";
@@ -16,6 +14,7 @@ import {
   OutraCidade,
   ComoPublicar,
 } from "../mesas-presenciais";
+import { FOTO_CIDADE, fotoOuBanner } from "../fotos-cidade";
 
 /**
  * Página de uma cidade atendida.
@@ -47,10 +46,10 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "Presencial" });
   const title = t("metaTituloCidade", { cidade });
   const description = t("metaDescricaoCidade", { cidade });
-  // A Praça Sete é de Belo Horizonte: usar a mesma foto em Curitiba seria
-  // ilustrar uma cidade com outra. As demais ficam com o banner da marca até
-  // existir foto de cada uma.
-  const imagem = cidade === "Belo Horizonte" ? pracaSete : bannerOg;
+  // Cada cidade usa a foto dela. Quem ainda não tem fica com o banner da
+  // marca — ilustrar uma cidade com a foto de outra seria pior que não
+  // ilustrar.
+  const imagem = fotoOuBanner(cidade);
 
   return {
     title,
@@ -82,7 +81,7 @@ export default async function PresencialCidadePage({
   const t = await getTranslations("Presencial");
   const sp = await searchParams;
   const todasMesas = await buscarMesasPresenciais();
-  const ehBeloHorizonte = cidade === "Belo Horizonte";
+  const foto = FOTO_CIDADE[cidade];
 
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const breadcrumbLd = {
@@ -100,11 +99,12 @@ export default async function PresencialCidadePage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSeguro(breadcrumbLd) }} />
 
       <section className="relative overflow-hidden">
-        {/* Só BH tem foto própria. Nas outras cidades o herói fica com a
-            textura da marca — melhor um fundo neutro que a praça errada. */}
-        {ehBeloHorizonte && (
+        {/* Só as cidades com foto própria ganham fundo. Nas outras o herói
+            fica com a textura da marca — melhor um fundo neutro que a praça
+            de outra cidade. */}
+        {foto && (
           <div className="absolute inset-0 -z-10">
-            <Image src={pracaSete} alt="" fill priority className="object-cover opacity-30" sizes="100vw" />
+            <Image src={foto} alt="" fill priority className="object-cover opacity-30" sizes="100vw" />
             <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
           </div>
         )}
