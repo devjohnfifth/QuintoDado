@@ -76,8 +76,8 @@ export default async function PresencialPage({
     <>
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <Image src={pracaSete} alt="" fill priority className="object-cover opacity-30" sizes="100vw" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
+          <Image src={pracaSete} alt="" fill priority className="object-cover opacity-70" sizes="100vw" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
         </div>
 
         {/* Herói enxuto de propósito: o que a pessoa veio fazer aqui é achar

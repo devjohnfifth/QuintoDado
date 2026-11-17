@@ -104,13 +104,13 @@ export default async function PresencialCidadePage({
             de outra cidade. */}
         {foto && (
           <div className="absolute inset-0 -z-10">
-            <Image src={foto} alt="" fill priority className="object-cover opacity-30" sizes="100vw" />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/80 to-background" />
+            <Image src={foto} alt="" fill priority className="object-cover opacity-70" sizes="100vw" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
           </div>
         )}
 
         <Container className="py-12 sm:py-16">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-foreground/80">
             <Link href="/presencial" className="hover:text-foreground hover:underline">
               ← {t("voltarParaTodas")}
             </Link>
