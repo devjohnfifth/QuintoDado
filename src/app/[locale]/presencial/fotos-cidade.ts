@@ -1,6 +1,7 @@
 import type { StaticImageData } from "next/image";
 import pracaSete from "@/assets/presencial/praca-sete.webp";
 import fortaleza from "@/assets/presencial/fortaleza.webp";
+import saoPaulo from "@/assets/presencial/sao-paulo.webp";
 import bannerOg from "@/assets/brand/banner-og.webp";
 import type { CidadePresencial } from "@/lib/mesas/cidades";
 
@@ -17,6 +18,7 @@ import type { CidadePresencial } from "@/lib/mesas/cidades";
  */
 export const FOTO_CIDADE: Partial<Record<CidadePresencial, StaticImageData>> = {
   "Belo Horizonte": pracaSete,
+  "São Paulo": saoPaulo,
   Fortaleza: fortaleza,
 };
 
