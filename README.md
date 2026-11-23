@@ -1,5 +1,18 @@
 # Quinto Dado
 
+A web platform for tabletop RPG games, in production at **[quinto-dado.vercel.app](https://quinto-dado.vercel.app)**.
+
+![Quinto Dado on desktop and mobile](docs/readme/quinto-dado.jpg)
+
+Built solo, end to end: players apply to online and in-person game tables, browse a
+free library of supplements with interactive random tables, and follow their campaign
+in a player dashboard, while the game master runs everything from an admin panel.
+Next.js 15 (App Router), React 19, TypeScript, PostgreSQL on Supabase with row-level
+security, Cloudflare R2, Zod and Vitest, deployed on Vercel. The product and the
+documentation below are in Brazilian Portuguese.
+
+---
+
 Site e plataforma do **Quinto Dado**, criador e mestre de RPG brasileiro. Reúne
 três coisas num lugar só:
 
