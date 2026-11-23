@@ -37,12 +37,15 @@ export function Elenco({
   entidades,
   membros,
   ehMestre,
+  podeCriar,
   usuarioId,
 }: {
   slug: string;
   entidades: Entidade[];
   membros: Membro[];
   ehMestre: boolean;
+  /** Espectador lê o elenco e não cria ficha. */
+  podeCriar: boolean;
   usuarioId: string;
 }) {
   const t = useTranslations("Painel");
@@ -71,7 +74,8 @@ export function Elenco({
 
   return (
     <div className="space-y-10">
-      <div className="rounded-2xl painel p-4">
+      {podeCriar ? (
+        <div className="rounded-2xl painel p-4">
           {criando ? (
             <div className="grid gap-3 sm:grid-cols-[1fr_12rem_auto]">
               <div className="space-y-1.5">
@@ -114,15 +118,24 @@ export function Elenco({
               {t("novaFicha")}
             </button>
           )}
-        {!ehMestre && <p className="mt-2 text-sm text-muted-foreground">{t("avisoJogador")}</p>}
-        {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
-      </div>
+          {!ehMestre && <p className="mt-2 text-sm text-muted-foreground">{t("avisoJogador")}</p>}
+          {erro && <p className="mt-2 text-sm text-destructive">{erro}</p>}
+        </div>
+      ) : (
+        <p className="rounded-2xl painel p-4 text-sm text-muted-foreground">{t("avisoEspectador")}</p>
+      )}
 
       {grupos.length === 0 ? (
         <EstadoVazio
           icone={Users}
           titulo={ehMestre ? t("elencoVazioMestre") : t("elencoVazioJogador")}
-          corpo={ehMestre ? t("elencoVazioMestreCorpo") : t("elencoVazioJogadorCorpo")}
+          corpo={
+            ehMestre
+              ? t("elencoVazioMestreCorpo")
+              : podeCriar
+                ? t("elencoVazioJogadorCorpo")
+                : t("elencoVazioEspectadorCorpo")
+          }
         />
       ) : (
         grupos.map((grupo) => (

@@ -291,8 +291,10 @@ export default async function MesaDetalhePage({
       {t("candidatar")}
     </a>
   ) : null;
-  // Membro da mesa (mestre ou candidatura aprovada) tem acesso ao painel da campanha.
-  const podeAbrirPainel = ehMestre || inscricao?.status === "aprovado";
+  // O painel é de leitura aberta a quem tem conta: se a pessoa está logada e
+  // esta página abriu, ela pode entrar. Escrever lá dentro continua sendo só
+  // do mestre e de quem tem candidatura aprovada.
+  const podeAbrirPainel = logado;
   const statusResumo = ehMestre
     ? t("voceMestra")
     : inscricao?.status === "aprovado"

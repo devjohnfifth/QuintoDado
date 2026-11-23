@@ -136,7 +136,7 @@ app/
 | `supabase/` | Clientes: `client` (navegador), `server` (SSR), `service-role` (ignora RLS), `types` (tipos gerados) |
 | `mesas/` | Rótulos, cidades atendidas, cores por sistema, horários, inscrições do usuário |
 | `suplementos/` | Leitura pública, tipos de dado e rolagem de tabela |
-| `painel/` | Acesso ao painel de campanha e leitura das entidades/sessões |
+| `painel/` | Papel no painel (mestre / jogador / espectador) e leitura das entidades/sessões |
 | `eventos/` | Rótulos de status de ingresso |
 | `notificacoes/` | Disparo de notificações internas (tabela `notificacoes`) |
 | `storage/` | `enviar-imagem` (Supabase Storage) e `r2` (arquivos privados) |
@@ -171,6 +171,13 @@ pode entrar no `disallow` do robots.
 
 **Autenticadas** — `/conta` · `/mesas/[slug]/painel` (+ `/elenco`, `/sessoes`) ·
 `/mesas/nova`, `/mesas/editar/[id]` e `/mesas/candidaturas/[id]` (mestres).
+
+O painel de campanha é de **leitura aberta a quem tem conta**: qualquer pessoa
+logada lê o elenco revelado e os resumos publicados de uma mesa que já está no
+ar. **Escrever continua sendo de quem joga** — mestre e inscrição aprovada.
+Segredo do mestre (ficha oculta, campo não revelado, sessão em rascunho) e
+anotação privada seguem invisíveis, e o painel continua fora do índice de
+busca: abriu pra quem tem conta, não pro Google.
 
 **Admin** (`papel = 'admin'`) — `/admin` e as seções de mesas, eventos,
 suplementos e usuários. Bloqueadas no `robots.ts`.

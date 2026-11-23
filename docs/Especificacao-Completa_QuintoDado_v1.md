@@ -955,3 +955,42 @@ endereço já indexado virava link morto. Evento encerrado passa a ser acervo:
 página no ar, selo "Já rolou", listagem separada em "Já rolaram", venda travada
 pelo `status` (não só por `vendas_abertas`) e `evento_pagamento` ainda restrito a
 evento publicado.
+
+## §30 — Painel da mesa aberto a quem tem conta (23/11/2026)
+
+O painel de campanha (`/mesas/[slug]/painel`) nasceu fechado: só mestre e
+inscrição aprovada liam qualquer coisa dele, e quem não era membro levava 404.
+Protegia bem e escondia justamente o que mostra a comunidade trabalhando — o
+elenco que o grupo construiu e o relato das sessões.
+
+**A regra passa a ter duas metades.** **Ler** é de quem tem conta no site.
+**Escrever** continua sendo de quem joga: mestre e inscrição aprovada. Nenhuma
+policy de escrita mudou; a leitura passou de `eh_membro_da_mesa()` para
+`pode_ver_painel()`, que é "membro **ou** pessoa logada numa mesa que já está no
+ar". A lista de status é a mesma de `mesa_leitura` (`publicada`, `confirmada`,
+`em_andamento`), pra não existirem duas definições de "mesa pública" se
+contradizendo. Mesa em rascunho, aguardando aprovação ou cancelada segue fechada,
+e visitante deslogado continua levando 404.
+
+**Nada do que era segredo virou público.** O que o espectador não vê é
+exatamente o que o jogador já não via: ficha `oculta`, campo `vis = 'oculto'`,
+campo e relacionamento `'especificos'` fora da lista, sessão não publicada,
+anotação privada e o log `painel_revelacoes`. O painel segue `noindex`: abriu
+pra quem tem conta, não pro Google.
+
+**O que isso obrigou a mudar nos textos.** Com o painel fechado, `vis = 'mesa'`
+queria dizer "a mesa toda", e os rótulos da tela diziam isso. Com o painel
+aberto, a mesma escolha passa a valer pra qualquer pessoa com conta — então
+"A mesa toda" virou **"Quem tem conta no site"**, "A mesa vê" virou "Quem tem
+conta vê" e "Revelar pra mesa" virou "Revelar no painel". O rótulo é a interface
+de uma decisão de privacidade: deixá-lo dizendo "a mesa" faria o mestre revelar
+achando que estava protegido. Quando a tela de anotações existir, ela nasce com
+esse mesmo vocabulário.
+
+**Terceiro papel.** `acessoAoPainel` passou a devolver `papel`
+(`mestre` | `jogador` | `espectador`) e `podeCriar`. `exigirMembroDaMesa` recusa
+espectador — sem isso, bastava chamar a Server Action direto pra tentar escrever
+na mesa de outra pessoa; o RLS recusaria, mas a regra ficaria num lugar só.
+
+A trava é testada por `scripts/testa-rls-painel.cjs`, que entra no banco com o
+token de um usuário sem relação com a mesa e confere as duas metades.

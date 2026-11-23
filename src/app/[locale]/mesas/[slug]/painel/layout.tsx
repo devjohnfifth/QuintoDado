@@ -7,12 +7,19 @@ import { Link } from "@/i18n/navigation";
 import { Container } from "@/components/site/container";
 import { Selo } from "@/components/site/selo";
 import { FundoSemImagem } from "@/components/site/card-midia";
-import { acessoAoPainel } from "@/lib/painel/acesso";
+import { acessoAoPainel, type PapelNoPainel } from "@/lib/painel/acesso";
 import { listarEntidades, listarSessoes } from "@/lib/painel/dados";
 import { AbasPainel } from "./abas-painel";
 
-// Conteúdo de campanha nunca entra em índice de busca.
+// Conteúdo de campanha nunca entra em índice de busca. O painel abriu pra
+// quem tem conta, não pro Google: continua fora do índice de propósito.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
+
+const SUBTITULO_CHAVE: Record<PapelNoPainel, string> = {
+  mestre: "subtituloMestre",
+  jogador: "subtituloJogador",
+  espectador: "subtituloEspectador",
+};
 
 export default async function PainelLayout({
   children,
@@ -25,8 +32,8 @@ export default async function PainelLayout({
   setRequestLocale(locale);
   const t = await getTranslations("Painel");
 
-  // Quem não é membro leva 404: "sem permissão" já confirmaria que existe
-  // conteúdo ali dentro.
+  // Visitante deslogado, e mesa que ainda não foi ao ar, levam 404: "sem
+  // permissão" já confirmaria que existe conteúdo ali dentro.
   const acesso = await acessoAoPainel(slug);
   if (!acesso) notFound();
 
@@ -71,9 +78,7 @@ export default async function PainelLayout({
               <p className="rotulo-caps text-muted-foreground">{t("titulo")}</p>
               <h1 className="titulo-display titulo-secao mt-1.5">{acesso.mesa.titulo}</h1>
             </div>
-            <Selo tom={acesso.ehMestre ? "marca" : "neutro"}>
-              {acesso.ehMestre ? t("subtituloMestre") : t("subtituloJogador")}
-            </Selo>
+            <Selo tom={acesso.ehMestre ? "marca" : "neutro"}>{t(SUBTITULO_CHAVE[acesso.papel])}</Selo>
           </div>
         </Container>
       </section>

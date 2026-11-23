@@ -23,11 +23,14 @@ export function Sessoes({
   slug,
   sessoes,
   ehMestre,
+  podeCriar,
   usuarioId,
 }: {
   slug: string;
   sessoes: Sessao[];
   ehMestre: boolean;
+  /** Espectador lê os resumos publicados e não escreve o próprio. */
+  podeCriar: boolean;
   usuarioId: string;
 }) {
   const t = useTranslations("Painel");
@@ -46,20 +49,30 @@ export function Sessoes({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="marca" onClick={criar} disabled={pendente}>
-          {pendente ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" aria-hidden />}
-          {ehMestre ? t("novaSessao") : t("novoResumo")}
-        </Button>
-        {!ehMestre && <p className="text-sm text-muted-foreground">{t("avisoJogador")}</p>}
-        {erro && <p className="text-sm text-destructive">{erro}</p>}
-      </div>
+      {podeCriar ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="marca" onClick={criar} disabled={pendente}>
+            {pendente ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" aria-hidden />}
+            {ehMestre ? t("novaSessao") : t("novoResumo")}
+          </Button>
+          {!ehMestre && <p className="text-sm text-muted-foreground">{t("avisoJogador")}</p>}
+          {erro && <p className="text-sm text-destructive">{erro}</p>}
+        </div>
+      ) : (
+        <p className="rounded-2xl painel p-4 text-sm text-muted-foreground">{t("avisoEspectador")}</p>
+      )}
 
       {sessoes.length === 0 ? (
         <EstadoVazio
           icone={CalendarDays}
           titulo={ehMestre ? t("sessoesVazioMestre") : t("sessoesVazioJogador")}
-          corpo={ehMestre ? t("sessoesVazioMestreCorpo") : t("sessoesVazioJogadorCorpo")}
+          corpo={
+            ehMestre
+              ? t("sessoesVazioMestreCorpo")
+              : podeCriar
+                ? t("sessoesVazioJogadorCorpo")
+                : t("sessoesVazioEspectadorCorpo")
+          }
         />
       ) : (
         // Linha do tempo: uma campanha é uma sequência, e a lista plana não

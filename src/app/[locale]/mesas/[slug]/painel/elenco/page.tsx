@@ -22,6 +22,7 @@ export default async function ElencoPage({ params }: { params: Promise<{ locale:
       entidades={entidades}
       membros={membros}
       ehMestre={acesso.ehMestre}
+      podeCriar={acesso.podeCriar}
       usuarioId={acesso.usuarioId}
     />
   );
