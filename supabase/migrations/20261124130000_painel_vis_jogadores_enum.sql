@@ -1,0 +1,24 @@
+-- =====================================================================
+-- Nível de visibilidade que faltou: "só quem joga nesta mesa".
+--
+-- Enquanto o painel era fechado, `vis = 'mesa'` queria dizer exatamente
+-- isso — a mesa, e mais ninguém. Quando o painel abriu pra quem tem conta
+-- (migration 20261123120000), esse mesmo valor passou a significar "todo
+-- mundo logado", e o mestre ficou sem o degrau do meio: ou o segredo é só
+-- dele, ou é de jogadores que ele nomeia um a um, ou é do site inteiro.
+--
+-- Nomear um a um não substitui: a lista não acompanha quem entra na mesa
+-- depois, então o jogador novo nunca vê o que já tinha sido revelado.
+--
+-- Fica, do mais fechado pro mais aberto:
+--   oculto      · só o mestre
+--   especificos · só os jogadores que ele marcar
+--   jogadores   · quem joga nesta mesa  (este)
+--   mesa        · quem tem conta no site
+--
+-- Esta migration só cria o valor. As policies vêm na seguinte, porque o
+-- Postgres recusa usar um valor de enum na mesma transação que o criou
+-- ("unsafe use of new value of enum type"). Rode as duas, nesta ordem.
+-- =====================================================================
+
+alter type visibilidade_painel add value if not exists 'jogadores';

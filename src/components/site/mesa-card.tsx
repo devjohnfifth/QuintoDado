@@ -12,6 +12,7 @@ import { BrilhoCursor } from "@/components/site/brilho-cursor";
 import { corDoSistema } from "@/lib/mesas/cores-sistemas";
 import { vagasLivres as calcularVagasLivres, mesaLotada } from "@/lib/mesas/vagas";
 import type { SituacaoNaMesa } from "@/lib/mesas/minhas-inscricoes";
+import { iniciais } from "@/lib/perfil/iniciais";
 
 export type MesaCardData = {
   sistema_id?: string | null;
@@ -248,7 +249,7 @@ export function MesaCard({
                   />
                 ) : (
                   <span className="flex size-5 items-center justify-center rounded-full bg-marca text-[0.6rem] font-bold text-white">
-                    {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+                    {iniciais(mesa.profiles.nome_exibicao)}
                   </span>
                 )}
                 {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}

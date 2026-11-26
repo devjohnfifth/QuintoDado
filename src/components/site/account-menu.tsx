@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { iniciais } from "@/lib/perfil/iniciais";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,16 +27,8 @@ function primeiroNome(nome: string) {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
 
-function iniciais(nome: string) {
-  return nome
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
-}
-
 export function AccountMenu({ perfil }: { perfil: Perfil }) {
+  const t = useTranslations("Nav");
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -62,12 +56,12 @@ export function AccountMenu({ perfil }: { perfil: Perfil }) {
           <DropdownMenuSeparator />
           <DropdownMenuItem render={<Link href="/conta" />}>
             <User className="size-4" aria-hidden />
-            Minha conta
+            {t("minhaConta")}
           </DropdownMenuItem>
           {perfil.papel === "admin" && (
             <DropdownMenuItem render={<Link href="/admin" />}>
               <LayoutDashboard className="size-4" aria-hidden />
-              Painel admin
+              {t("painelAdmin")}
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
@@ -78,7 +72,7 @@ export function AccountMenu({ perfil }: { perfil: Perfil }) {
             }}
           >
             <LogOut className="size-4" aria-hidden />
-            Sair
+            {t("sairDaConta")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

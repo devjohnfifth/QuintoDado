@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Ticket } from "lucide-react";
+import { CalendarDays, Dices, MessageCircle, Sparkles, Ticket, Wand2 } from "lucide-react";
 import { redirect } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/is-configured";
 import { meusDadosPessoais } from "@/lib/auth/dados-pessoais";
-import { Button } from "@/components/ui/button";
+import { SITE_LINKS } from "@/lib/site-links";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { mesaVisivelParaODono } from "@/lib/mesas/cancelamento";
+import { Container } from "@/components/site/container";
+import { EstadoVazio } from "@/components/site/estado-vazio";
 import { PerfilSection } from "@/components/site/perfil-section";
 import { TrocarSenhaForm } from "@/components/site/trocar-senha-form";
 import { CancelarMesaMestreButton } from "./cancelar-mesa-mestre-button";
@@ -77,6 +80,16 @@ const STATUS_INGRESSO_COR: Record<string, string> = {
   cancelado: "border-border text-muted-foreground",
 };
 
+/** Título de seção da conta — um só, porque a página tinha dois. */
+function TituloSecao({ children, acao }: { children: React.ReactNode; acao?: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <h2 className="titulo-display titulo-secao">{children}</h2>
+      {acao}
+    </div>
+  );
+}
+
 export default async function ContaPage({
   params,
 }: {
@@ -107,7 +120,7 @@ export default async function ContaPage({
   const [{ data: perfil }, pessoais, { data: sistemas }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos")
+      .select("username, nome_exibicao, avatar_url, papel, bio, sistemas_favoritos, perfil_publico, mestre_solicitado_em")
       .eq("id", user.id)
       .single(),
     meusDadosPessoais(supabase),
@@ -143,8 +156,13 @@ export default async function ContaPage({
   const mesasVisiveis = mesasCriadas?.filter((mesa) => mesaVisivelParaODono(mesa)) ?? null;
   const escondeuCanceladas = (mesasCriadas?.length ?? 0) > (mesasVisiveis?.length ?? 0);
 
+  const ehMestre = ["mestre", "admin"].includes(perfil?.papel ?? "");
+  // O que faz o perfil público valer a pena existir. Se faltar, a conta
+  // convida a preencher em vez de deixar a página vazia sem explicar nada.
+  const perfilIncompleto = !perfil?.bio || (perfil?.sistemas_favoritos ?? []).length === 0;
+
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6">
+    <>
       <PerfilSection
         nomeExibicao={perfil?.nome_exibicao ?? "?"}
         nomeCompleto={pessoais?.nome_completo ?? null}
@@ -152,166 +170,287 @@ export default async function ContaPage({
         username={perfil?.username ?? ""}
         bio={perfil?.bio ?? null}
         avatarUrl={perfil?.avatar_url ?? null}
+        perfilPublico={perfil?.perfil_publico ?? true}
+        papel={perfil?.papel ?? "usuario"}
         sistemasFavoritos={perfil?.sistemas_favoritos ?? []}
         sistemas={sistemas ?? []}
       />
 
-      <TrocarSenhaForm />
-
-      {perfil?.papel === "admin" && (
-        <Link
-          href="/admin"
-          className="mt-6 inline-block rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground"
-        >
-          {t("painelAdmin")}
-        </Link>
-      )}
-
-      {mesasVisiveis && (
-        <>
-          <div className="mt-10 flex items-center justify-between">
-            <h2 className="font-heading text-lg font-bold">{t("minhasMesas")}</h2>
-            <Link href="/mesas/nova" className="text-sm font-medium text-primary hover:underline">
-              {t("novaMesa")}
-            </Link>
-          </div>
-          {mesasVisiveis.length === 0 ? (
-            <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              {escondeuCanceladas ? t("semMesasAtivas") : t("semMesas")}
+      <Container className="space-y-12 py-10 sm:py-14">
+        {/* Convite pra completar o perfil. Fica no topo porque é a única
+            coisa que a pessoa recém-cadastrada pode fazer aqui que muda
+            alguma coisa — e a página inteira dela era só "Trocar senha". */}
+        {perfilIncompleto && (
+          <section className="rounded-2xl painel p-5 sm:p-6">
+            <p className="rotulo-caps flex items-center gap-2 text-primary">
+              <Sparkles className="size-4" aria-hidden />
+              {t("completarRotulo")}
             </p>
-          ) : (
-            <ul className="mt-3 space-y-3">
-              {mesasVisiveis.map((mesa) => (
-                <li
-                  key={mesa.id}
-                  className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
-                >
-                  <Link href={`/mesas/${mesa.slug}`} className="font-medium hover:underline">
-                    {mesa.titulo}
-                  </Link>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                    <span
-                      className={`rounded-full border px-2 py-0.5 text-xs ${
-                        STATUS_MESA_COR[mesa.status] ?? "border-border text-muted-foreground"
-                      }`}
+            <h2 className="titulo-display titulo-bloco mt-2">{t("completarTitulo")}</h2>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("completarCorpo")}</p>
+          </section>
+        )}
+
+        {perfil?.papel === "admin" && (
+          <Link href="/admin" className={buttonVariants({ variant: "outline", className: "rounded-full" })}>
+            {t("painelAdmin")}
+          </Link>
+        )}
+
+        {mesasVisiveis && (
+          <section>
+            <TituloSecao
+              acao={
+                <Link href="/mesas/nova" className="text-sm font-medium text-primary hover:underline">
+                  {t("novaMesa")}
+                </Link>
+              }
+            >
+              {t("minhasMesas")}
+            </TituloSecao>
+
+            {mesasVisiveis.length === 0 ? (
+              <div className="mt-5">
+                <EstadoVazio
+                  icone={Wand2}
+                  titulo={escondeuCanceladas ? t("semMesasAtivas") : t("semMesas")}
+                  corpo={t("semMesasCorpo")}
+                  acao={
+                    <Link
+                      href="/mesas/nova"
+                      className={buttonVariants({ variant: "marca", className: "rounded-full" })}
                     >
-                      {STATUS_MESA_CHAVE[mesa.status] ? t(STATUS_MESA_CHAVE[mesa.status]) : mesa.status}
-                    </span>
-                    {/* Vale pras duas modalidades: o mestre publica mesa
-                        online também, e antes ele ficava sem nenhuma ação
-                        aqui. Editar fica de fora quando o site é quem cobra a
-                        mesa — essa é do admin, e a tela de edição recusaria. */}
+                      {t("criarPrimeiraMesa")}
+                    </Link>
+                  }
+                />
+              </div>
+            ) : (
+              <ul className="mt-5 space-y-3">
+                {mesasVisiveis.map((mesa) => (
+                  <li
+                    key={mesa.id}
+                    className="rounded-2xl painel p-4 transition-colors duration-200 hover:border-primary/30"
+                  >
+                    {/* Título e status em cima, ações embaixo. Antes era tudo
+                        numa linha só: no celular "Cancelar" caía sozinha numa
+                        terceira linha, e ela é a única irreversível. */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                      <Link href={`/mesas/${mesa.slug}`} className="font-heading font-bold hover:underline">
+                        {mesa.titulo}
+                      </Link>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-xs ${
+                          STATUS_MESA_COR[mesa.status] ?? "border-border text-muted-foreground"
+                        }`}
+                      >
+                        {STATUS_MESA_CHAVE[mesa.status] ? t(STATUS_MESA_CHAVE[mesa.status]) : mesa.status}
+                      </span>
+                    </div>
+
                     {mesa.status !== "cancelada" && (
-                      <>
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+                        {/* Vale pras duas modalidades: o mestre publica mesa
+                            online também. Editar fica de fora quando o site é
+                            quem cobra — essa é do admin, e a tela recusaria. */}
                         <Link
                           href={`/mesas/candidaturas/${mesa.id}`}
-                          className="text-xs text-primary hover:underline"
+                          className={buttonVariants({ variant: "outline", size: "sm", className: "rounded-full" })}
                         >
                           {t("candidaturasDaMesa")}
                         </Link>
                         {!mesa.cobranca_gerenciada_pelo_site && (
                           <Link
                             href={`/mesas/editar/${mesa.id}`}
-                            className="text-xs text-primary hover:underline"
+                            className={buttonVariants({ variant: "ghost", size: "sm", className: "rounded-full" })}
                           >
                             {t("editarMesa")}
                           </Link>
                         )}
-                      </>
+                        {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
+                          <AprovarMesaAdminButton mesaId={mesa.id} />
+                        )}
+                        {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
+                          <span className="ms-auto">
+                            <CancelarMesaMestreButton mesaId={mesa.id} />
+                          </span>
+                        )}
+                      </div>
                     )}
-                    {perfil?.papel === "admin" && mesa.status === "aguardando_aprovacao" && (
-                      <AprovarMesaAdminButton mesaId={mesa.id} />
-                    )}
-                    {STATUS_MESA_CANCELAVEL.includes(mesa.status) && (
-                      <CancelarMesaMestreButton mesaId={mesa.id} />
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
-      <h2 className="mt-10 font-heading text-lg font-bold">{t("minhasCandidaturas")}</h2>
-      {!inscricoes || inscricoes.length === 0 ? (
-        <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {t("semCandidaturas")}
-        </p>
-      ) : (
-        <ul className="mt-3 space-y-3">
-          {inscricoes.map((inscricao) => {
-            const mesa = inscricao.mesas as unknown as { titulo: string; slug: string } | null;
-            return (
-              <li
-                key={inscricao.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/60 p-4 text-sm transition-colors duration-200 hover:border-primary/30"
-              >
-                <Link href={`/mesas/${mesa?.slug}`} className="font-medium hover:underline">
-                  {mesa?.titulo ?? "Mesa"}
-                </Link>
-                <span
-                  className={`rounded-full border px-2 py-0.5 text-xs ${
-                    STATUS_COR[inscricao.status] ?? "border-border text-muted-foreground"
-                  }`}
+        {/* Quem ainda não mestra precisa saber que pode. O botão de pedir o
+            papel vive em /mesas/nova; aqui fica o convite e, pra quem já
+            pediu, o aviso de que o pedido está na fila — que antes não
+            aparecia em lugar nenhum depois de enviado. */}
+        {!ehMestre && (
+          <section className="rounded-2xl painel p-5 sm:p-6">
+            <p className="rotulo-caps flex items-center gap-2 text-primary">
+              <Wand2 className="size-4" aria-hidden />
+              {t("mestrarRotulo")}
+            </p>
+            <h2 className="titulo-display titulo-bloco mt-2">{t("mestrarTitulo")}</h2>
+            {perfil?.mestre_solicitado_em ? (
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("mestrarPedidoEnviado")}</p>
+            ) : (
+              <>
+                <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("mestrarCorpo")}</p>
+                <Link
+                  href="/mesas/nova"
+                  className={buttonVariants({ variant: "outline", className: "mt-4 rounded-full" })}
                 >
-                  {STATUS_CHAVE[inscricao.status] ? t(STATUS_CHAVE[inscricao.status]) : inscricao.status}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                  {t("mestrarCta")}
+                </Link>
+              </>
+            )}
+          </section>
+        )}
 
-      {ingressos && ingressos.length > 0 && (
-        <>
-          <h2 className="titulo-display titulo-secao mt-12">{t("meusIngressos")}</h2>
-          {/* Com cara de ingresso de verdade: o canhoto à esquerda com o
-              picote, igual ao card de mesa e aos ingressos do evento. Antes
-              era uma linha de lista que não parecia valer nada. */}
-          <ul className="cascata mt-5 grid gap-3 sm:grid-cols-2">
-            {ingressos.map((ingresso) => {
-              const evento = ingresso.eventos as unknown as { titulo: string; slug: string } | null;
-              const tipo = ingresso.evento_ingresso_tipos as unknown as { nome: string } | null;
-              return (
-                <li key={ingresso.id} className="relative flex overflow-hidden rounded-2xl painel-alto">
-                  <span
-                    aria-hidden
-                    className="flex w-14 shrink-0 items-center justify-center bg-marca text-white"
+        <section>
+          <TituloSecao>{t("minhasCandidaturas")}</TituloSecao>
+          {!inscricoes || inscricoes.length === 0 ? (
+            <div className="mt-5">
+              <EstadoVazio
+                icone={Dices}
+                titulo={t("semCandidaturas")}
+                corpo={t("semCandidaturasCorpo")}
+                acao={
+                  <Link
+                    href="/mesas"
+                    className={buttonVariants({ variant: "marca", className: "rounded-full" })}
                   >
-                    <Ticket className="size-5" aria-hidden />
-                  </span>
-                  <span aria-hidden className="my-3 border-l-2 border-dashed border-foreground/25" />
-                  <span aria-hidden className="absolute -top-3 left-[3.4rem] size-6 rounded-full bg-background" />
-                  <span aria-hidden className="absolute -bottom-3 left-[3.4rem] size-6 rounded-full bg-background" />
-
-                  <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 p-4">
-                    <div className="min-w-0">
-                      <Link href={`/eventos/${evento?.slug}`} className="font-heading font-bold hover:underline">
-                        {evento?.titulo ?? "Evento"}
-                      </Link>
-                      {tipo && <p className="text-sm text-muted-foreground">{tipo.nome}</p>}
-                    </div>
+                    {t("verMesasAbertas")}
+                  </Link>
+                }
+              />
+            </div>
+          ) : (
+            <ul className="mt-5 space-y-3">
+              {inscricoes.map((inscricao) => {
+                const mesa = inscricao.mesas as unknown as { titulo: string; slug: string } | null;
+                return (
+                  <li
+                    key={inscricao.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-2xl painel p-4 text-sm transition-colors duration-200 hover:border-primary/30"
+                  >
+                    <Link href={`/mesas/${mesa?.slug}`} className="font-medium hover:underline">
+                      {mesa?.titulo ?? t("mesaSemTitulo")}
+                    </Link>
                     <span
-                      className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
-                        STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
+                      className={`rounded-full border px-2 py-0.5 text-xs ${
+                        STATUS_COR[inscricao.status] ?? "border-border text-muted-foreground"
                       }`}
                     >
-                      {STATUS_INGRESSO_CHAVE[ingresso.status] ? t(STATUS_INGRESSO_CHAVE[ingresso.status]) : ingresso.status}
+                      {STATUS_CHAVE[inscricao.status] ? t(STATUS_CHAVE[inscricao.status]) : inscricao.status}
                     </span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
 
-      <form action={sairAction} className="mt-10">
-        <Button type="submit" variant="outline">
-          {t("sair")}
-        </Button>
-      </form>
-    </div>
+        <section>
+          <TituloSecao>{t("meusIngressos")}</TituloSecao>
+          {!ingressos || ingressos.length === 0 ? (
+            /* A seção só existia quando havia ingresso, então quem nunca
+               comprou nunca ficava sabendo que o site tem evento. */
+            <div className="mt-5">
+              <EstadoVazio
+                icone={CalendarDays}
+                titulo={t("semIngressos")}
+                corpo={t("semIngressosCorpo")}
+                acao={
+                  <Link
+                    href="/eventos"
+                    className={buttonVariants({ variant: "outline", className: "rounded-full" })}
+                  >
+                    {t("verEventos")}
+                  </Link>
+                }
+              />
+            </div>
+          ) : (
+            /* Com cara de ingresso de verdade: o canhoto à esquerda com o
+               picote, igual ao card de mesa e aos ingressos do evento. */
+            <ul className="cascata mt-5 grid gap-3 sm:grid-cols-2">
+              {ingressos.map((ingresso) => {
+                const evento = ingresso.eventos as unknown as { titulo: string; slug: string } | null;
+                const tipo = ingresso.evento_ingresso_tipos as unknown as { nome: string } | null;
+                return (
+                  <li key={ingresso.id} className="relative flex overflow-hidden rounded-2xl painel-alto">
+                    <span aria-hidden className="flex w-14 shrink-0 items-center justify-center bg-marca text-white">
+                      <Ticket className="size-5" aria-hidden />
+                    </span>
+                    <span aria-hidden className="my-3 border-l-2 border-dashed border-foreground/25" />
+                    <span aria-hidden className="absolute -top-3 left-[3.4rem] size-6 rounded-full bg-background" />
+                    <span aria-hidden className="absolute -bottom-3 left-[3.4rem] size-6 rounded-full bg-background" />
+
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 p-4">
+                      <div className="min-w-0">
+                        <Link href={`/eventos/${evento?.slug}`} className="font-heading font-bold hover:underline">
+                          {evento?.titulo ?? t("eventoSemTitulo")}
+                        </Link>
+                        {tipo && <p className="text-sm text-muted-foreground">{tipo.nome}</p>}
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                          STATUS_INGRESSO_COR[ingresso.status] ?? "border-border text-muted-foreground"
+                        }`}
+                      >
+                        {STATUS_INGRESSO_CHAVE[ingresso.status]
+                          ? t(STATUS_INGRESSO_CHAVE[ingresso.status])
+                          : ingresso.status}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* O grupo é a porta da comunidade e o objetivo desta fase; a conta
+            é onde a pessoa pousa depois de se cadastrar e não tinha nenhuma
+            menção a ele. */}
+        <section className="rounded-2xl painel-alto p-5 sm:p-6">
+          <p className="rotulo-caps flex items-center gap-2 text-primary">
+            <MessageCircle className="size-4" aria-hidden />
+            {t("comunidadeRotulo")}
+          </p>
+          <h2 className="titulo-display titulo-bloco mt-2">{t("comunidadeTitulo")}</h2>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("comunidadeCorpo")}</p>
+          <a
+            href={SITE_LINKS.whatsappComunidade}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "marca", className: "mt-4 rounded-full" })}
+          >
+            <MessageCircle className="size-4" aria-hidden />
+            {t("comunidadeCta")}
+          </a>
+        </section>
+
+        {/* Segurança e sair vão pro fim: trocar senha era a segunda coisa da
+            página, e é a que menos gente usa. */}
+        <section>
+          <TituloSecao>{t("seguranca")}</TituloSecao>
+          <div className="mt-5">
+            <TrocarSenhaForm />
+          </div>
+        </section>
+
+        <form action={sairAction}>
+          <Button type="submit" variant="outline" className="rounded-full">
+            {t("sair")}
+          </Button>
+        </form>
+      </Container>
+    </>
   );
 }

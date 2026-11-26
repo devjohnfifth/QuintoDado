@@ -106,7 +106,7 @@ function FormEsqueciSenha({ onVoltar }: { onVoltar: () => void }) {
         onClick={onVoltar}
         className="w-full text-center text-xs text-muted-foreground hover:text-foreground hover:underline"
       >
-        Voltar pro login
+        {t("voltarPraLogin")}
       </button>
     </form>
   );

@@ -77,7 +77,7 @@ export function CompletarCadastroForm({ nomeSugerido }: { nomeSugerido: string }
           onChange={campo("username", sanitizarUsername)}
         />
         <p className="text-xs text-muted-foreground">
-          Só letras minúsculas, números, - ou _. A gente ajusta pra esse formato enquanto você digita.
+          {t("usernameAjuda")}
         </p>
       </div>
       <div className="space-y-2">

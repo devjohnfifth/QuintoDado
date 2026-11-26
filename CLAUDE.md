@@ -48,8 +48,12 @@ Next.js 15 (App Router) · TypeScript · Tailwind · shadcn/ui · Supabase
 7. **Nenhum texto de interface embutido no JSX.** Tudo em arquivo de mensagem do
    `next-intl` desde o primeiro commit. O site é pt-BR na v1, mas o inglês vem —
    pt-BR fica na raiz sem prefixo, `/en` é reservado. Nunca use `/pt/...`.
-   Tudo fora de `/admin` já está migrado (15/11/2026); o painel admin é a
-   dívida que sobrou, e tela nova dele nasce com `next-intl` mesmo assim.
+   Fora de `/admin`, está migrado (varrido de novo em 24/11/2026 — na
+   primeira passada escaparam o menu da conta, o sino de notificações, o
+   formulário de perfil e mais quatro telas; não presuma que está limpo,
+   confira). Exceção única: `src/app/global-error.tsx`, que substitui o
+   layout raiz e não tem `IntlProvider` pra chamar. O painel admin é a dívida
+   que sobrou, e tela nova dele nasce com `next-intl` mesmo assim.
 8. **Mobile-first.** Tema escuro é o padrão.
 9. Regra que mexe em dinheiro ou em reembolso **exige teste automatizado**.
 

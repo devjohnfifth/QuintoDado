@@ -28,6 +28,8 @@
     "links": "Links",
     "entrar": "Entrar",
     "minhaConta": "Minha conta",
+    "painelAdmin": "Painel admin",
+    "sairDaConta": "Sair",
     "abrirMenu": "Abrir menu",
     "fecharMenu": "Fechar menu",
     "pularParaConteudo": "Pular pro conteúdo"
@@ -70,7 +72,8 @@
     "enviando": "Enviando...",
     "enviarLinkRecuperacao": "Enviar link de recuperação",
     "linkRecuperacaoEnviado": "Se esse e-mail tiver conta, mandamos um link de recuperação. Confira sua caixa de entrada.",
-    "esqueciSenhaAjuda": "Digite seu e-mail e mandamos um link pra você escolher uma senha nova."
+    "esqueciSenhaAjuda": "Digite seu e-mail e mandamos um link pra você escolher uma senha nova.",
+    "voltarPraLogin": "Voltar pro login"
   },
   "CompletarCadastro": {
     "titulo": "Só falta um passo",
@@ -83,7 +86,8 @@
     "aceiteTermosPre": "Eu li e aceito os",
     "aceiteTermosLink": "termos de uso",
     "enviar": "Concluir cadastro",
-    "enviando": "Enviando..."
+    "enviando": "Enviando...",
+    "usernameAjuda": "Só letras minúsculas, números, - ou _. A gente ajusta pra esse formato enquanto você digita."
   },
   "Home": {
     "hero": {
@@ -309,6 +313,19 @@
     "mestradoPor": "Mestrado por {nome}",
     "sessoes": "{n, plural, one {# sessão} other {# sessões}}"
   },
+  "Perfil": {
+    "metaTitulo": "{nome} — Quinto Dado",
+    "metaDescricaoComMesas": "{nome} mestra {mesas, plural, one {# mesa aberta} other {# mesas abertas}} no Quinto Dado. Veja as vagas e candidate-se.",
+    "metaDescricaoSemMesas": "O perfil de {nome} no Quinto Dado: sistemas que joga e mesas que mestra.",
+    "mestre": "Mestre",
+    "desde": "No Quinto Dado desde {quando}",
+    "joga": "Joga",
+    "mesasDe": "Mesas de {nome}",
+    "semMesasTitulo": "Nenhuma mesa aberta agora",
+    "semMesasCorpo": "{nome} não tem mesa no ar neste momento. Quando abrir uma, ela aparece aqui.",
+    "verTodasAsMesas": "Ver as mesas abertas",
+    "breadcrumbInicio": "Início"
+  },
   "Painel": {
     "titulo": "Painel da mesa",
     "subtituloMestre": "Seu material da campanha. Quem abrir o painel só vê o que você revelar.",
@@ -368,7 +385,11 @@
     "avisoEspectador": "Você está visitando. Quem mestra e quem joga nesta mesa é que escreve aqui.",
     "novoResumo": "Escrever resumo",
     "resumoDe": "Resumo de {nome}",
-    "resumoDoMestre": "Resumo do mestre"
+    "resumoDoMestre": "Resumo do mestre",
+    "quemVeJogadores": "Quem joga nesta mesa",
+    "seloJogadores": "A mesa vê",
+    "especificosSemJogadores": "Ninguém foi aprovado nesta mesa ainda, então não há quem marcar. Salvando assim, o campo fica só pra você — use “Quem joga nesta mesa” pra revelar pra quem entrar depois.",
+    "especificosNinguemMarcado": "Marque pelo menos um jogador. Sem ninguém marcado, o campo é salvo como “Só você vê”."
   },
   "Eventos": {
     "metaTitulo": "Eventos de RPG de mesa — Quinto Dado",
@@ -424,7 +445,8 @@
     "enviando": "Enviando...",
     "jaPaguei": "Já paguei, enviar solicitação",
     "erroNomeCompleto": "Digite seu nome completo.",
-    "erroTelefone": "Digite um telefone válido, com DDD."
+    "erroTelefone": "Digite um telefone válido, com DDD.",
+    "telefoneAjuda": "Pra gente conseguir te achar se o comprovante não chegar pelo WhatsApp."
   },
   "Presencial": {
     "titulo": "RPG de mesa presencial",
@@ -516,7 +538,8 @@
     "solicitarEnviando": "Enviando...",
     "imagemDeCapa": "Imagem de capa",
     "salvarAlteracoes": "Salvar alterações",
-    "editarMetaTitulo": "Editar mesa — Quinto Dado"
+    "editarMetaTitulo": "Editar mesa — Quinto Dado",
+    "solicitarEnviado": "Pedido enviado! A gente avisa quando for aprovado."
   },
   "Rodape": {
     "avisoLegal": "Quinto Dado é um projeto independente e não possui vínculo com as editoras dos sistemas citados. Materiais compatíveis são publicados sob as respectivas licenças abertas de cada sistema. Marcas e nomes mencionados pertencem a seus respectivos detentores.",
@@ -708,7 +731,41 @@
     "ingressoPendente": "Pendente",
     "ingressoAprovado": "Aprovado",
     "ingressoRecusado": "Recusado",
-    "ingressoCancelado": "Cancelado"
+    "ingressoCancelado": "Cancelado",
+    "seloMestre": "Mestre",
+    "verPerfilPublico": "Ver meu perfil",
+    "completarRotulo": "Seu perfil",
+    "completarTitulo": "Conte quem você é na mesa",
+    "completarCorpo": "Escreva uma bio e marque os sistemas que você joga. É o que aparece no seu perfil público e o que ajuda um mestre a te escolher — leva um minuto, no botão “Editar perfil” aí em cima.",
+    "semMesasCorpo": "Quando você publicar uma mesa, ela aparece aqui com as candidaturas que chegarem.",
+    "criarPrimeiraMesa": "Criar minha primeira mesa",
+    "mestrarRotulo": "Mestrar",
+    "mestrarTitulo": "Quer abrir a sua mesa?",
+    "mestrarCorpo": "Qualquer pessoa cadastrada pode virar mestre e publicar mesa online ou presencial. A gente só confere o cadastro antes de liberar.",
+    "mestrarCta": "Quero mestrar",
+    "mestrarPedidoEnviado": "Seu pedido pra virar mestre já chegou e está na fila. A gente avisa por aqui assim que liberar.",
+    "semCandidaturasCorpo": "Escolha uma mesa aberta, leia a proposta do mestre e mande sua candidatura. As respostas aparecem aqui.",
+    "verMesasAbertas": "Ver mesas abertas",
+    "semIngressos": "Nenhum ingresso ainda",
+    "semIngressosCorpo": "A gente faz encontros presenciais de vez em quando. Quando você garantir um lugar, o ingresso fica aqui.",
+    "verEventos": "Ver os eventos",
+    "mesaSemTitulo": "Mesa",
+    "eventoSemTitulo": "Evento",
+    "comunidadeRotulo": "Comunidade",
+    "comunidadeTitulo": "A mesa começa no grupo",
+    "comunidadeCorpo": "É no WhatsApp que as mesas são combinadas, que as vagas são avisadas primeiro e que dá pra achar gente da sua cidade.",
+    "comunidadeCta": "Entrar no grupo",
+    "avatarAjuda": "Clique na foto pra trocar. JPEG, PNG ou WebP.",
+    "nomeCompletoAjuda": "Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.",
+    "telefoneAjuda": "Também só pedido quando precisar, como comprar ingresso de evento.",
+    "bio": "Bio",
+    "bioAjuda": "Aparece no seu perfil público, embaixo do seu nome.",
+    "perfilPublico": "Deixar meu perfil público",
+    "perfilPublicoAjuda": "Cria uma página sua em /u/seu-usuario com avatar, bio, sistemas e as mesas que você mestra.",
+    "perfilPublicoAviso": "Com o perfil fechado seu nome também deixa de aparecer no “mestrada por” das suas mesas.",
+    "marcarTodasLidas": "Marcar todas como lidas",
+    "limparLidas": "Limpar lidas",
+    "semNotificacoes": "Nenhuma notificação ainda."
   },
   "Candidaturas": {
     "metaTitulo": "Candidaturas da mesa — Quinto Dado",

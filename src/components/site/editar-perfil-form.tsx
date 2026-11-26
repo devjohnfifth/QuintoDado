@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { iniciais } from "@/lib/perfil/iniciais";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 import { atualizarPerfilAction } from "@/app/[locale]/conta/actions";
 
@@ -21,6 +22,7 @@ export function EditarPerfilForm({
   telefone,
   bio,
   avatarUrl,
+  perfilPublico,
   sistemasFavoritos,
   sistemas,
   onCancelar,
@@ -30,6 +32,7 @@ export function EditarPerfilForm({
   telefone: string | null;
   bio: string | null;
   avatarUrl: string | null;
+  perfilPublico: boolean;
   sistemasFavoritos: string[];
   sistemas: Sistema[];
   onCancelar: () => void;
@@ -43,6 +46,8 @@ export function EditarPerfilForm({
   const [novoAvatar, setNovoAvatar] = useState<string | null>(avatarUrl);
   const [arquivoParaRecorte, setArquivoParaRecorte] = useState<File | null>(null);
   const [favoritos, setFavoritos] = useState<string[]>(sistemasFavoritos);
+  const [textoBio, setTextoBio] = useState(bio ?? "");
+  const [publico, setPublico] = useState(perfilPublico);
 
   function alternarSistema(id: string) {
     setFavoritos((prev) =>
@@ -63,6 +68,7 @@ export function EditarPerfilForm({
         bio: formData.get("bio"),
         sistemasFavoritos: favoritos,
         avatarUrl: novoAvatar,
+        perfilPublico: publico,
       });
       if (!resultado.ok) {
         setErro(resultado.error);
@@ -86,7 +92,7 @@ export function EditarPerfilForm({
               <Image src={novoAvatar} alt="" fill className="object-cover" sizes="64px" />
             ) : (
               <div className="flex size-full items-center justify-center bg-marca text-lg font-semibold text-white">
-                {nome.charAt(0).toUpperCase()}
+                {iniciais(nome)}
               </div>
             )}
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
@@ -104,9 +110,7 @@ export function EditarPerfilForm({
               if (f) setArquivoParaRecorte(f);
             }}
           />
-          <p className="text-xs text-muted-foreground">
-            Clique na foto pra trocar. JPEG, PNG ou WebP.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("avatarAjuda")}</p>
         </div>
 
         <div className="space-y-2">
@@ -123,22 +127,37 @@ export function EditarPerfilForm({
         <div className="space-y-2">
           <Label htmlFor="nomeCompleto">{t("nomeCompleto")}</Label>
           <Input id="nomeCompleto" name="nomeCompleto" defaultValue={nomeCompleto ?? ""} maxLength={160} />
-          <p className="text-xs text-muted-foreground">
-            Só pedimos quando precisar pra alguma coisa específica, como comprar ingresso de evento.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("nomeCompletoAjuda")}</p>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="telefone">{t("telefone")}</Label>
           <Input id="telefone" name="telefone" defaultValue={telefone ?? ""} maxLength={20} placeholder="31999999999" />
-          <p className="text-xs text-muted-foreground">
-            Também só pedido quando precisar, como comprar ingresso de evento.
-          </p>
+          <p className="text-xs text-muted-foreground">{t("telefoneAjuda")}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
-          <Textarea id="bio" name="bio" defaultValue={bio ?? ""} maxLength={280} rows={3} />
+          <div className="flex items-baseline justify-between gap-2">
+            <Label htmlFor="bio">{t("bio")}</Label>
+            {/* O limite é 280 e o campo trava em silêncio ao chegar lá: sem o
+                contador, a pessoa só percebia que o texto parou de entrar. */}
+            <span
+              className={`text-xs tabular-nums ${
+                textoBio.length >= 280 ? "text-primary" : "text-muted-foreground"
+              }`}
+            >
+              {textoBio.length}/280
+            </span>
+          </div>
+          <Textarea
+            id="bio"
+            name="bio"
+            value={textoBio}
+            onChange={(e) => setTextoBio(e.target.value)}
+            maxLength={280}
+            rows={3}
+          />
+          <p className="text-xs text-muted-foreground">{t("bioAjuda")}</p>
         </div>
 
         <div className="space-y-2">
@@ -157,6 +176,21 @@ export function EditarPerfilForm({
               </label>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-2 rounded-xl border border-border bg-background/40 p-4">
+          <label className="flex cursor-pointer items-start gap-3">
+            <Checkbox checked={publico} onCheckedChange={() => setPublico((v) => !v)} className="mt-0.5" />
+            <span>
+              <span className="block text-sm font-medium">{t("perfilPublico")}</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{t("perfilPublicoAjuda")}</span>
+            </span>
+          </label>
+          {/* Fechar o perfil não esconde só a página: a policy
+              `perfil_leitura_publica` para de devolver a linha, então o nome
+              some também do "mestrada por" dos cards. Melhor dizer isso aqui
+              do que a pessoa descobrir depois. */}
+          {!publico && <p className="text-xs text-primary">{t("perfilPublicoAviso")}</p>}
         </div>
 
         {erro && <p className="text-sm text-destructive">{erro}</p>}

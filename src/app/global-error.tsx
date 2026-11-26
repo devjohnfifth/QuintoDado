@@ -2,6 +2,15 @@
 
 import { useEffect } from "react";
 
+/**
+ * A única tela do site com texto fixo no JSX, e de propósito.
+ *
+ * `global-error` substitui o layout raiz inteiro quando ele próprio quebra —
+ * é o que aparece quando nem o `IntlProvider` subiu. Chamar `useTranslations`
+ * aqui dependeria justamente do que acabou de falhar, e o resultado seria uma
+ * tela de erro que também dá erro. Fica em pt-BR mesmo quando o inglês
+ * chegar: é melhor uma frase no idioma errado que tela branca.
+ */
 export default function GlobalError({
   error,
   reset,

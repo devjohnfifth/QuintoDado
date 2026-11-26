@@ -46,15 +46,14 @@ export function TrocarSenhaForm() {
   }
 
   return (
-    <div className="mt-10">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-lg font-bold">{t("seguranca")}</h2>
-        {!aberto && (
-          <Button variant="outline" size="sm" onClick={() => setAberto(true)}>
-            {t("trocarSenha")}
-          </Button>
-        )}
-      </div>
+    /* O título da seção é da página (que usa um só pra todas); aqui fica
+       só o botão e o formulário. */
+    <div>
+      {!aberto && (
+        <Button variant="outline" size="sm" className="rounded-full" onClick={() => setAberto(true)}>
+          {t("trocarSenha")}
+        </Button>
+      )}
 
       {aberto && (
         <form onSubmit={onSubmit} className="mt-4 space-y-4 rounded-xl border border-border bg-card/40 p-5">

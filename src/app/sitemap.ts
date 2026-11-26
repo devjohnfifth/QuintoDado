@@ -56,6 +56,44 @@ async function buscarSlugsDeMesas() {
   return data ?? [];
 }
 
+/**
+ * Os perfis que entram no sitemap: só quem mestra mesa que está no ar.
+ *
+ * Perfil é página pública, mas conta recém-criada não é conteúdo — anunciar
+ * todo cadastro ao Google transformaria o site num diretório de pessoas. Quem
+ * publicou mesa já se colocou em público, e é o perfil dele que responde a
+ * busca pelo nome. A página em si decide o mesmo pelo `robots`.
+ *
+ * Perfil fechado não aparece aqui porque a policy `perfil_leitura_publica`
+ * não devolve a linha — o filtro é do banco, não desta função.
+ */
+async function buscarPerfisDeMestres() {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("mesas")
+    .select("atualizado_em, profiles!mesas_mestre_id_fkey(username)")
+    .in("status", ["publicada", "confirmada", "em_andamento"]);
+
+  if (error) {
+    console.error("[sitemap] erro ao buscar perfis de mestres:", error.message);
+    return [];
+  }
+
+  // Um mestre com três mesas tem que virar uma URL, não três; fica com a data
+  // da mesa mexida mais recentemente.
+  const porUsername = new Map<string, string>();
+  for (const linha of data ?? []) {
+    const perfil = linha.profiles as unknown as { username: string } | null;
+    if (!perfil?.username) continue;
+    const atual = porUsername.get(perfil.username);
+    const quando = linha.atualizado_em as string;
+    if (!atual || quando > atual) porUsername.set(perfil.username, quando);
+  }
+  return [...porUsername].map(([username, atualizado_em]) => ({ username, atualizado_em }));
+}
+
 async function buscarSlugsDeEventos() {
   if (!isSupabaseConfigured()) return [];
 
@@ -93,10 +131,11 @@ const PRIORIDADE: Record<string, number> = {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const [mesas, eventos, suplementos] = await Promise.all([
+  const [mesas, eventos, suplementos, perfis] = await Promise.all([
     buscarSlugsDeMesas(),
     buscarSlugsDeEventos(),
     buscarSlugsDeSuplementos(),
+    buscarPerfisDeMestres(),
   ]);
 
   return [
@@ -126,6 +165,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: s.publicado_em ? new Date(s.publicado_em as string) : new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.7,
+    })),
+    // O perfil do mestre é a página que responde a busca pelo nome dele e a
+    // que ele cola na bio do Instagram.
+    ...perfis.map((p) => ({
+      url: `${site}/u/${p.username}`,
+      lastModified: new Date(p.atualizado_em),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
     })),
   ];
 }

@@ -994,3 +994,59 @@ na mesa de outra pessoa; o RLS recusaria, mas a regra ficaria num lugar só.
 
 A trava é testada por `scripts/testa-rls-painel.cjs`, que entra no banco com o
 token de um usuário sem relação com a mesa e confere as duas metades.
+
+## §31 — Perfil público e a reforma da conta (24/11/2026)
+
+### 31.1 `/u/[username]` saiu do papel
+
+A §276 descrevia o perfil público desde o começo e `profiles.perfil_publico`
+existia no banco; a página nunca tinha sido feita, e o `@username` aparecia na
+conta sem levar a lugar nenhum. Agora existe: avatar, bio, sistemas favoritos,
+desde quando a pessoa está no site e as mesas que ela mestra, com `Person` e
+`BreadcrumbList` em JSON-LD.
+
+**Quem entra no índice:** só quem tem mesa no ar. Perfil é página pública, mas
+cadastro recém-feito não é conteúdo — indexar todo mundo transformaria o site
+num diretório de pessoas. Quem publicou mesa já se colocou em público, ganha
+com a busca pelo próprio nome e entra no sitemap; o resto responde por link,
+com `noindex, follow`.
+
+### 31.2 A conta deixou de ser um beco sem saída
+
+Quem acabava de se cadastrar via cinco linhas: nome, "Trocar senha",
+"nenhuma candidatura" e "Sair" — nenhum link pra `/mesas`, nenhuma menção ao
+grupo de WhatsApp e nenhum caminho pra virar mestre, numa fase cujo objetivo é
+justamente construir audiência. A página passa a ter capa na mesma linguagem
+do resto do site, convite pra completar o perfil, caminho pra mestrar (com o
+estado "pedido na fila", que antes não aparecia depois de enviado), estados
+vazios com ação em todas as listas, o bloco da comunidade, e "Segurança" e
+"Sair" no fim, que é onde pertencem.
+
+### 31.3 O susto: `eh_admin()` sem `security definer`
+
+Ligar a tela do `perfil_publico` descobriu uma armadilha que estava no banco
+desde 06/09/2026. `eh_admin()` nasceu `language sql stable`, lê `profiles`, e é
+usada dentro da policy de leitura de `profiles`. Com todo mundo público, o
+`or` resolvia antes e a função nunca era chamada por visitante. Bastava uma
+pessoa fechar o perfil pra cair na recursão e o banco responder `stack depth
+limit exceeded`.
+
+E não quebrava só aquele perfil: **qualquer consulta que faz join em
+`profiles` caía junto, incluindo a listagem pública de `/mesas`.** Um único
+perfil fechado derrubaria a vitrine do site pra quem não está logado.
+Corrigido em `20261124120000_eh_admin_security_definer.sql`, e travado por
+`scripts/testa-rls-perfil.cjs`, que confere principalmente que o resto do site
+continua de pé com um perfil fechado no banco.
+
+A lição repete a da §29.2 por outro caminho: **coluna que existe no banco e
+nunca foi exercitada não está testada.** `perfil_publico` tinha três anos de
+schema e zero uso; o primeiro uso real foi também o primeiro teste.
+
+### 31.4 Regra 7, de novo
+
+A varredura de 15/11 não tinha ficado completa fora do `/admin`: escaparam o
+menu da conta, o sino de notificações, o formulário de perfil, o "voltar pro
+login", a ajuda do username, o aviso de pedido de mestre e a ajuda do telefone
+no ingresso. Todos migrados. Fica **uma exceção registrada**:
+`src/app/global-error.tsx` substitui o layout raiz e não tem `IntlProvider`
+pra chamar — texto fixo ali é de propósito.

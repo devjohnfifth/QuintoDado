@@ -137,7 +137,7 @@ export function ComprarIngressoButton({
                   maxLength={20}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Pra gente conseguir te achar se o comprovante não chegar pelo WhatsApp.
+                  {t("telefoneAjuda")}
                 </p>
               </div>
             )}

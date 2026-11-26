@@ -150,6 +150,7 @@ app/
 | `mesas/` | Rótulos, cidades atendidas, cores por sistema, horários, inscrições do usuário |
 | `suplementos/` | Leitura pública, tipos de dado e rolagem de tabela |
 | `painel/` | Papel no painel (mestre / jogador / espectador) e leitura das entidades/sessões |
+| `perfil/` | Iniciais do avatar e leitura do perfil público (`/u/[username]`) |
 | `eventos/` | Rótulos de status de ingresso |
 | `notificacoes/` | Disparo de notificações internas (tabela `notificacoes`) |
 | `storage/` | `enviar-imagem` (Supabase Storage) e `r2` (arquivos privados) |
@@ -184,6 +185,13 @@ pode entrar no `disallow` do robots.
 
 **Autenticadas** — `/conta` · `/mesas/[slug]/painel` (+ `/elenco`, `/sessoes`) ·
 `/mesas/nova`, `/mesas/editar/[id]` e `/mesas/candidaturas/[id]` (mestres).
+
+`/u/[username]` é o **perfil público**: avatar, bio, sistemas e as mesas que a
+pessoa mestra. Quem tem mesa no ar entra no sitemap e no índice do Google; o
+resto fica acessível por link e com `noindex`, pra o site não virar diretório
+de pessoas. Quem não quer página desliga em "Editar perfil" — e aí a policy
+`perfil_leitura_publica` para de devolver a linha, então o nome some também do
+"mestrada por" das mesas.
 
 O painel de campanha é de **leitura aberta a quem tem conta**: qualquer pessoa
 logada lê o elenco revelado e os resumos publicados de uma mesa que já está no

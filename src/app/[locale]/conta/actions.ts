@@ -11,6 +11,7 @@ const schema = z.object({
   bio: z.string().trim().max(280).optional(),
   sistemasFavoritos: z.array(z.string().uuid()).max(10),
   avatarUrl: z.string().url().nullable().optional(),
+  perfilPublico: z.boolean(),
 });
 
 export type AtualizarPerfilResult = { ok: true } | { ok: false; error: string };
@@ -30,7 +31,7 @@ export async function atualizarPerfilAction(input: unknown): Promise<AtualizarPe
     return { ok: false, error: "Você precisa estar logado." };
   }
 
-  const { error } = await supabase
+  const { data: atualizado, error } = await supabase
     .from("profiles")
     .update({
       nome_exibicao: d.nomeExibicao,
@@ -39,8 +40,11 @@ export async function atualizarPerfilAction(input: unknown): Promise<AtualizarPe
       bio: d.bio || null,
       sistemas_favoritos: d.sistemasFavoritos,
       avatar_url: d.avatarUrl || null,
+      perfil_publico: d.perfilPublico,
     })
-    .eq("id", user.id);
+    .eq("id", user.id)
+    .select("username")
+    .single();
 
   if (error) {
     console.error("[atualizarPerfilAction] erro:", error.message);
@@ -48,6 +52,10 @@ export async function atualizarPerfilAction(input: unknown): Promise<AtualizarPe
   }
 
   revalidatePath("/conta");
+  // O perfil público mostra os mesmos campos; sem isto, salvar a bio aqui
+  // deixava `/u/[username]` com o texto velho até o cache expirar. O username
+  // vem do próprio update pra não custar uma segunda ida ao banco.
+  if (atualizado?.username) revalidatePath(`/u/${atualizado.username}`);
   return { ok: true };
 }
 

@@ -109,9 +109,15 @@ export async function salvarCampoAction(
   const { supabase, mesaId, ehMestre } = await exigirMembroDaMesa(slug);
   // "Específicos" sem ninguém escolhido é o mesmo que oculto — evita um campo
   // que parece revelado na tela do mestre e não chega em ninguém.
-  // Campo escrito por jogador é sempre da mesa: ele não controla segredo.
+  //
+  // Jogador não cria segredo: ele escolhe entre "quem joga na mesa" e "quem
+  // tem conta", e qualquer outra coisa vira 'jogadores'. Antes isso era
+  // sempre 'mesa', que na época queria dizer "a mesa"; com o painel aberto,
+  // forçar 'mesa' publicaria a ficha dele pro site inteiro sem ele pedir.
   const vis = !ehMestre
-    ? "mesa"
+    ? parsed.data.vis === "mesa"
+      ? "mesa"
+      : "jogadores"
     : parsed.data.vis === "especificos" && parsed.data.reveladoPara.length === 0
       ? "oculto"
       : parsed.data.vis;

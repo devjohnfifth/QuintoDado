@@ -50,7 +50,7 @@ function checa(nome, condicao, detalhe = "") {
 
 async function main() {
   const marca = `rls-painel-${Date.now()}`;
-  const lixo = { mesaNoAr: null, mesaFechada: null, usuario: null, email: null };
+  const lixo = { mesaNoAr: null, mesaFechada: null, usuario: null, jogador: null, email: null };
 
   try {
     // ---------- cenário ------------------------------------------------
@@ -128,6 +128,9 @@ async function main() {
       .insert([
         { mesa_id: lixo.mesaNoAr, entidade_id: revelada.id, rotulo: "Apelido", valor: "Beto", vis: "mesa" },
         { mesa_id: lixo.mesaNoAr, entidade_id: revelada.id, rotulo: "Segredo", valor: "é espião", vis: "oculto" },
+        // O nível do meio, criado em 20261124130000/130100: a mesa lê, quem
+        // só tem conta não.
+        { mesa_id: lixo.mesaNoAr, entidade_id: revelada.id, rotulo: "Só da mesa", valor: "o grupo sabe", vis: "jogadores" },
       ])
       .select("id, rotulo");
     if (campos.error) throw new Error(`criar campos: ${campos.error.message}`);
@@ -152,6 +155,21 @@ async function main() {
     if (novo.error) throw new Error(`criar espectador: ${novo.error.message}`);
     lixo.usuario = novo.data.user.id;
 
+    // Um jogador de verdade: inscrição aprovada na mesa. É ele que separa
+    // "quem joga nesta mesa" de "quem só tem conta".
+    const jog = await admin.auth.admin.createUser({
+      email: `${marca}-jogador@exemplo.invalid`,
+      password: "senha-de-teste-123",
+      email_confirm: true,
+      user_metadata: { username: `${marca}-j`.replace(/-/g, ""), nome_exibicao: "Jogador", data_nascimento: "1990-01-01" },
+    });
+    if (jog.error) throw new Error(`criar jogador: ${jog.error.message}`);
+    lixo.jogador = jog.data.user.id;
+    const insc = await admin
+      .from("inscricoes")
+      .insert({ mesa_id: lixo.mesaNoAr, usuario_id: lixo.jogador, status: "aprovado" });
+    if (insc.error) throw new Error(`inscrever jogador: ${insc.error.message}`);
+
     const como = createClient(URL, ANON, { auth: { persistSession: false } });
     const entrou = await como.auth.signInWithPassword({ email: lixo.email, password: "senha-de-teste-123" });
     if (entrou.error) throw new Error(`entrar como espectador: ${entrou.error.message}`);
@@ -168,6 +186,7 @@ async function main() {
     const rotulos = (vc.data ?? []).map((c) => c.rotulo);
     checa("vê o campo revelado", rotulos.includes("Apelido"), vc.error?.message ?? `veio ${JSON.stringify(rotulos)}`);
     checa("NÃO vê o campo oculto", !rotulos.includes("Segredo"), `veio ${JSON.stringify(rotulos)}`);
+    checa("NÃO vê o campo que é só da mesa", !rotulos.includes("Só da mesa"), `veio ${JSON.stringify(rotulos)}`);
 
     const vs = await como.from("painel_sessoes").select("numero, publicado").eq("mesa_id", lixo.mesaNoAr);
     const numeros = (vs.data ?? []).map((s) => s.numero);
@@ -207,6 +226,21 @@ async function main() {
       .select("id");
     checa("NÃO cria anotação", Boolean(insA.error), insA.error ? "" : "o insert passou");
 
+    // ---------- o jogador da mesa ----------------------------------------
+    console.log("\nJogador (inscrição aprovada) — o nível do meio:");
+    const comoJogador = createClient(URL, ANON, { auth: { persistSession: false } });
+    const entrouJog = await comoJogador.auth.signInWithPassword({
+      email: `${marca}-jogador@exemplo.invalid`,
+      password: "senha-de-teste-123",
+    });
+    if (entrouJog.error) throw new Error(`entrar como jogador: ${entrouJog.error.message}`);
+
+    const jv = await comoJogador.from("painel_campos").select("rotulo").eq("entidade_id", revelada.id);
+    const jr = (jv.data ?? []).map((c) => c.rotulo);
+    checa("vê o campo que é só da mesa", jr.includes("Só da mesa"), jv.error?.message ?? `veio ${JSON.stringify(jr)}`);
+    checa("vê o campo revelado a todos", jr.includes("Apelido"), `veio ${JSON.stringify(jr)}`);
+    checa("NÃO vê o campo oculto do mestre", !jr.includes("Segredo"), `veio ${JSON.stringify(jr)}`);
+
     // ---------- deslogado não vê nada ------------------------------------
     console.log("\nVisitante deslogado:");
     const anonimo = createClient(URL, ANON, { auth: { persistSession: false } });
@@ -219,6 +253,7 @@ async function main() {
     if (lixo.mesaNoAr) await admin.from("mesas").delete().eq("id", lixo.mesaNoAr);
     if (lixo.mesaFechada) await admin.from("mesas").delete().eq("id", lixo.mesaFechada);
     if (lixo.usuario) await admin.auth.admin.deleteUser(lixo.usuario);
+    if (lixo.jogador) await admin.auth.admin.deleteUser(lixo.jogador);
     if (lixo.mestre) await admin.auth.admin.deleteUser(lixo.mestre);
   }
 

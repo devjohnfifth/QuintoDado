@@ -32,6 +32,16 @@ type Membro = { id: string; nome: string };
 const CLASSE_SELECT =
   "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground";
 
+/* Visibilidade → chave do selo. Era uma escada de ternários que mandava
+   qualquer valor desconhecido pra "Revelado a alguns" — com o nível novo,
+   'jogadores' cairia calado no rótulo errado. */
+const SELO_VIS: Record<Visibilidade, string> = {
+  oculto: "seloOculto",
+  especificos: "seloEspecificos",
+  jogadores: "seloJogadores",
+  mesa: "seloMesa",
+};
+
 export function Elenco({
   slug,
   entidades,
@@ -333,7 +343,8 @@ function CampoFicha({
   entidadeId: string;
   campo?: Campo;
   membros: Membro[];
-  /** Mestre escolhe quem vê cada campo; jogador escreve sempre pra mesa toda. */
+  /** O mestre tem os quatro níveis; o jogador escolhe entre "quem joga nesta
+   *  mesa" e "quem tem conta no site" — ele não guarda segredo. */
   ehMestre: boolean;
   podeEditar: boolean;
   aoFechar?: () => void;
@@ -343,7 +354,9 @@ function CampoFicha({
   const [editando, setEditando] = useState(!campo);
   const [rotulo, setRotulo] = useState(campo?.rotulo ?? "");
   const [valor, setValor] = useState(campo?.valor ?? "");
-  const [vis, setVis] = useState<Visibilidade>(campo?.vis ?? "oculto");
+  // O padrão do mestre é fechado (revelar é ato deliberado); o do jogador é a
+  // mesa — "oculto" nem aparece no seletor dele, e deixava o campo em branco.
+  const [vis, setVis] = useState<Visibilidade>(campo?.vis ?? (ehMestre ? "oculto" : "jogadores"));
   const [reveladoPara, setReveladoPara] = useState<string[]>(campo?.revelado_para ?? []);
   const [erro, setErro] = useState<string | null>(null);
   const [pendente, startTransition] = useTransition();
@@ -377,15 +390,7 @@ function CampoFicha({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{campo!.rotulo}</p>
           {podeEditar && (
             <div className="flex items-center gap-2">
-              {ehMestre && (
-                <span className="text-xs font-medium">
-                  {campo!.vis === "oculto"
-                    ? t("seloOculto")
-                    : campo!.vis === "mesa"
-                      ? t("seloMesa")
-                      : t("seloEspecificos")}
-                </span>
-              )}
+              {ehMestre && <span className="text-xs font-medium">{t(SELO_VIS[campo!.vis])}</span>}
               <Button variant="ghost" size="sm" onClick={() => setEditando(true)}>
                 {t("editar")}
               </Button>
@@ -410,7 +415,7 @@ function CampoFicha({
             onChange={(e) => setRotulo(e.target.value)}
           />
         </div>
-        <div className={`space-y-1.5 ${ehMestre ? "" : "hidden"}`}>
+        <div className="space-y-1.5">
           <Label htmlFor={`vis-${campo?.id ?? "novo"}`}>{t("quemVe")}</Label>
           <select
             id={`vis-${campo?.id ?? "novo"}`}
@@ -418,9 +423,14 @@ function CampoFicha({
             onChange={(e) => setVis(e.target.value as Visibilidade)}
             className={CLASSE_SELECT}
           >
-            <option value="oculto">{t("quemVeOculto")}</option>
+            {/* Do mais fechado pro mais aberto. O jogador vê só os dois
+                últimos: ele não guarda segredo, mas desde que o painel abriu
+                pra quem tem conta ele precisa poder deixar a ficha dele só
+                pra mesa em vez de publicar pro site inteiro. */}
+            {ehMestre && <option value="oculto">{t("quemVeOculto")}</option>}
+            {ehMestre && <option value="especificos">{t("quemVeEspecificos")}</option>}
+            <option value="jogadores">{t("quemVeJogadores")}</option>
             <option value="mesa">{t("quemVeMesa")}</option>
-            <option value="especificos">{t("quemVeEspecificos")}</option>
           </select>
         </div>
       </div>
@@ -436,6 +446,15 @@ function CampoFicha({
         />
       </div>
 
+      {/* Sem ninguém aprovado na mesa, esta lista vinha vazia e a opção
+          parecia quebrada: nada pra marcar, nenhuma explicação, e ao salvar
+          o campo virava "Só você vê" em silêncio. */}
+      {ehMestre && vis === "especificos" && membros.length === 0 && (
+        <p className="text-sm text-alerta">{t("especificosSemJogadores")}</p>
+      )}
+      {ehMestre && vis === "especificos" && membros.length > 0 && reveladoPara.length === 0 && (
+        <p className="text-sm text-muted-foreground">{t("especificosNinguemMarcado")}</p>
+      )}
       {ehMestre && vis === "especificos" && (
         <ul className="flex flex-wrap gap-2">
           {membros.map((m) => {

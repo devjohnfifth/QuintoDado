@@ -95,7 +95,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
                   onClick={marcarTodas}
                   className="text-xs font-medium text-primary hover:underline"
                 >
-                  Marcar todas como lidas
+                  {t("marcarTodasLidas")}
                 </button>
               )}
               {temLidas && (
@@ -104,7 +104,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
                   onClick={limparLidas}
                   className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline"
                 >
-                  Limpar lidas
+                  {t("limparLidas")}
                 </button>
               )}
             </div>
@@ -115,7 +115,7 @@ export function NotificationBell({ naoLidasIniciais }: { naoLidasIniciais: numbe
           )}
           {!pending && notificacoes?.length === 0 && (
             <p className="px-2 py-3 text-center text-sm text-muted-foreground">
-              Nenhuma notificação ainda.
+              {t("semNotificacoes")}
             </p>
           )}
           {!pending &&

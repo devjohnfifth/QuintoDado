@@ -14,17 +14,20 @@ export const TIPO_ENTIDADE_LABEL: Record<TipoEntidade, { singular: string; plura
   personagem: { singular: "Personagem", plural: "Personagens" },
 };
 
-export const VISIBILIDADES = ["oculto", "mesa", "especificos"] as const;
+/** Do mais fechado pro mais aberto — a ordem é a do seletor na tela. */
+export const VISIBILIDADES = ["oculto", "especificos", "jogadores", "mesa"] as const;
 export type Visibilidade = (typeof VISIBILIDADES)[number];
 
 /**
  * Convenção visual fixa do painel, aprendida uma vez e válida em campo,
- * relacionamento e entidade:
- * vermelho tracejado = só o mestre vê · azul = revelado a alguns · verde = a mesa toda vê.
+ * relacionamento e entidade. Fecha → abre:
+ * vermelho tracejado = só o mestre · azul = alguns jogadores ·
+ * âmbar = quem joga na mesa · verde = quem tem conta no site.
  */
 export const CLASSE_VISIBILIDADE: Record<Visibilidade, string> = {
   oculto: "border border-dashed border-erro/60 text-erro",
   especificos: "border border-primary/50 text-primary",
+  jogadores: "border border-alerta/50 text-alerta",
   mesa: "border border-sucesso/50 text-sucesso",
 };
 

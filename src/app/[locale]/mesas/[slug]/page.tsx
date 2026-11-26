@@ -44,6 +44,7 @@ import { CandidaturaForm } from "./candidatura-form";
 import { ShareButton } from "./share-button";
 import { SinopseExpansivel } from "./sinopse-expansivel";
 import bannerOg from "@/assets/brand/banner-og.webp";
+import { iniciais } from "@/lib/perfil/iniciais";
 
 type MesaDetalhe = {
   id: string;
@@ -64,7 +65,7 @@ type MesaDetalhe = {
   sistemas: { nome: string } | null;
   sistema_outro: string | null;
   mestre_id: string;
-  profiles: { nome_exibicao: string; avatar_url: string | null } | null;
+  profiles: { nome_exibicao: string; avatar_url: string | null; username: string } | null;
   vagas_preenchidas: number;
   banner_url: string | null;
   jogadores_aprovados: { nome: string; avatar_url: string | null }[] | null;
@@ -91,7 +92,7 @@ async function buscarMesa(slug: string) {
   const { data: mesa } = await supabase
     .from("mesas")
     .select(
-      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url), vagas_preenchidas, banner_url, jogadores_aprovados, evento_id, eventos(slug, titulo), link_externo",
+      "id, titulo, sinopse, modalidade, cidade_uf, tipo, classificacao, nivel_experiencia, preco_centavos, frequencia, qtd_sessoes, data_inicio, horario_inicio, horario_fim, vagas_total, sistemas(nome), sistema_outro, mestre_id, profiles!mesas_mestre_id_fkey(nome_exibicao, avatar_url, username), vagas_preenchidas, banner_url, jogadores_aprovados, evento_id, eventos(slug, titulo), link_externo",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -354,7 +355,13 @@ export default async function MesaDetalhePage({
 
           <h1 className="titulo-display titulo-pagina mt-4">{mesa.titulo}</h1>
           {mesa.profiles?.nome_exibicao && (
-            <p className="mt-4 flex items-center gap-2.5 text-muted-foreground">
+            /* O nome leva ao perfil de quem mestra: é daqui que a pessoa
+               descobre as outras mesas dele. Perfil fechado não chega aqui —
+               a policy não devolve a linha, e sem `profiles` o bloco some. */
+            <Link
+              href={`/u/${mesa.profiles.username}`}
+              className="mt-4 inline-flex items-center gap-2.5 text-muted-foreground transition-colors hover:text-foreground"
+            >
               {mesa.profiles.avatar_url ? (
                 <Image
                   src={mesa.profiles.avatar_url}
@@ -365,11 +372,13 @@ export default async function MesaDetalhePage({
                 />
               ) : (
                 <span className="flex size-9 items-center justify-center rounded-full bg-marca text-sm font-bold text-white">
-                  {mesa.profiles.nome_exibicao.charAt(0).toUpperCase()}
+                  {iniciais(mesa.profiles.nome_exibicao)}
                 </span>
               )}
-              {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
-            </p>
+              <span className="hover:underline">
+                {t("mestradoPor", { nome: mesa.profiles.nome_exibicao })}
+              </span>
+            </Link>
           )}
         </Container>
       </section>
